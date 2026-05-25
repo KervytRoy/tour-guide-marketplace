@@ -1,0 +1,12 @@
+bin/
+obj/
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.rsuser
+*.db
+*.log
+appsettings.Local.json
+**/.keys/

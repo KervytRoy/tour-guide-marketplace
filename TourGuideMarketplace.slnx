@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TourGuideMarketplace.Api/TourGuideMarketplace.Api.csproj" />
+    <Project Path="src/TourGuideMarketplace.Application/TourGuideMarketplace.Application.csproj" />
+    <Project Path="src/TourGuideMarketplace.Domain/TourGuideMarketplace.Domain.csproj" />
+    <Project Path="src/TourGuideMarketplace.Infrastructure/TourGuideMarketplace.Infrastructure.csproj" />
+  </Folder>
+</Solution>
