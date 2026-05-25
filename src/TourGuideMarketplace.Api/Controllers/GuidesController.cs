@@ -2,7 +2,6 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TourGuideMarketplace.Application.Common.Models;
-using TourGuideMarketplace.Application.Common.Security;
 using TourGuideMarketplace.Application.Interfaces;
 using TourGuideMarketplace.Contracts.Common;
 using TourGuideMarketplace.Contracts.Guides;
@@ -56,6 +55,22 @@ public sealed class GuidesController : ControllerBase
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
     {
         var result = await _guideService.GetByIdAsync(id, cancellationToken);
+        return ToActionResult(result);
+    }
+
+    [Authorize(Roles = AppRoles.Guide)]
+    [HttpGet("me")]
+    [ProducesResponseType(typeof(GuideProfileResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetMyProfile(CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            return Unauthorized(new ApiErrorResponse(["Invalid access token."]));
+        }
+
+        var result = await _guideService.GetMyProfileAsync(userId.Value, cancellationToken);
         return ToActionResult(result);
     }
 
