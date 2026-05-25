@@ -2,8 +2,11 @@ using System.Text;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using TourGuideMarketplace.Application.Common.Security;
 using TourGuideMarketplace.Infrastructure;
+
+const string SwaggerBearerScheme = "bearer";
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +15,29 @@ builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
 builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Tour Guide Marketplace API",
+        Version = "v1"
+    });
+
+    options.AddSecurityDefinition(SwaggerBearerScheme, new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = SwaggerBearerScheme,
+        BearerFormat = "JWT",
+        Description = "JWT Authorization header using the Bearer scheme."
+    });
+
+    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecuritySchemeReference(SwaggerBearerScheme, document)] = []
+    });
+});
 builder.Services.AddProblemDetails();
 builder.Services.AddHttpContextAccessor();
 builder.Services
@@ -53,6 +78,12 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Tour Guide Marketplace API v1");
+        options.RoutePrefix = "swagger";
+    });
 }
 
 app.UseExceptionHandler();

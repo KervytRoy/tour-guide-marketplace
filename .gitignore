@@ -9,4 +9,5 @@ obj/
 *.db
 *.log
 appsettings.Local.json
+appsetting.json
 **/.keys/
