@@ -1,0 +1,138 @@
+@page "/guides"
+@attribute [Authorize(Roles = AppRoles.Tourist)]
+@inject GuidesApiClient GuidesApi
+@inject ISnackbar Snackbar
+
+<MudStack Spacing="3">
+    <div class="page-heading">
+        <div>
+            <MudText Typo="Typo.h4">Buscar guias</MudText>
+            <MudText Typo="Typo.body1" Color="Color.Secondary">Filtra por ubicacion, idioma, especialidad y disponibilidad.</MudText>
+        </div>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SearchAsync" StartIcon="@Icons.Material.Filled.Search" Disabled="_isBusy">
+            Buscar
+        </MudButton>
+    </div>
+
+    <MudPaper Class="filter-panel" Elevation="0">
+        <MudGrid Spacing="2">
+            <MudItem xs="12" md="3">
+                <MudTextField T="string" @bind-Value="_city" Label="Ciudad" />
+            </MudItem>
+            <MudItem xs="12" md="3">
+                <MudTextField T="string" @bind-Value="_country" Label="Pais" />
+            </MudItem>
+            <MudItem xs="12" md="3">
+                <MudTextField T="string" @bind-Value="_specialty" Label="Especialidad" />
+            </MudItem>
+            <MudItem xs="12" md="3">
+                <MudTextField T="string" @bind-Value="_language" Label="Idioma" />
+            </MudItem>
+            <MudItem xs="12" md="3">
+                <MudNumericField T="decimal?" @bind-Value="_maxHourlyRate" Label="Tarifa maxima" />
+            </MudItem>
+            <MudItem xs="12" md="3">
+                <MudNumericField T="decimal?" @bind-Value="_minRating" Label="Rating minimo" />
+            </MudItem>
+            <MudItem xs="12" md="3">
+                <MudSwitch T="bool" @bind-Value="_availableNow" Color="Color.Success" Label="Disponible ahora" />
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    @if (_isBusy)
+    {
+        <div class="app-loading">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        </div>
+    }
+    else if (_guides.Count == 0)
+    {
+        <MudPaper Class="state-panel" Elevation="0">
+            <MudIcon Icon="@Icons.Material.Filled.TravelExplore" Color="Color.Secondary" Size="Size.Large" />
+            <MudText Typo="Typo.h6">No hay guias para los filtros actuales</MudText>
+            <MudText Color="Color.Secondary">Ajusta la busqueda o intenta con menos filtros.</MudText>
+        </MudPaper>
+    }
+    else
+    {
+        <MudGrid Spacing="3">
+            @foreach (var guide in _guides)
+            {
+                <MudItem xs="12" md="6" xl="4">
+                    <MudPaper Class="guide-card" Elevation="0">
+                        <div class="guide-card-header">
+                            <MudAvatar Color="Color.Primary">@GetInitials(guide.GuideName)</MudAvatar>
+                            <div>
+                                <MudText Typo="Typo.h6">@guide.GuideName</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">@guide.City, @guide.Country</MudText>
+                            </div>
+                        </div>
+
+                        <MudText Typo="Typo.body2" Class="guide-bio">@guide.Bio</MudText>
+
+                        <div class="guide-meta">
+                            <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined">@guide.Currency @guide.HourlyRate / hora</MudChip>
+                            <MudChip T="string" Color="Color.Secondary" Variant="Variant.Outlined">@guide.AverageRating rating</MudChip>
+                            @if (guide.AvailableNow)
+                            {
+                                <MudChip T="string" Color="Color.Success">Disponible</MudChip>
+                            }
+                        </div>
+
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            @string.Join(", ", guide.Specialties.Take(3))
+                        </MudText>
+                    </MudPaper>
+                </MudItem>
+            }
+        </MudGrid>
+    }
+</MudStack>
+
+@code {
+    private string? _city;
+    private string? _country;
+    private string? _specialty;
+    private string? _language;
+    private decimal? _maxHourlyRate;
+    private decimal? _minRating;
+    private bool _availableNow;
+    private bool _isBusy;
+    private IReadOnlyCollection<GuideProfileResponse> _guides = [];
+
+    protected override Task OnInitializedAsync()
+    {
+        return SearchAsync();
+    }
+
+    private async Task SearchAsync()
+    {
+        _isBusy = true;
+        var result = await GuidesApi.SearchAsync(new GuideSearchRequest(
+            _city,
+            _country,
+            _specialty,
+            _language,
+            _maxHourlyRate,
+            _minRating,
+            _availableNow ? true : null,
+            PageNumber: 1,
+            PageSize: 24));
+        _isBusy = false;
+
+        if (!result.Succeeded)
+        {
+            Snackbar.Add(string.Join(" ", result.Errors), Severity.Error);
+            return;
+        }
+
+        _guides = result.Value?.Items ?? [];
+    }
+
+    private static string GetInitials(string value)
+    {
+        var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return string.Concat(parts.Take(2).Select(part => part[0])).ToUpperInvariant();
+    }
+}

@@ -1,0 +1,128 @@
+@page "/guide/profile"
+@attribute [Authorize(Roles = AppRoles.Guide)]
+@inject GuidesApiClient GuidesApi
+@inject ISnackbar Snackbar
+
+<MudStack Spacing="3">
+    <div class="page-heading">
+        <div>
+            <MudText Typo="Typo.h4">Mi perfil de guia</MudText>
+            <MudText Typo="Typo.body1" Color="Color.Secondary">Estos datos alimentan tu ficha publica para turistas.</MudText>
+        </div>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_isBusy" OnClick="SaveAsync" StartIcon="@Icons.Material.Filled.Save">
+            Guardar
+        </MudButton>
+    </div>
+
+    @if (_loadErrors.Count > 0)
+    {
+        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+            Aun no tienes perfil publicado. Completa el formulario para crearlo.
+        </MudAlert>
+    }
+
+    <MudPaper Class="form-panel" Elevation="0">
+        <MudGrid Spacing="3">
+            <MudItem xs="12">
+                <MudTextField T="string" @bind-Value="_bio" Label="Biografia" Lines="5" />
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudTextField T="string" @bind-Value="_city" Label="Ciudad" />
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudTextField T="string" @bind-Value="_country" Label="Pais" />
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudNumericField T="decimal" @bind-Value="_hourlyRate" Label="Tarifa por hora" />
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudTextField T="string" @bind-Value="_currency" Label="Moneda" HelperText="Ejemplo: USD, COP, EUR" />
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudSwitch T="bool" @bind-Value="_availableNow" Color="Color.Success" Label="Disponible ahora" />
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudNumericField T="decimal?" @bind-Value="_latitude" Label="Latitud" />
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudNumericField T="decimal?" @bind-Value="_longitude" Label="Longitud" />
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudTextField T="string" @bind-Value="_specialtiesCsv" Label="Especialidades" HelperText="Separadas por coma" />
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudTextField T="string" @bind-Value="_languagesCsv" Label="Idiomas" HelperText="Separados por coma" />
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</MudStack>
+
+@code {
+    private string _bio = string.Empty;
+    private string _city = string.Empty;
+    private string _country = string.Empty;
+    private decimal _hourlyRate;
+    private string _currency = "USD";
+    private bool _availableNow;
+    private decimal? _latitude;
+    private decimal? _longitude;
+    private string _specialtiesCsv = string.Empty;
+    private string _languagesCsv = string.Empty;
+    private bool _isBusy;
+    private IReadOnlyCollection<string> _loadErrors = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await GuidesApi.GetMyProfileAsync();
+        if (!result.Succeeded || result.Value is null)
+        {
+            _loadErrors = result.Errors;
+            return;
+        }
+
+        var profile = result.Value;
+        _bio = profile.Bio;
+        _city = profile.City;
+        _country = profile.Country;
+        _hourlyRate = profile.HourlyRate;
+        _currency = profile.Currency;
+        _availableNow = profile.AvailableNow;
+        _latitude = profile.Latitude;
+        _longitude = profile.Longitude;
+        _specialtiesCsv = string.Join(", ", profile.Specialties);
+        _languagesCsv = string.Join(", ", profile.Languages);
+    }
+
+    private async Task SaveAsync()
+    {
+        _isBusy = true;
+        var result = await GuidesApi.UpsertMyProfileAsync(new GuideProfileRequest(
+            _bio,
+            _city,
+            _country,
+            _hourlyRate,
+            _currency,
+            _availableNow,
+            _latitude,
+            _longitude,
+            ParseCsv(_specialtiesCsv),
+            ParseCsv(_languagesCsv)));
+        _isBusy = false;
+
+        if (!result.Succeeded)
+        {
+            Snackbar.Add(string.Join(" ", result.Errors), Severity.Error);
+            return;
+        }
+
+        _loadErrors = [];
+        Snackbar.Add("Perfil de guia guardado.", Severity.Success);
+    }
+
+    private static IReadOnlyCollection<string> ParseCsv(string value)
+    {
+        return value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+    }
+}

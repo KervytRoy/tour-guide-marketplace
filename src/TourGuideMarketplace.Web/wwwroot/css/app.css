@@ -1,0 +1,276 @@
+html,
+body {
+    background: #f7f9fb;
+    color: #18212f;
+    font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+    min-height: 100%;
+}
+
+h1:focus {
+    outline: none;
+}
+
+a {
+    color: #1f7a8c;
+}
+
+.app-shell {
+    background: #f7f9fb;
+}
+
+.app-topbar {
+    border-bottom: 1px solid #e5ebf2;
+}
+
+.app-drawer {
+    border-right: 1px solid #e5ebf2;
+}
+
+.brand-title {
+    font-weight: 700;
+}
+
+.drawer-brand {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    min-height: 72px;
+    padding: 18px 20px;
+}
+
+.nav-menu {
+    padding: 4px 12px 20px;
+}
+
+.main-content {
+    min-height: 100vh;
+}
+
+.content-container {
+    padding-bottom: 40px;
+    padding-top: 32px;
+}
+
+.page-heading {
+    align-items: center;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+.metric-card,
+.work-panel,
+.filter-panel,
+.form-panel,
+.profile-panel,
+.guide-card,
+.state-panel,
+.auth-card {
+    border: 1px solid #e5ebf2;
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.metric-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 140px;
+    padding: 22px;
+}
+
+.work-panel,
+.filter-panel,
+.form-panel {
+    padding: 24px;
+}
+
+.profile-panel {
+    align-items: center;
+    display: flex;
+    gap: 18px;
+    padding: 24px;
+}
+
+.profile-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.guide-card {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: 260px;
+    padding: 22px;
+}
+
+.guide-card-header {
+    align-items: center;
+    display: flex;
+    gap: 14px;
+}
+
+.guide-bio {
+    color: #3e4a59;
+    min-height: 56px;
+}
+
+.guide-meta {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.action-row {
+    flex-wrap: wrap;
+    margin-top: 14px;
+}
+
+.state-panel {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 280px;
+    justify-content: center;
+    padding: 32px;
+    text-align: center;
+}
+
+.app-loading {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    min-height: 220px;
+}
+
+.auth-shell {
+    display: grid;
+    grid-template-columns: minmax(320px, 0.9fr) minmax(360px, 1.1fr);
+    min-height: 100vh;
+}
+
+.auth-brand-panel {
+    background: #183642;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    justify-content: center;
+    padding: 56px;
+}
+
+.auth-brand-panel .mud-typography-body1 {
+    color: #d8e6ea;
+    max-width: 480px;
+}
+
+.auth-brand-mark {
+    align-items: center;
+    background: #f4a261;
+    border-radius: 8px;
+    color: #183642;
+    display: flex;
+    height: 48px;
+    justify-content: center;
+    width: 48px;
+}
+
+.auth-content {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    padding: 32px;
+}
+
+.auth-card {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 460px;
+    padding: 30px;
+    width: 100%;
+}
+
+.role-picker {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#blazor-error-ui {
+    background: #fff4cf;
+    border-top: 1px solid #e9c46a;
+    bottom: 0;
+    box-sizing: border-box;
+    color: #18212f;
+    display: none;
+    left: 0;
+    padding: 12px 48px 12px 20px;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 16px;
+    top: 10px;
+}
+
+.loading-progress {
+    display: block;
+    height: 96px;
+    inset: 22vh 0 auto 0;
+    margin: 0 auto;
+    position: absolute;
+    width: 96px;
+}
+
+.loading-progress circle {
+    fill: none;
+    stroke: #dce5ee;
+    stroke-width: 0.6rem;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+}
+
+.loading-progress circle:last-child {
+    stroke: #1f7a8c;
+    stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
+    transition: stroke-dasharray 0.05s ease-in-out;
+}
+
+.loading-progress-text {
+    font-weight: 700;
+    inset: calc(22vh + 38px) 0 auto 0;
+    position: absolute;
+    text-align: center;
+}
+
+.loading-progress-text::after {
+    content: var(--blazor-load-percentage-text, "Cargando");
+}
+
+@media (max-width: 900px) {
+    .auth-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .auth-brand-panel {
+        padding: 32px;
+    }
+
+    .page-heading {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .user-name {
+        display: none;
+    }
+}

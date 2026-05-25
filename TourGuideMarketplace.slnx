@@ -5,5 +5,6 @@
     <Project Path="src/TourGuideMarketplace.Contracts/TourGuideMarketplace.Contracts.csproj" />
     <Project Path="src/TourGuideMarketplace.Domain/TourGuideMarketplace.Domain.csproj" />
     <Project Path="src/TourGuideMarketplace.Infrastructure/TourGuideMarketplace.Infrastructure.csproj" />
+    <Project Path="src/TourGuideMarketplace.Web/TourGuideMarketplace.Web.csproj" />
   </Folder>
 </Solution>

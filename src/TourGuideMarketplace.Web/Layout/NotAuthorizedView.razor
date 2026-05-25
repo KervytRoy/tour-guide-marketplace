@@ -1,0 +1,38 @@
+@inject NavigationManager Navigation
+
+@if (_isAuthenticated)
+{
+    <MudPaper Class="state-panel" Elevation="0">
+        <MudIcon Icon="@Icons.Material.Filled.Lock" Color="Color.Warning" Size="Size.Large" />
+        <MudText Typo="Typo.h5">No tienes acceso a esta seccion</MudText>
+        <MudText Color="Color.Secondary">Tu cuenta no tiene el rol requerido para abrir esta pagina.</MudText>
+        <MudButton Href="/dashboard" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.SpaceDashboard">
+            Volver al dashboard
+        </MudButton>
+    </MudPaper>
+}
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    private bool _isAuthenticated;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthenticationStateTask is null)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        var authState = await AuthenticationStateTask;
+        _isAuthenticated = authState.User.Identity?.IsAuthenticated == true;
+
+        if (!_isAuthenticated)
+        {
+            var returnUrl = Uri.EscapeDataString(Navigation.ToBaseRelativePath(Navigation.Uri));
+            Navigation.NavigateTo($"/login?returnUrl={returnUrl}");
+        }
+    }
+}
