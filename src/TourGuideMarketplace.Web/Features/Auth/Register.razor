@@ -1,0 +1,94 @@
+@page "/register"
+@layout AuthLayout
+@attribute [AllowAnonymous]
+@inject AuthSessionService AuthSession
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<MudPaper Class="auth-card" Elevation="0">
+    <MudText Typo="Typo.h4">Crea tu cuenta</MudText>
+    <MudText Typo="Typo.body2" Color="Color.Secondary">Elige el tipo de cuenta con el que usaras el marketplace.</MudText>
+
+    @if (_errors.Count > 0)
+    {
+        <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">
+            @string.Join(" ", _errors)
+        </MudAlert>
+    }
+
+    <div class="role-picker">
+        <MudButton Variant="@GetRoleVariant(AppRoles.Tourist)" Color="Color.Primary" OnClick="@(() => _role = AppRoles.Tourist)"
+                   StartIcon="@Icons.Material.Filled.TravelExplore">
+            Turista
+        </MudButton>
+        <MudButton Variant="@GetRoleVariant(AppRoles.Guide)" Color="Color.Secondary" OnClick="@(() => _role = AppRoles.Guide)"
+                   StartIcon="@Icons.Material.Filled.Badge">
+            Guia
+        </MudButton>
+    </div>
+
+    <MudTextField T="string" @bind-Value="_fullName" Label="Nombre completo"
+                  Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Person" />
+    <MudTextField T="string" @bind-Value="_email" Label="Email" InputType="InputType.Email"
+                  Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Email" />
+    <MudTextField T="string" @bind-Value="_phoneNumber" Label="Telefono" InputType="InputType.Telephone"
+                  Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Phone" />
+    <MudTextField T="string" @bind-Value="_password" Label="Contrasena" InputType="InputType.Password"
+                  Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Lock" />
+
+    <MudButton FullWidth="true" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
+               Disabled="_isBusy" OnClick="RegisterAsync" StartIcon="@Icons.Material.Filled.PersonAdd">
+        @(_isBusy ? "Creando cuenta..." : "Crear cuenta")
+    </MudButton>
+
+    <MudDivider />
+
+    <MudText Typo="Typo.body2">
+        Ya tienes cuenta?
+        <MudLink Href="/login">Ingresar</MudLink>
+    </MudText>
+</MudPaper>
+
+@code {
+    private string _role = AppRoles.Tourist;
+    private string _fullName = string.Empty;
+    private string _email = string.Empty;
+    private string? _phoneNumber;
+    private string _password = string.Empty;
+    private bool _isBusy;
+    private IReadOnlyCollection<string> _errors = [];
+
+    private Variant GetRoleVariant(string role)
+    {
+        return _role == role ? Variant.Filled : Variant.Outlined;
+    }
+
+    private async Task RegisterAsync()
+    {
+        _errors = [];
+
+        if (string.IsNullOrWhiteSpace(_fullName) || string.IsNullOrWhiteSpace(_email) || string.IsNullOrWhiteSpace(_password))
+        {
+            _errors = ["Nombre, email y contrasena son requeridos."];
+            return;
+        }
+
+        _isBusy = true;
+        var result = await AuthSession.RegisterAsync(new RegisterRequest(
+            _email.Trim(),
+            _password,
+            _fullName.Trim(),
+            string.IsNullOrWhiteSpace(_phoneNumber) ? null : _phoneNumber.Trim(),
+            _role));
+        _isBusy = false;
+
+        if (!result.Succeeded)
+        {
+            _errors = result.Errors;
+            return;
+        }
+
+        Snackbar.Add("Cuenta creada.", Severity.Success);
+        Navigation.NavigateTo("/dashboard");
+    }
+}

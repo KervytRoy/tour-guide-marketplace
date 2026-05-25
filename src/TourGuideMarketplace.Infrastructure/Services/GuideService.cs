@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TourGuideMarketplace.Application.Common.Models;
-using TourGuideMarketplace.Application.Common.Security;
-using TourGuideMarketplace.Application.Guides;
 using TourGuideMarketplace.Application.Interfaces;
+using TourGuideMarketplace.Contracts.Common;
+using TourGuideMarketplace.Contracts.Guides;
+using TourGuideMarketplace.Contracts.Security;
 using TourGuideMarketplace.Domain.Guides;
 using TourGuideMarketplace.Infrastructure.Identity;
 using TourGuideMarketplace.Infrastructure.Persistence;
@@ -67,6 +68,35 @@ internal sealed class GuideService : IGuideService
         ReplaceLanguages(profile, request.Languages);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return Result<GuideProfileResponse>.Success(MapProfile(profile, user.FullName));
+    }
+
+    public async Task<Result<GuideProfileResponse>> GetMyProfileAsync(
+        Guid userId,
+        CancellationToken cancellationToken)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user is null)
+        {
+            return Result<GuideProfileResponse>.Failure("User was not found.");
+        }
+
+        if (!await _userManager.IsInRoleAsync(user, AppRoles.Guide))
+        {
+            return Result<GuideProfileResponse>.Failure("Only guide users can access a guide profile.");
+        }
+
+        var profile = await _dbContext.GuideProfiles
+            .AsNoTracking()
+            .Include(guide => guide.Specialties)
+            .Include(guide => guide.Languages)
+            .FirstOrDefaultAsync(guide => guide.UserId == userId, cancellationToken);
+
+        if (profile is null)
+        {
+            return Result<GuideProfileResponse>.Failure("Guide profile was not found.");
+        }
 
         return Result<GuideProfileResponse>.Success(MapProfile(profile, user.FullName));
     }

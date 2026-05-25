@@ -1,0 +1,89 @@
+@page "/login"
+@layout AuthLayout
+@attribute [AllowAnonymous]
+@inject AuthSessionService AuthSession
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<MudPaper Class="auth-card" Elevation="0">
+    <MudText Typo="Typo.h4">Ingresa a tu cuenta</MudText>
+    <MudText Typo="Typo.body2" Color="Color.Secondary">Usa tus credenciales para continuar como turista o guia.</MudText>
+
+    @if (_errors.Count > 0)
+    {
+        <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">
+            @string.Join(" ", _errors)
+        </MudAlert>
+    }
+
+    <MudTextField T="string" @bind-Value="_email" Label="Email" InputType="InputType.Email"
+                  Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Email" />
+    <MudTextField T="string" @bind-Value="_password" Label="Contrasena" InputType="InputType.Password"
+                  Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Lock" />
+
+    <MudButton FullWidth="true" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
+               Disabled="_isBusy" OnClick="LoginAsync" StartIcon="@Icons.Material.Filled.Login">
+        @(_isBusy ? "Ingresando..." : "Ingresar")
+    </MudButton>
+
+    <MudDivider />
+
+    <MudText Typo="Typo.body2">
+        Aun no tienes cuenta?
+        <MudLink Href="/register">Crear cuenta</MudLink>
+    </MudText>
+</MudPaper>
+
+@code {
+    private string _email = string.Empty;
+    private string _password = string.Empty;
+    private bool _isBusy;
+    private IReadOnlyCollection<string> _errors = [];
+
+    [SupplyParameterFromQuery]
+    public string? ReturnUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == true)
+        {
+            Navigation.NavigateTo("/dashboard");
+        }
+    }
+
+    private async Task LoginAsync()
+    {
+        _errors = [];
+
+        if (string.IsNullOrWhiteSpace(_email) || string.IsNullOrWhiteSpace(_password))
+        {
+            _errors = ["Email y contrasena son requeridos."];
+            return;
+        }
+
+        _isBusy = true;
+        var result = await AuthSession.LoginAsync(new LoginRequest(_email.Trim(), _password));
+        _isBusy = false;
+
+        if (!result.Succeeded)
+        {
+            _errors = result.Errors;
+            return;
+        }
+
+        Snackbar.Add("Bienvenido.", Severity.Success);
+        Navigation.NavigateTo(GetReturnUrl());
+    }
+
+    private string GetReturnUrl()
+    {
+        if (string.IsNullOrWhiteSpace(ReturnUrl) || ReturnUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        {
+            return "/dashboard";
+        }
+
+        return $"/{ReturnUrl.TrimStart('/')}";
+    }
+}

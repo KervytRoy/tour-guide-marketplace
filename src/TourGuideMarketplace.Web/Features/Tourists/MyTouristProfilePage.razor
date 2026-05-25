@@ -1,0 +1,57 @@
+@page "/tourist/profile"
+@attribute [Authorize(Roles = AppRoles.Tourist)]
+@inject TouristsApiClient TouristsApi
+@inject ISnackbar Snackbar
+
+<MudStack Spacing="3">
+    <div class="page-heading">
+        <div>
+            <MudText Typo="Typo.h4">Mi perfil turista</MudText>
+            <MudText Typo="Typo.body1" Color="Color.Secondary">Información base para personalizar busquedas y futuras reservas.</MudText>
+        </div>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_isBusy" OnClick="SaveAsync" StartIcon="@Icons.Material.Filled.Save">
+            Guardar
+        </MudButton>
+    </div>
+
+    <MudPaper Class="form-panel" Elevation="0">
+        <MudGrid Spacing="3">
+            <MudItem xs="12" md="6">
+                <MudTextField T="string" @bind-Value="_country" Label="Pais" />
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudTextField T="string" @bind-Value="_preferredLanguage" Label="Idioma preferido" />
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</MudStack>
+
+@code {
+    private string? _country;
+    private string? _preferredLanguage;
+    private bool _isBusy;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await TouristsApi.GetMyProfileAsync();
+        if (!result.Succeeded || result.Value is null)
+        {
+            Snackbar.Add(string.Join(" ", result.Errors), Severity.Error);
+            return;
+        }
+
+        _country = result.Value.Country;
+        _preferredLanguage = result.Value.PreferredLanguage;
+    }
+
+    private async Task SaveAsync()
+    {
+        _isBusy = true;
+        var result = await TouristsApi.UpsertMyProfileAsync(new TouristProfileRequest(_country, _preferredLanguage));
+        _isBusy = false;
+
+        Snackbar.Add(
+            result.Succeeded ? "Perfil turista guardado." : string.Join(" ", result.Errors),
+            result.Succeeded ? Severity.Success : Severity.Error);
+    }
+}

@@ -1,0 +1,59 @@
+@page "/profile"
+@attribute [Authorize]
+@inject AuthSessionService AuthSession
+@inject ISnackbar Snackbar
+
+<MudStack Spacing="3">
+    <div class="page-heading">
+        <div>
+            <MudText Typo="Typo.h4">Perfil</MudText>
+            <MudText Typo="Typo.body1" Color="Color.Secondary">Datos de identidad y roles de la cuenta autenticada.</MudText>
+        </div>
+    </div>
+
+    @if (_user is null)
+    {
+        <div class="app-loading">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        </div>
+    }
+    else
+    {
+        <MudPaper Class="profile-panel" Elevation="0">
+            <MudAvatar Size="Size.Large" Color="Color.Primary">@GetInitials(_user.FullName)</MudAvatar>
+            <div class="profile-fields">
+                <MudText Typo="Typo.h5">@_user.FullName</MudText>
+                <MudText Color="Color.Secondary">@_user.Email</MudText>
+                <MudText Color="Color.Secondary">@(_user.PhoneNumber ?? "Sin telefono")</MudText>
+                <div class="guide-meta">
+                    @foreach (var role in _user.Roles)
+                    {
+                        <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined">@role</MudChip>
+                    }
+                </div>
+            </div>
+        </MudPaper>
+    }
+</MudStack>
+
+@code {
+    private CurrentUserResponse? _user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await AuthSession.GetCurrentUserAsync();
+        if (!result.Succeeded)
+        {
+            Snackbar.Add(string.Join(" ", result.Errors), Severity.Error);
+            return;
+        }
+
+        _user = result.Value;
+    }
+
+    private static string GetInitials(string value)
+    {
+        var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return string.Concat(parts.Take(2).Select(part => part[0])).ToUpperInvariant();
+    }
+}

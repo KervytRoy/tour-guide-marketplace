@@ -40,6 +40,7 @@ public static class DependencyInjection
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IGuideService, GuideService>();
+        services.AddScoped<ITouristService, TouristService>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
 
         return services;

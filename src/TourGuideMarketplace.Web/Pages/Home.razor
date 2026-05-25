@@ -1,0 +1,12 @@
+@page "/"
+@layout AuthLayout
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        Navigation.NavigateTo(authState.User.Identity?.IsAuthenticated == true ? "/dashboard" : "/login");
+    }
+}

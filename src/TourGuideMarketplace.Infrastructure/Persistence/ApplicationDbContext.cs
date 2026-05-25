@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using TourGuideMarketplace.Application.Common.Security;
+using TourGuideMarketplace.Contracts.Security;
 using TourGuideMarketplace.Domain.Bookings;
 using TourGuideMarketplace.Domain.Common;
 using TourGuideMarketplace.Domain.Guides;

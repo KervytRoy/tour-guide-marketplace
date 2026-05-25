@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <ProjectReference Include="..\TourGuideMarketplace.Contracts\TourGuideMarketplace.Contracts.csproj" />
     <ProjectReference Include="..\TourGuideMarketplace.Domain\TourGuideMarketplace.Domain.csproj" />
   </ItemGroup>
 

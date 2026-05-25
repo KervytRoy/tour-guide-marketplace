@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TourGuideMarketplace.Application\TourGuideMarketplace.Application.csproj" />
+    <ProjectReference Include="..\TourGuideMarketplace.Contracts\TourGuideMarketplace.Contracts.csproj" />
     <ProjectReference Include="..\TourGuideMarketplace.Infrastructure\TourGuideMarketplace.Infrastructure.csproj" />
   </ItemGroup>
 

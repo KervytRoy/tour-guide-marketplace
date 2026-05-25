@@ -1,5 +1,5 @@
-using TourGuideMarketplace.Application.Auth;
 using TourGuideMarketplace.Application.Common.Models;
+using TourGuideMarketplace.Contracts.Auth;
 
 namespace TourGuideMarketplace.Application.Interfaces;
 

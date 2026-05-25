@@ -7,6 +7,7 @@ using TourGuideMarketplace.Application.Common.Security;
 using TourGuideMarketplace.Infrastructure;
 
 const string SwaggerBearerScheme = "bearer";
+const string WebCorsPolicy = "TourGuideMarketplace.Web";
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,21 @@ builder.Services.AddSwaggerGen(options =>
 });
 builder.Services.AddProblemDetails();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddCors(options =>
+{
+    var allowedOrigins = builder.Configuration
+        .GetSection("Cors:AllowedOrigins")
+        .Get<string[]>()
+        ?? ["http://localhost:5010", "https://localhost:7278"];
+
+    options.AddPolicy(WebCorsPolicy, policy =>
+    {
+        policy
+            .WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 builder.Services
     .AddDataProtection()
     .SetApplicationName("TourGuideMarketplace.Api")
@@ -87,6 +103,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseExceptionHandler();
+app.UseCors(WebCorsPolicy);
 app.UseAuthentication();
 app.UseAuthorization();
 
