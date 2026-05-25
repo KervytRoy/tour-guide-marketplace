@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TourGuideMarketplace.Application.Common.Models;
-using TourGuideMarketplace.Application.Common.Security;
-using TourGuideMarketplace.Application.Guides;
 using TourGuideMarketplace.Application.Interfaces;
+using TourGuideMarketplace.Contracts.Common;
+using TourGuideMarketplace.Contracts.Guides;
+using TourGuideMarketplace.Contracts.Security;
 using TourGuideMarketplace.Domain.Guides;
 using TourGuideMarketplace.Infrastructure.Identity;
 using TourGuideMarketplace.Infrastructure.Persistence;

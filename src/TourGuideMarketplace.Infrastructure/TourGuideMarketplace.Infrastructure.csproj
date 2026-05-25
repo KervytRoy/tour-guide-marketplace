@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\TourGuideMarketplace.Domain\TourGuideMarketplace.Domain.csproj" />
     <ProjectReference Include="..\TourGuideMarketplace.Application\TourGuideMarketplace.Application.csproj" />
+    <ProjectReference Include="..\TourGuideMarketplace.Contracts\TourGuideMarketplace.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

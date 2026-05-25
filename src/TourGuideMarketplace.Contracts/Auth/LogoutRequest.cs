@@ -1,3 +1,3 @@
-namespace TourGuideMarketplace.Application.Auth;
+namespace TourGuideMarketplace.Contracts.Auth;
 
 public sealed record LogoutRequest(string RefreshToken);

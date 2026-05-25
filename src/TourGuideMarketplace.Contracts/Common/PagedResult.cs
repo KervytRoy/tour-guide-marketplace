@@ -1,4 +1,4 @@
-namespace TourGuideMarketplace.Application.Common.Models;
+namespace TourGuideMarketplace.Contracts.Common;
 
 public sealed record PagedResult<T>(
     IReadOnlyCollection<T> Items,

@@ -1,5 +1,6 @@
 using TourGuideMarketplace.Application.Common.Models;
-using TourGuideMarketplace.Application.Guides;
+using TourGuideMarketplace.Contracts.Common;
+using TourGuideMarketplace.Contracts.Guides;
 
 namespace TourGuideMarketplace.Application.Interfaces;
 

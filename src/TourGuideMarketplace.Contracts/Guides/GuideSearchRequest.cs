@@ -1,4 +1,4 @@
-namespace TourGuideMarketplace.Application.Guides;
+namespace TourGuideMarketplace.Contracts.Guides;
 
 public sealed record GuideSearchRequest(
     string? City,

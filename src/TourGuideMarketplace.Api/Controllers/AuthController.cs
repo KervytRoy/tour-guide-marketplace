@@ -1,10 +1,10 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TourGuideMarketplace.Api.Common;
-using TourGuideMarketplace.Application.Auth;
 using TourGuideMarketplace.Application.Common.Models;
 using TourGuideMarketplace.Application.Interfaces;
+using TourGuideMarketplace.Contracts.Auth;
+using TourGuideMarketplace.Contracts.Common;
 
 namespace TourGuideMarketplace.Api.Controllers;
 

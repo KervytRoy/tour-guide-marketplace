@@ -1,4 +1,4 @@
-namespace TourGuideMarketplace.Application.Common.Security;
+namespace TourGuideMarketplace.Contracts.Security;
 
 public static class AppRoles
 {
