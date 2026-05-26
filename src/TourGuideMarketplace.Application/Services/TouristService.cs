@@ -1,44 +1,39 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using TourGuideMarketplace.Application.Common.Models;
+using TourGuideMarketplace.Application.Common.Users;
 using TourGuideMarketplace.Application.Interfaces;
 using TourGuideMarketplace.Contracts.Security;
 using TourGuideMarketplace.Contracts.Tourists;
 using TourGuideMarketplace.Domain.Tourists;
-using TourGuideMarketplace.Infrastructure.Identity;
-using TourGuideMarketplace.Infrastructure.Persistence;
 
-namespace TourGuideMarketplace.Infrastructure.Services;
+namespace TourGuideMarketplace.Application.Services;
 
-internal sealed class TouristService : ITouristService
+public sealed class TouristService : ITouristService
 {
-    private readonly ApplicationDbContext _dbContext;
-    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly ITouristProfileRepository _touristProfileRepository;
+    private readonly IUserAccountService _userAccountService;
 
-    public TouristService(ApplicationDbContext dbContext, UserManager<ApplicationUser> userManager)
+    public TouristService(ITouristProfileRepository touristProfileRepository, IUserAccountService userAccountService)
     {
-        _dbContext = dbContext;
-        _userManager = userManager;
+        _touristProfileRepository = touristProfileRepository;
+        _userAccountService = userAccountService;
     }
 
     public async Task<Result<TouristProfileResponse>> GetMyProfileAsync(
         Guid userId,
         CancellationToken cancellationToken)
     {
-        var user = await _userManager.FindByIdAsync(userId.ToString());
+        var user = await _userAccountService.FindByIdAsync(userId, cancellationToken);
         if (user is null)
         {
             return Result<TouristProfileResponse>.Failure("User was not found.");
         }
 
-        if (!await _userManager.IsInRoleAsync(user, AppRoles.Tourist))
+        if (!await _userAccountService.IsInRoleAsync(user.Id, AppRoles.Tourist, cancellationToken))
         {
             return Result<TouristProfileResponse>.Failure("Only tourist users can access a tourist profile.");
         }
 
-        var profile = await _dbContext.TouristProfiles
-            .AsNoTracking()
-            .FirstOrDefaultAsync(tourist => tourist.UserId == userId, cancellationToken);
+        var profile = await _touristProfileRepository.GetByUserIdAsync(userId, asTracking: false, cancellationToken);
 
         if (profile is null)
         {
@@ -53,13 +48,13 @@ internal sealed class TouristService : ITouristService
         TouristProfileRequest request,
         CancellationToken cancellationToken)
     {
-        var user = await _userManager.FindByIdAsync(userId.ToString());
+        var user = await _userAccountService.FindByIdAsync(userId, cancellationToken);
         if (user is null)
         {
             return Result<TouristProfileResponse>.Failure("User was not found.");
         }
 
-        if (!await _userManager.IsInRoleAsync(user, AppRoles.Tourist))
+        if (!await _userAccountService.IsInRoleAsync(user.Id, AppRoles.Tourist, cancellationToken))
         {
             return Result<TouristProfileResponse>.Failure("Only tourist users can manage a tourist profile.");
         }
@@ -70,19 +65,18 @@ internal sealed class TouristService : ITouristService
             return Result<TouristProfileResponse>.Failure(validationErrors.ToArray());
         }
 
-        var profile = await _dbContext.TouristProfiles
-            .FirstOrDefaultAsync(tourist => tourist.UserId == userId, cancellationToken);
+        var profile = await _touristProfileRepository.GetByUserIdAsync(userId, asTracking: true, cancellationToken);
 
         if (profile is null)
         {
             profile = new TouristProfile { UserId = userId };
-            _dbContext.TouristProfiles.Add(profile);
+            _touristProfileRepository.Add(profile);
         }
 
         profile.Country = NormalizeOptional(request.Country);
         profile.PreferredLanguage = NormalizeOptional(request.PreferredLanguage);
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _touristProfileRepository.SaveChangesAsync(cancellationToken);
 
         return Result<TouristProfileResponse>.Success(MapProfile(profile, user.FullName));
     }

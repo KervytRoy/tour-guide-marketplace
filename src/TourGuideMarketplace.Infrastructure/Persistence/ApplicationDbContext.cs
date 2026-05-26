@@ -8,6 +8,7 @@ using TourGuideMarketplace.Domain.Guides;
 using TourGuideMarketplace.Domain.Payments;
 using TourGuideMarketplace.Domain.Reviews;
 using TourGuideMarketplace.Domain.Tourists;
+using TourGuideMarketplace.Domain.Trust;
 using TourGuideMarketplace.Infrastructure.Identity;
 
 namespace TourGuideMarketplace.Infrastructure.Persistence;
@@ -32,6 +33,10 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Id
     public DbSet<Booking> Bookings => Set<Booking>();
     public DbSet<Review> Reviews => Set<Review>();
     public DbSet<Payment> Payments => Set<Payment>();
+    public DbSet<UserVerification> UserVerifications => Set<UserVerification>();
+    public DbSet<ContactVerificationCode> ContactVerificationCodes => Set<ContactVerificationCode>();
+    public DbSet<IdentityVerificationAttempt> IdentityVerificationAttempts => Set<IdentityVerificationAttempt>();
+    public DbSet<AdminReviewCase> AdminReviewCases => Set<AdminReviewCase>();
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -48,6 +53,7 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Id
         ConfigureBookings(builder);
         ConfigureReviews(builder);
         ConfigurePayments(builder);
+        ConfigureTrust(builder);
     }
 
     private static void ConfigureIdentity(ModelBuilder builder)
@@ -165,7 +171,6 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Id
             entity.HasQueryFilter(verification => !verification.IsDeleted);
             entity.Property(verification => verification.DocumentType).HasMaxLength(80).IsRequired();
             entity.Property(verification => verification.DocumentUrl).HasMaxLength(600).IsRequired();
-            entity.Property(verification => verification.LicenseNumber).HasMaxLength(120);
             entity.Property(verification => verification.RejectionReason).HasMaxLength(500);
             entity.HasOne<GuideProfile>()
                 .WithMany()
@@ -249,6 +254,78 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Id
                 .WithMany()
                 .HasForeignKey(payment => payment.BookingId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    private static void ConfigureTrust(ModelBuilder builder)
+    {
+        builder.Entity<UserVerification>(entity =>
+        {
+            entity.ToTable("UserVerifications");
+            entity.HasKey(verification => verification.Id);
+            entity.HasQueryFilter(verification => !verification.IsDeleted);
+            entity.HasIndex(verification => verification.UserId)
+                .IsUnique()
+                .HasFilter("[IsDeleted] = 0");
+            entity.Property(verification => verification.IdentityProvider).HasMaxLength(80);
+            entity.Property(verification => verification.ExternalVerificationId).HasMaxLength(200);
+            entity.Property(verification => verification.InReviewReason).HasMaxLength(500);
+            entity.Property(verification => verification.SuspendedReason).HasMaxLength(500);
+            entity.HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(verification => verification.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<ContactVerificationCode>(entity =>
+        {
+            entity.ToTable("ContactVerificationCodes");
+            entity.HasKey(code => code.Id);
+            entity.HasQueryFilter(code => !code.IsDeleted);
+            entity.Property(code => code.Destination).HasMaxLength(256).IsRequired();
+            entity.Property(code => code.CodeHash).HasMaxLength(128).IsRequired();
+            entity.Property(code => code.DeliveryProvider).HasMaxLength(80).IsRequired();
+            entity.HasIndex(code => new { code.UserId, code.Channel, code.IsUsed, code.ExpiresAt });
+            entity.HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(code => code.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<IdentityVerificationAttempt>(entity =>
+        {
+            entity.ToTable("IdentityVerificationAttempts");
+            entity.HasKey(attempt => attempt.Id);
+            entity.HasQueryFilter(attempt => !attempt.IsDeleted);
+            entity.Property(attempt => attempt.Provider).HasMaxLength(80).IsRequired();
+            entity.Property(attempt => attempt.ExternalVerificationId).HasMaxLength(200).IsRequired();
+            entity.Property(attempt => attempt.Country).HasMaxLength(120).IsRequired();
+            entity.Property(attempt => attempt.DocumentType).HasMaxLength(80).IsRequired();
+            entity.Property(attempt => attempt.DocumentNumberLast4).HasMaxLength(4);
+            entity.Property(attempt => attempt.FailureReason).HasMaxLength(500);
+            entity.Property(attempt => attempt.RequestPayloadJson).HasMaxLength(4000).IsRequired();
+            entity.Property(attempt => attempt.ResponsePayloadJson).HasMaxLength(4000).IsRequired();
+            entity.HasIndex(attempt => new { attempt.Provider, attempt.ExternalVerificationId }).IsUnique();
+            entity.HasIndex(attempt => new { attempt.UserId, attempt.RequestedAt });
+            entity.HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(attempt => attempt.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<AdminReviewCase>(entity =>
+        {
+            entity.ToTable("AdminReviewCases");
+            entity.HasKey(reviewCase => reviewCase.Id);
+            entity.HasQueryFilter(reviewCase => !reviewCase.IsDeleted);
+            entity.Property(reviewCase => reviewCase.Reason).HasMaxLength(500).IsRequired();
+            entity.Property(reviewCase => reviewCase.Notes).HasMaxLength(1000);
+            entity.Property(reviewCase => reviewCase.Decision).HasMaxLength(500);
+            entity.HasIndex(reviewCase => new { reviewCase.UserId, reviewCase.Status, reviewCase.Type });
+            entity.HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(reviewCase => reviewCase.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 

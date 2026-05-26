@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
-using TourGuideMarketplace.Application.Common.Security;
 using TourGuideMarketplace.Infrastructure;
+using TourGuideMarketplace.Infrastructure.Auth;
 
 const string SwaggerBearerScheme = "bearer";
 const string WebCorsPolicy = "TourGuideMarketplace.Web";
