@@ -1,4 +1,4 @@
-namespace TourGuideMarketplace.Application.Common.Security;
+namespace TourGuideMarketplace.Infrastructure.Auth;
 
 public sealed class JwtOptions
 {

@@ -3,11 +3,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TourGuideMarketplace.Application.Common.Security;
+using TourGuideMarketplace.Application.Common.Users;
 using TourGuideMarketplace.Application.Interfaces;
+using TourGuideMarketplace.Application.Services;
 using TourGuideMarketplace.Infrastructure.Auth;
 using TourGuideMarketplace.Infrastructure.Identity;
 using TourGuideMarketplace.Infrastructure.Persistence;
-using TourGuideMarketplace.Infrastructure.Services;
+using TourGuideMarketplace.Infrastructure.Persistence.Repositories;
+using TourGuideMarketplace.Infrastructure.Trust;
 
 namespace TourGuideMarketplace.Infrastructure;
 
@@ -38,10 +41,22 @@ public static class DependencyInjection
             .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
 
+        // Application use cases.
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IGuideService, GuideService>();
         services.AddScoped<ITouristService, TouristService>();
-        services.AddScoped<IJwtTokenService, JwtTokenService>();
+        services.AddScoped<ITrustService, TrustService>();
+        services.AddScoped<IAdminTrustService, AdminTrustService>();
+
+        // Infrastructure adapters for Application ports.
+        services.AddScoped<IUserAccountService, IdentityUserAccountService>();
+        services.AddScoped<ITokenService, JwtTokenService>();
+        services.AddScoped<IApplicationTransactionRunner, ApplicationTransactionRunner>();
+        services.AddScoped<IGuideProfileRepository, GuideProfileRepository>();
+        services.AddScoped<ITouristProfileRepository, TouristProfileRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<ITrustRepository, TrustRepository>();
+        services.AddScoped<IIdentityVerificationProvider, MockIdentityVerificationProvider>();
 
         return services;
     }

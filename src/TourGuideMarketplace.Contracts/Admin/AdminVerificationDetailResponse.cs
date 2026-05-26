@@ -1,0 +1,13 @@
+using TourGuideMarketplace.Contracts.Trust;
+
+namespace TourGuideMarketplace.Contracts.Admin;
+
+public sealed record AdminVerificationDetailResponse(
+    Guid UserId,
+    string FullName,
+    string Email,
+    string? PhoneNumber,
+    IReadOnlyCollection<string> Roles,
+    TrustStatusResponse TrustStatus,
+    IReadOnlyCollection<AdminVerificationAttemptResponse> Attempts,
+    IReadOnlyCollection<AdminReviewCaseResponse> ReviewCases);

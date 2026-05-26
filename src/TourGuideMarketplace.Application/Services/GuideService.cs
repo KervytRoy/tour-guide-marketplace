@@ -1,25 +1,22 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using TourGuideMarketplace.Application.Common.Models;
+using TourGuideMarketplace.Application.Common.Users;
 using TourGuideMarketplace.Application.Interfaces;
 using TourGuideMarketplace.Contracts.Common;
 using TourGuideMarketplace.Contracts.Guides;
 using TourGuideMarketplace.Contracts.Security;
 using TourGuideMarketplace.Domain.Guides;
-using TourGuideMarketplace.Infrastructure.Identity;
-using TourGuideMarketplace.Infrastructure.Persistence;
 
-namespace TourGuideMarketplace.Infrastructure.Services;
+namespace TourGuideMarketplace.Application.Services;
 
-internal sealed class GuideService : IGuideService
+public sealed class GuideService : IGuideService
 {
-    private readonly ApplicationDbContext _dbContext;
-    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IGuideProfileRepository _guideProfileRepository;
+    private readonly IUserAccountService _userAccountService;
 
-    public GuideService(ApplicationDbContext dbContext, UserManager<ApplicationUser> userManager)
+    public GuideService(IGuideProfileRepository guideProfileRepository, IUserAccountService userAccountService)
     {
-        _dbContext = dbContext;
-        _userManager = userManager;
+        _guideProfileRepository = guideProfileRepository;
+        _userAccountService = userAccountService;
     }
 
     public async Task<Result<GuideProfileResponse>> UpsertMyProfileAsync(
@@ -27,13 +24,13 @@ internal sealed class GuideService : IGuideService
         GuideProfileRequest request,
         CancellationToken cancellationToken)
     {
-        var user = await _userManager.FindByIdAsync(userId.ToString());
+        var user = await _userAccountService.FindByIdAsync(userId, cancellationToken);
         if (user is null)
         {
             return Result<GuideProfileResponse>.Failure("User was not found.");
         }
 
-        if (!await _userManager.IsInRoleAsync(user, AppRoles.Guide))
+        if (!await _userAccountService.IsInRoleAsync(user.Id, AppRoles.Guide, cancellationToken))
         {
             return Result<GuideProfileResponse>.Failure("Only guide users can manage a guide profile.");
         }
@@ -44,15 +41,12 @@ internal sealed class GuideService : IGuideService
             return Result<GuideProfileResponse>.Failure(validationErrors.ToArray());
         }
 
-        var profile = await _dbContext.GuideProfiles
-            .Include(guide => guide.Specialties)
-            .Include(guide => guide.Languages)
-            .FirstOrDefaultAsync(guide => guide.UserId == userId, cancellationToken);
+        var profile = await _guideProfileRepository.GetByUserIdAsync(userId, asTracking: true, cancellationToken);
 
         if (profile is null)
         {
             profile = new GuideProfile { UserId = userId };
-            _dbContext.GuideProfiles.Add(profile);
+            _guideProfileRepository.Add(profile);
         }
 
         profile.Bio = request.Bio.Trim();
@@ -67,7 +61,7 @@ internal sealed class GuideService : IGuideService
         ReplaceSpecialties(profile, request.Specialties);
         ReplaceLanguages(profile, request.Languages);
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _guideProfileRepository.SaveChangesAsync(cancellationToken);
 
         return Result<GuideProfileResponse>.Success(MapProfile(profile, user.FullName));
     }
@@ -76,22 +70,18 @@ internal sealed class GuideService : IGuideService
         Guid userId,
         CancellationToken cancellationToken)
     {
-        var user = await _userManager.FindByIdAsync(userId.ToString());
+        var user = await _userAccountService.FindByIdAsync(userId, cancellationToken);
         if (user is null)
         {
             return Result<GuideProfileResponse>.Failure("User was not found.");
         }
 
-        if (!await _userManager.IsInRoleAsync(user, AppRoles.Guide))
+        if (!await _userAccountService.IsInRoleAsync(user.Id, AppRoles.Guide, cancellationToken))
         {
             return Result<GuideProfileResponse>.Failure("Only guide users can access a guide profile.");
         }
 
-        var profile = await _dbContext.GuideProfiles
-            .AsNoTracking()
-            .Include(guide => guide.Specialties)
-            .Include(guide => guide.Languages)
-            .FirstOrDefaultAsync(guide => guide.UserId == userId, cancellationToken);
+        var profile = await _guideProfileRepository.GetByUserIdAsync(userId, asTracking: false, cancellationToken);
 
         if (profile is null)
         {
@@ -105,24 +95,16 @@ internal sealed class GuideService : IGuideService
         Guid guideProfileId,
         CancellationToken cancellationToken)
     {
-        var profile = await _dbContext.GuideProfiles
-            .AsNoTracking()
-            .Include(guide => guide.Specialties)
-            .Include(guide => guide.Languages)
-            .FirstOrDefaultAsync(guide => guide.Id == guideProfileId, cancellationToken);
+        var profile = await _guideProfileRepository.GetPublicByIdAsync(guideProfileId, cancellationToken);
 
         if (profile is null)
         {
             return Result<GuideProfileResponse>.Failure("Guide profile was not found.");
         }
 
-        var guideName = await _dbContext.Users
-            .AsNoTracking()
-            .Where(user => user.Id == profile.UserId)
-            .Select(user => user.FullName)
-            .FirstOrDefaultAsync(cancellationToken);
+        var user = await _userAccountService.FindByIdAsync(profile.UserId, cancellationToken);
 
-        return Result<GuideProfileResponse>.Success(MapProfile(profile, guideName ?? string.Empty));
+        return Result<GuideProfileResponse>.Success(MapProfile(profile, user?.FullName ?? string.Empty));
     }
 
     public async Task<Result<PagedResult<GuideProfileResponse>>> SearchAsync(
@@ -132,71 +114,19 @@ internal sealed class GuideService : IGuideService
         var pageNumber = Math.Max(request.PageNumber, 1);
         var pageSize = Math.Clamp(request.PageSize, 1, 100);
 
-        var query = _dbContext.GuideProfiles
-            .AsNoTracking()
-            .AsQueryable();
+        var totalCount = await _guideProfileRepository.CountPublicAsync(request, cancellationToken);
+        var profiles = await _guideProfileRepository.SearchPublicAsync(
+            request,
+            pageNumber,
+            pageSize,
+            cancellationToken);
 
-        if (!string.IsNullOrWhiteSpace(request.City))
+        var items = new List<GuideProfileResponse>();
+        foreach (var profile in profiles)
         {
-            var city = request.City.Trim();
-            query = query.Where(guide => guide.City == city);
+            var user = await _userAccountService.FindByIdAsync(profile.UserId, cancellationToken);
+            items.Add(MapProfile(profile, user?.FullName ?? string.Empty));
         }
-
-        if (!string.IsNullOrWhiteSpace(request.Country))
-        {
-            var country = request.Country.Trim();
-            query = query.Where(guide => guide.Country == country);
-        }
-
-        if (!string.IsNullOrWhiteSpace(request.Specialty))
-        {
-            var specialty = request.Specialty.Trim();
-            query = query.Where(guide => guide.Specialties.Any(item => item.Name == specialty));
-        }
-
-        if (!string.IsNullOrWhiteSpace(request.Language))
-        {
-            var language = request.Language.Trim();
-            query = query.Where(guide => guide.Languages.Any(item => item.Name == language));
-        }
-
-        if (request.MaxHourlyRate.HasValue)
-        {
-            query = query.Where(guide => guide.HourlyRate <= request.MaxHourlyRate.Value);
-        }
-
-        if (request.MinRating.HasValue)
-        {
-            query = query.Where(guide => guide.AverageRating >= request.MinRating.Value);
-        }
-
-        if (request.AvailableNow.HasValue)
-        {
-            query = query.Where(guide => guide.AvailableNow == request.AvailableNow.Value);
-        }
-
-        var totalCount = await query.CountAsync(cancellationToken);
-        var profiles = await query
-            .OrderByDescending(guide => guide.IsVerified)
-            .ThenByDescending(guide => guide.AverageRating)
-            .ThenByDescending(guide => guide.ReviewsCount)
-            .Include(guide => guide.Specialties)
-            .Include(guide => guide.Languages)
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
-
-        var userIds = profiles.Select(profile => profile.UserId).Distinct().ToArray();
-        var guideNames = await _dbContext.Users
-            .AsNoTracking()
-            .Where(user => userIds.Contains(user.Id))
-            .ToDictionaryAsync(user => user.Id, user => user.FullName, cancellationToken);
-
-        var items = profiles
-            .Select(profile => MapProfile(
-                profile,
-                guideNames.GetValueOrDefault(profile.UserId, string.Empty)))
-            .ToArray();
 
         return Result<PagedResult<GuideProfileResponse>>.Success(new PagedResult<GuideProfileResponse>(
             items,

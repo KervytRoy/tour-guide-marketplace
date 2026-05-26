@@ -5,11 +5,11 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using TourGuideMarketplace.Application.Common.Security;
-using TourGuideMarketplace.Infrastructure.Identity;
+using TourGuideMarketplace.Application.Common.Users;
 
 namespace TourGuideMarketplace.Infrastructure.Auth;
 
-internal sealed class JwtTokenService : IJwtTokenService
+internal sealed class JwtTokenService : ITokenService
 {
     private readonly JwtOptions _options;
 
@@ -18,7 +18,7 @@ internal sealed class JwtTokenService : IJwtTokenService
         _options = options.Value;
     }
 
-    public AccessTokenResult CreateAccessToken(ApplicationUser user, IEnumerable<string> roles)
+    public AccessTokenResult CreateAccessToken(UserAccount user, IEnumerable<string> roles)
     {
         var now = DateTimeOffset.UtcNow;
         var expiresAt = now.AddMinutes(_options.AccessTokenMinutes);
@@ -28,11 +28,11 @@ internal sealed class JwtTokenService : IJwtTokenService
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+            new(JwtRegisteredClaimNames.Email, user.Email),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Name, user.FullName),
-            new(ClaimTypes.Email, user.Email ?? string.Empty)
+            new(ClaimTypes.Email, user.Email)
         };
 
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
@@ -58,5 +58,10 @@ internal sealed class JwtTokenService : IJwtTokenService
     {
         var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(refreshToken));
         return Convert.ToBase64String(bytes);
+    }
+
+    public DateTimeOffset GetRefreshTokenExpiration(DateTimeOffset issuedAt)
+    {
+        return issuedAt.AddDays(_options.RefreshTokenDays);
     }
 }
