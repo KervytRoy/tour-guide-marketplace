@@ -63,6 +63,8 @@ a {
 .filter-panel,
 .form-panel,
 .profile-panel,
+.trust-summary-panel,
+.trust-panel,
 .guide-card,
 .state-panel,
 .auth-card {
@@ -81,8 +83,42 @@ a {
 
 .work-panel,
 .filter-panel,
-.form-panel {
+.form-panel,
+.trust-panel,
+.trust-summary-panel {
     padding: 24px;
+}
+
+.trust-summary-panel {
+    align-items: center;
+    display: grid;
+    gap: 20px;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 0.45fr);
+}
+
+.trust-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.trust-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.trust-panel-heading {
+    align-items: flex-start;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+.trust-requirement {
+    align-items: flex-start;
+    display: flex;
+    gap: 12px;
 }
 
 .profile-panel {
@@ -266,6 +302,15 @@ a {
     }
 
     .page-heading {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .trust-summary-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .trust-panel-heading {
         align-items: stretch;
         flex-direction: column;
     }
