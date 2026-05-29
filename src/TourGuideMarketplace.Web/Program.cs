@@ -5,6 +5,7 @@ using MudBlazor.Services;
 using TourGuideMarketplace.Web;
 using TourGuideMarketplace.Web.Features.Guides;
 using TourGuideMarketplace.Web.Features.Tourists;
+using TourGuideMarketplace.Web.Features.Trust;
 using TourGuideMarketplace.Web.Infrastructure.Api;
 using TourGuideMarketplace.Web.Infrastructure.Auth;
 using TourGuideMarketplace.Web.Infrastructure.State;
@@ -28,5 +29,6 @@ builder.Services.AddScoped<AuthSessionService>();
 builder.Services.AddScoped<CurrentUserState>();
 builder.Services.AddScoped<GuidesApiClient>();
 builder.Services.AddScoped<TouristsApiClient>();
+builder.Services.AddScoped<TrustApiClient>();
 
 await builder.Build().RunAsync();
