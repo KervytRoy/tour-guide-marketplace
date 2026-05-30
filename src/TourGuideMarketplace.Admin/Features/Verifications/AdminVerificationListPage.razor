@@ -1,0 +1,270 @@
+@page "/"
+@page "/admin/verifications"
+@attribute [Authorize(Roles = AppRoles.Admin)]
+@inject AdminVerificationsApiClient VerificationsApi
+@inject ISnackbar Snackbar
+
+<MudStack Spacing="3">
+    <div class="page-heading">
+        <div>
+            <MudText Typo="Typo.h4">Verificaciones</MudText>
+            <MudText Typo="Typo.body1" Color="Color.Secondary">
+                Revisa el estado de identidad y perfil de los guias.
+            </MudText>
+        </div>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@_isLoading" OnClick="SearchAsync" StartIcon="@Icons.Material.Filled.Refresh">
+            Actualizar
+        </MudButton>
+    </div>
+
+    <MudPaper Class="filter-panel" Elevation="0">
+        <MudGrid Spacing="2">
+            <MudItem xs="12" md="4">
+                <MudSelect T="string" @bind-Value="_statusFilter" Label="Estado">
+                    <MudSelectItem T="string" Value="@("")">Todos</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("Unverified")">Sin verificar</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("ContactVerified")">Contacto verificado</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("IdentityVerified")">Identidad verificada</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("InReview")">En revision</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("ProfileValidated")">Perfil validado</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("Suspended")">Suspendido</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="3">
+                <MudSelect T="int" @bind-Value="_pageSize" Label="Tamano de pagina">
+                    <MudSelectItem T="int" Value="10">10</MudSelectItem>
+                    <MudSelectItem T="int" Value="20">20</MudSelectItem>
+                    <MudSelectItem T="int" Value="50">50</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="3" Class="filter-actions">
+                <MudButton FullWidth="true" Variant="Variant.Outlined" Color="Color.Primary" Disabled="@_isLoading" OnClick="ApplyFiltersAsync" StartIcon="@Icons.Material.Filled.FilterAlt">
+                    Aplicar filtros
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    @if (_result is not null)
+    {
+        <MudGrid Spacing="3">
+            <MudItem xs="12" md="4">
+                <MudPaper Class="metric-card" Elevation="0">
+                    <MudText Typo="Typo.overline">Total filtrado</MudText>
+                    <MudText Typo="Typo.h4">@_result.TotalCount</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Registros encontrados</MudText>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudPaper Class="metric-card" Elevation="0">
+                    <MudText Typo="Typo.overline">En esta pagina</MudText>
+                    <MudText Typo="Typo.h4">@_items.Count</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Casos visibles</MudText>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudPaper Class="metric-card" Elevation="0">
+                    <MudText Typo="Typo.overline">Pendientes visibles</MudText>
+                    <MudText Typo="Typo.h4">@VisiblePendingCount</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Requieren seguimiento</MudText>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    }
+
+    @if (_isLoading)
+    {
+        <div class="app-loading">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        </div>
+    }
+    else if (_items.Count == 0)
+    {
+        <MudPaper Class="state-panel" Elevation="0">
+            <MudIcon Icon="@Icons.Material.Filled.VerifiedUser" Color="Color.Secondary" Size="Size.Large" />
+            <MudText Typo="Typo.h6">No hay verificaciones para los filtros actuales</MudText>
+            <MudText Color="Color.Secondary">Ajusta el estado o actualiza la lista.</MudText>
+        </MudPaper>
+    }
+    else
+    {
+        <MudPaper Class="table-panel" Elevation="0">
+            <MudTable Items="_items" Hover="true" Dense="true" Elevation="0">
+                <HeaderContent>
+                    <MudTh>Guia</MudTh>
+                    <MudTh>Estado</MudTh>
+                    <MudTh>Contacto</MudTh>
+                    <MudTh>Identidad</MudTh>
+                    <MudTh>Perfil</MudTh>
+                    <MudTh>Proveedor</MudTh>
+                    <MudTh>Actualizado</MudTh>
+                    <MudTh></MudTh>
+                </HeaderContent>
+                <RowTemplate Context="item">
+                    <MudTd DataLabel="Guia">
+                        <div class="identity-cell">
+                            <MudAvatar Color="Color.Primary">@GetInitials(item.FullName)</MudAvatar>
+                            <div>
+                                <MudText Typo="Typo.subtitle2">@item.FullName</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">@item.Email</MudText>
+                            </div>
+                        </div>
+                    </MudTd>
+                    <MudTd DataLabel="Estado">
+                        <MudChip T="string" Color="@GetStatusColor(item.Status)" Variant="Variant.Outlined">
+                            @GetStatusLabel(item.Status)
+                        </MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="Contacto">
+                        <div class="indicator-row">
+                            <MudIcon Icon="@GetBooleanIcon(item.EmailVerified)" Color="@GetBooleanColor(item.EmailVerified)" Size="Size.Small" />
+                            <MudText Typo="Typo.caption">Email</MudText>
+                            <MudIcon Icon="@GetBooleanIcon(item.PhoneVerified)" Color="@GetBooleanColor(item.PhoneVerified)" Size="Size.Small" />
+                            <MudText Typo="Typo.caption">Telefono</MudText>
+                        </div>
+                    </MudTd>
+                    <MudTd DataLabel="Identidad">
+                        <MudIcon Icon="@GetBooleanIcon(item.IdentityVerified)" Color="@GetBooleanColor(item.IdentityVerified)" />
+                    </MudTd>
+                    <MudTd DataLabel="Perfil">
+                        <MudIcon Icon="@GetBooleanIcon(item.ProfileValidated)" Color="@GetBooleanColor(item.ProfileValidated)" />
+                    </MudTd>
+                    <MudTd DataLabel="Proveedor">
+                        <MudText Typo="Typo.body2">@(item.IdentityProvider ?? "-")</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">@(item.LastAttemptStatus ?? "Sin intentos")</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Actualizado">
+                        <MudText Typo="Typo.body2">@FormatDate(item.UpdatedAt ?? item.CreatedAt)</MudText>
+                    </MudTd>
+                    <MudTd>
+                        <MudButton Href="@($"/admin/verifications/{item.UserId}")" Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small" StartIcon="@Icons.Material.Filled.OpenInNew">
+                            Abrir
+                        </MudButton>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+
+            <div class="pager-row">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                    Pagina @_pageNumber de @TotalPages
+                </MudText>
+                <MudStack Row="true" Spacing="1">
+                    <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft" Color="Color.Primary" Disabled="@(_pageNumber <= 1 || _isLoading)" OnClick="PreviousPageAsync" />
+                    <MudIconButton Icon="@Icons.Material.Filled.ChevronRight" Color="Color.Primary" Disabled="@(_pageNumber >= TotalPages || _isLoading)" OnClick="NextPageAsync" />
+                </MudStack>
+            </div>
+        </MudPaper>
+    }
+</MudStack>
+
+@code {
+    private PagedResult<AdminVerificationSummaryResponse>? _result;
+    private IReadOnlyCollection<AdminVerificationSummaryResponse> _items = [];
+    private string _statusFilter = string.Empty;
+    private int _pageNumber = 1;
+    private int _pageSize = 20;
+    private bool _isLoading;
+
+    private int TotalPages => Math.Max(_result?.TotalPages ?? 1, 1);
+    private int VisiblePendingCount => _items.Count(item => item.Status is "InReview" or "IdentityVerified");
+
+    protected override Task OnInitializedAsync()
+    {
+        return SearchAsync();
+    }
+
+    private async Task ApplyFiltersAsync()
+    {
+        _pageNumber = 1;
+        await SearchAsync();
+    }
+
+    private async Task PreviousPageAsync()
+    {
+        if (_pageNumber <= 1)
+        {
+            return;
+        }
+
+        _pageNumber--;
+        await SearchAsync();
+    }
+
+    private async Task NextPageAsync()
+    {
+        if (_pageNumber >= TotalPages)
+        {
+            return;
+        }
+
+        _pageNumber++;
+        await SearchAsync();
+    }
+
+    private async Task SearchAsync()
+    {
+        _isLoading = true;
+        var result = await VerificationsApi.SearchAsync(new AdminVerificationSearchRequest(
+            string.IsNullOrWhiteSpace(_statusFilter) ? null : _statusFilter,
+            _pageNumber,
+            _pageSize));
+        _isLoading = false;
+
+        if (!result.Succeeded || result.Value is null)
+        {
+            Snackbar.Add(string.Join(" ", result.Errors), Severity.Error);
+            return;
+        }
+
+        _result = result.Value;
+        _items = result.Value.Items;
+    }
+
+    private static string GetInitials(string value)
+    {
+        var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return string.Concat(parts.Take(2).Select(part => part[0])).ToUpperInvariant();
+    }
+
+    private static string GetBooleanIcon(bool value)
+    {
+        return value ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.RadioButtonUnchecked;
+    }
+
+    private static Color GetBooleanColor(bool value)
+    {
+        return value ? Color.Success : Color.Secondary;
+    }
+
+    private static Color GetStatusColor(string status)
+    {
+        return status switch
+        {
+            "ProfileValidated" => Color.Success,
+            "IdentityVerified" => Color.Info,
+            "ContactVerified" => Color.Primary,
+            "InReview" => Color.Warning,
+            "Suspended" => Color.Error,
+            _ => Color.Secondary
+        };
+    }
+
+    private static string GetStatusLabel(string status)
+    {
+        return status switch
+        {
+            "Unverified" => "Sin verificar",
+            "ContactVerified" => "Contacto verificado",
+            "IdentityVerified" => "Identidad verificada",
+            "ProfileValidated" => "Perfil validado",
+            "InReview" => "En revision",
+            "Suspended" => "Suspendido",
+            _ => status
+        };
+    }
+
+    private static string FormatDate(DateTimeOffset value)
+    {
+        return value.ToLocalTime().ToString("yyyy-MM-dd HH:mm");
+    }
+}

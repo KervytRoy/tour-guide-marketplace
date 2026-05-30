@@ -1,0 +1,73 @@
+@inherits LayoutComponentBase
+@inject AuthSessionService AuthSession
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject CurrentUserState CurrentUser
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<MudLayout Class="admin-shell">
+    <MudAppBar Class="admin-topbar" Elevation="0">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
+        <MudText Typo="Typo.h6" Class="brand-title">Trust Admin</MudText>
+        <MudSpacer />
+        <MudText Typo="Typo.body2" Class="user-name">@(_currentUser?.FullName ?? "Administrador")</MudText>
+        <MudMenu Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit">
+            <MudMenuItem OnClick="LogoutAsync" Icon="@Icons.Material.Filled.Logout">Cerrar sesion</MudMenuItem>
+        </MudMenu>
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="_drawerOpen" Variant="DrawerVariant.Responsive" Breakpoint="Breakpoint.Md" Elevation="0" Class="admin-drawer">
+        <div class="drawer-brand">
+            <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" Color="Color.Primary" />
+            <div>
+                <MudText Typo="Typo.subtitle1">Administracion</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Identidad y confianza</MudText>
+            </div>
+        </div>
+
+        <MudNavMenu Class="nav-menu">
+            <MudNavLink Href="/admin/verifications" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.VerifiedUser">
+                Verificaciones
+            </MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent Class="main-content">
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="content-container">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private bool _drawerOpen = true;
+    private CurrentUserResponse? _currentUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated != true)
+        {
+            return;
+        }
+
+        var result = await CurrentUser.LoadAsync();
+        if (result.Succeeded)
+        {
+            _currentUser = result.Value;
+        }
+    }
+
+    private void ToggleDrawer()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    private async Task LogoutAsync()
+    {
+        await AuthSession.LogoutAsync();
+        CurrentUser.Clear();
+        Snackbar.Add("Sesion cerrada.", Severity.Info);
+        Navigation.NavigateTo("/login");
+    }
+}

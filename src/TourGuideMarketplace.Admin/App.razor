@@ -1,0 +1,45 @@
+<MudThemeProvider Theme="_theme" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                <NotAuthorized>
+                    <NotAuthorizedView />
+                </NotAuthorized>
+                <Authorizing>
+                    <div class="app-loading">
+                        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+                    </div>
+                </Authorizing>
+            </AuthorizeRouteView>
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        </Found>
+    </Router>
+</CascadingAuthenticationState>
+
+@code {
+    private readonly MudTheme _theme = new()
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#28536B",
+            Secondary = "#C27D38",
+            Tertiary = "#5F4B66",
+            Success = "#2F855A",
+            Warning = "#C05621",
+            Error = "#B42318",
+            Background = "#F5F7FA",
+            Surface = "#FFFFFF",
+            AppbarBackground = "#FFFFFF",
+            AppbarText = "#17202A",
+            DrawerBackground = "#FFFFFF",
+            DrawerText = "#273444",
+            TextPrimary = "#17202A",
+            TextSecondary = "#617182"
+        }
+    };
+}
