@@ -53,6 +53,19 @@
             </div>
         </MudPaper>
 
+        @if (NeedsProfileChanges)
+        {
+            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined">
+                Tu perfil requiere cambios antes de ser validado. Corrige tu perfil y vuelve a enviarlo a revision.
+            </MudAlert>
+        }
+        else if (IsProfileInReview)
+        {
+            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+                Tu perfil ya esta en revision administrativa. Las validaciones completadas se conservan mientras esperas la decision.
+            </MudAlert>
+        }
+
         <MudGrid Spacing="3">
             <MudItem xs="12" lg="4">
                 <MudPaper Class="trust-panel" Elevation="0">
@@ -192,7 +205,7 @@
                         <div class="trust-panel-heading">
                             <div>
                                 <MudText Typo="Typo.h6">Reglas y revision</MudText>
-                                <MudText Typo="Typo.body2" Color="Color.Secondary">Acepta las reglas y envia tu perfil para validacion administrativa.</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">@GetReviewHelpText()</MudText>
                             </div>
                             <MudChip T="string" Color="@(_status.ProfileValidated ? Color.Success : Color.Warning)" Variant="Variant.Outlined">
                                 @(_status.ProfileValidated ? "Perfil validado" : "Sin validar")
@@ -210,7 +223,7 @@
                                     Editar perfil
                                 </MudButton>
                                 <MudButton Variant="Variant.Filled" Color="Color.Success" Disabled="@(!CanSubmitReview || IsBusy(ReviewAction))" OnClick="SubmitReviewAsync" StartIcon="@Icons.Material.Filled.Send">
-                                    Enviar a revision
+                                    @GetReviewButtonText()
                                 </MudButton>
                             </MudStack>
                         </MudStack>
@@ -250,11 +263,16 @@
     private int CompletedRequirements => _status?.Requirements.Count(requirement => requirement.IsComplete) ?? 0;
     private double CompletionPercent => TotalRequirements == 0 ? 0 : CompletedRequirements * 100d / TotalRequirements;
     private bool CanStartIdentity => _status is { EmailVerified: true, PhoneVerified: true };
+    private bool NeedsProfileChanges => _status?.Status == "ProfileChangesRequested";
+    private bool IsProfileInReview => _status?.Status == "InReview";
+    private bool IsSuspended => _status?.Status == "Suspended";
     private bool CanAcceptRules => _status is not null
         && (!_status.CodeOfConductAccepted || !_status.SafetyRulesAccepted)
         && _acceptCodeOfConduct
         && _acceptSafetyRules;
-    private bool CanSubmitReview => _status is { IdentityVerified: true, CodeOfConductAccepted: true, SafetyRulesAccepted: true, ProfileValidated: false };
+    private bool CanSubmitReview => _status is { IdentityVerified: true, CodeOfConductAccepted: true, SafetyRulesAccepted: true, ProfileValidated: false }
+        && !IsProfileInReview
+        && !IsSuspended;
 
     protected override Task OnInitializedAsync()
     {
@@ -390,6 +408,7 @@
     {
         await RunAsync(ReviewAction, async () =>
         {
+            var wasResubmission = NeedsProfileChanges;
             var result = await TrustApi.SubmitGuideProfileReviewAsync();
             if (!result.Succeeded || result.Value is null)
             {
@@ -398,7 +417,7 @@
             }
 
             ApplyStatus(result.Value);
-            Snackbar.Add("Perfil enviado a revision administrativa.", Severity.Success);
+            Snackbar.Add(wasResubmission ? "Perfil reenviado a revision administrativa." : "Perfil enviado a revision administrativa.", Severity.Success);
         });
     }
 
@@ -439,7 +458,42 @@
             return Color.Error;
         }
 
+        if (_status?.Status == "ProfileChangesRequested")
+        {
+            return Color.Warning;
+        }
+
         return CompletionPercent >= 100 ? Color.Success : Color.Primary;
+    }
+
+    private string GetReviewHelpText()
+    {
+        if (NeedsProfileChanges)
+        {
+            return "Corrige tu perfil y reenvialo a validacion administrativa.";
+        }
+
+        if (IsProfileInReview)
+        {
+            return "Tu perfil esta en revision administrativa.";
+        }
+
+        return "Acepta las reglas y envia tu perfil para validacion administrativa.";
+    }
+
+    private string GetReviewButtonText()
+    {
+        if (NeedsProfileChanges)
+        {
+            return "Reenviar a revision";
+        }
+
+        if (IsProfileInReview)
+        {
+            return "En revision";
+        }
+
+        return "Enviar a revision";
     }
 
     private static Severity GetIdentitySeverity(string status)
@@ -461,6 +515,7 @@
             "IdentityVerified" => "Identidad verificada",
             "ProfileValidated" => "Perfil validado",
             "InReview" => "En revision",
+            "ProfileChangesRequested" => "Perfil requiere cambios",
             "Suspended" => "Suspendido",
             _ => status
         };
@@ -479,7 +534,7 @@
             "request-phone-code" => "Solicita y confirma el codigo de telefono.",
             "start-identity-verification" => "Completa el formulario de documento.",
             "accept-trust-rules" => "Acepta el codigo de conducta y reglas de seguridad.",
-            "submit-guide-profile-review" => "Completa tu perfil y envialo a revision.",
+            "submit-guide-profile-review" => "Completa o corrige tu perfil y envialo a revision.",
             _ => "Pendiente"
         };
     }

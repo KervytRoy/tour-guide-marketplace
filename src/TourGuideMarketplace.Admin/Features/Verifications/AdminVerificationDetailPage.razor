@@ -217,7 +217,7 @@
                             </MudButton>
                             <MudButton Variant="Variant.Outlined" Color="Color.Warning" Disabled="@(!CanReject || IsBusy(RejectAction))"
                                        OnClick="@(() => ExecuteDecisionAsync(RejectAction))" StartIcon="@Icons.Material.Filled.ReportProblem">
-                                Rechazar con cambios
+                                Solicitar cambios de perfil
                             </MudButton>
                             <MudButton Variant="Variant.Outlined" Color="Color.Error" Disabled="@(!CanSuspend || IsBusy(SuspendAction))"
                                        OnClick="@(() => ExecuteDecisionAsync(SuspendAction))" StartIcon="@Icons.Material.Filled.Block">
@@ -262,8 +262,8 @@
     private double CompletionPercent => TotalRequirements == 0 ? 0 : CompletedRequirements * 100d / TotalRequirements;
     private int OpenCaseCount => _detail?.ReviewCases.Count(reviewCase => reviewCase.Status == "Open") ?? 0;
     private bool RequiresReason => string.IsNullOrWhiteSpace(_reason);
-    private bool CanApprove => _detail?.TrustStatus is { IdentityVerified: true, ProfileValidated: false, Status: not "Suspended" };
-    private bool CanReject => _detail?.TrustStatus is { ProfileValidated: false, Status: not "Suspended" } && !string.IsNullOrWhiteSpace(_reason);
+    private bool CanApprove => _detail?.TrustStatus is { IdentityVerified: true, ProfileValidated: false, Status: "InReview" };
+    private bool CanReject => _detail?.TrustStatus is { ProfileValidated: false, Status: "InReview" } && !string.IsNullOrWhiteSpace(_reason);
     private bool CanSuspend => _detail?.TrustStatus.Status != "Suspended" && !string.IsNullOrWhiteSpace(_reason);
     private bool CanReactivate => _detail?.TrustStatus.Status == "Suspended";
 
@@ -364,6 +364,7 @@
             "IdentityVerified" => Color.Info,
             "ContactVerified" => Color.Primary,
             "InReview" => Color.Warning,
+            "ProfileChangesRequested" => Color.Warning,
             "Suspended" => Color.Error,
             _ => Color.Secondary
         };
@@ -378,6 +379,7 @@
             "IdentityVerified" => "Identidad verificada",
             "ProfileValidated" => "Perfil validado",
             "InReview" => "En revision",
+            "ProfileChangesRequested" => "Perfil requiere cambios",
             "Suspended" => "Suspendido",
             _ => status
         };
