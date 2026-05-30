@@ -9,9 +9,14 @@
             <MudText Typo="Typo.h4">Mi perfil de guia</MudText>
             <MudText Typo="Typo.body1" Color="Color.Secondary">Estos datos alimentan tu ficha publica para turistas.</MudText>
         </div>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_isBusy" OnClick="SaveAsync" StartIcon="@Icons.Material.Filled.Save">
-            Guardar
-        </MudButton>
+        <MudStack Row="true" Spacing="2" Class="action-row">
+            <MudButton Href="/guide/trust" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.VerifiedUser">
+                Validacion
+            </MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_isBusy" OnClick="SaveAsync" StartIcon="@Icons.Material.Filled.Save">
+                Guardar
+            </MudButton>
+        </MudStack>
     </div>
 
     @if (_loadErrors.Count > 0)

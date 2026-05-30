@@ -43,6 +43,14 @@ public sealed class ApiClient
         return SendAsync<TResponse>(() => CreateJsonRequest(HttpMethod.Post, path, request), authorized, cancellationToken);
     }
 
+    public Task<ApiResult<TResponse>> PostAsync<TResponse>(
+        string path,
+        bool authorized = true,
+        CancellationToken cancellationToken = default)
+    {
+        return SendAsync<TResponse>(() => new HttpRequestMessage(HttpMethod.Post, path), authorized, cancellationToken);
+    }
+
     public Task<ApiResult<TResponse>> PutAsync<TRequest, TResponse>(
         string path,
         TRequest request,

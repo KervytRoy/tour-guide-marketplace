@@ -11,3 +11,4 @@ obj/
 appsettings.Local.json
 appsetting.json
 **/.keys/
+/src/TourGuideMarketplace.Api/appsettings.json
