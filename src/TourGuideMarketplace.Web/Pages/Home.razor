@@ -1,12 +1,128 @@
 @page "/"
-@layout AuthLayout
-@inject AuthenticationStateProvider AuthenticationStateProvider
-@inject NavigationManager Navigation
+@attribute [AllowAnonymous]
+@inject GuidesApiClient GuidesApi
+
+<MudStack Spacing="3" Class="home-page">
+    <div class="home-heading">
+        <div>
+            <MudText Typo="Typo.h4">Guias verificados</MudText>
+            <MudText Typo="Typo.body1" Color="Color.Secondary">
+                Encuentra expertos locales listos para ayudarte a descubrir tu proximo destino.
+            </MudText>
+        </div>
+        <AuthorizeView>
+            <Authorized>
+                <MudButton Href="/dashboard" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.SpaceDashboard">
+                    Dashboard
+                </MudButton>
+            </Authorized>
+            <NotAuthorized>
+                <MudButton Href="/login" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Login">
+                    Ingresar
+                </MudButton>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+
+    @if (_isBusy)
+    {
+        <div class="app-loading">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        </div>
+    }
+    else if (_errors.Count > 0)
+    {
+        <MudPaper Class="state-panel" Elevation="0">
+            <MudIcon Icon="@Icons.Material.Filled.CloudOff" Color="Color.Secondary" Size="Size.Large" />
+            <MudText Typo="Typo.h6">No pudimos cargar los guias</MudText>
+            <MudText Color="Color.Secondary">@string.Join(" ", _errors)</MudText>
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="LoadVerifiedGuidesAsync" StartIcon="@Icons.Material.Filled.Refresh">
+                Reintentar
+            </MudButton>
+        </MudPaper>
+    }
+    else if (_guides.Count == 0)
+    {
+        <MudPaper Class="state-panel" Elevation="0">
+            <MudIcon Icon="@Icons.Material.Filled.TravelExplore" Color="Color.Secondary" Size="Size.Large" />
+            <MudText Typo="Typo.h6">Aun no hay guias verificados</MudText>
+            <MudText Color="Color.Secondary">Vuelve pronto para explorar nuevos perfiles aprobados.</MudText>
+        </MudPaper>
+    }
+    else
+    {
+        <div class="home-guide-grid">
+            @foreach (var guide in _guides)
+            {
+                <MudPaper Class="home-guide-card" Elevation="0">
+                    <div class="home-guide-photo">
+                        @if (!string.IsNullOrWhiteSpace(guide.PhotoUrl))
+                        {
+                            <img src="@guide.PhotoUrl" alt="@($"Foto de {guide.GuideName}")" class="home-guide-image" />
+                        }
+                        else
+                        {
+                            <MudAvatar Size="Size.Large" Color="Color.Primary">@GetInitials(guide.GuideName)</MudAvatar>
+                        }
+                    </div>
+
+                    <div class="home-guide-content">
+                        <MudText Typo="Typo.subtitle1" Class="home-guide-name">@guide.GuideName</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">@guide.City, @guide.Country</MudText>
+
+                        <div class="home-guide-tags">
+                            @foreach (var specialty in guide.Specialties.Take(2))
+                            {
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary">@specialty</MudChip>
+                            }
+                        </div>
+                    </div>
+                </MudPaper>
+            }
+        </div>
+    }
+</MudStack>
 
 @code {
-    protected override async Task OnInitializedAsync()
+    private bool _isBusy;
+    private IReadOnlyCollection<GuideProfileResponse> _guides = [];
+    private IReadOnlyCollection<string> _errors = [];
+
+    protected override Task OnInitializedAsync()
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        Navigation.NavigateTo(authState.User.Identity?.IsAuthenticated == true ? "/dashboard" : "/login");
+        return LoadVerifiedGuidesAsync();
+    }
+
+    private async Task LoadVerifiedGuidesAsync()
+    {
+        _isBusy = true;
+        _errors = [];
+        var result = await GuidesApi.SearchAsync(new GuideSearchRequest(
+            City: null,
+            Country: null,
+            Specialty: null,
+            Language: null,
+            MaxHourlyRate: null,
+            MinRating: null,
+            AvailableNow: null,
+            PageNumber: 1,
+            PageSize: 24));
+        _isBusy = false;
+
+        if (!result.Succeeded)
+        {
+            _errors = result.Errors;
+            return;
+        }
+
+        _guides = result.Value?.Items ?? [];
+    }
+
+    private static string GetInitials(string value)
+    {
+        var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return parts.Length == 0
+            ? "GM"
+            : string.Concat(parts.Take(2).Select(part => part[0])).ToUpperInvariant();
     }
 }

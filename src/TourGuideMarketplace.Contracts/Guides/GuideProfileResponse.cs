@@ -16,4 +16,5 @@ public sealed record GuideProfileResponse(
     decimal? Latitude,
     decimal? Longitude,
     IReadOnlyCollection<string> Specialties,
-    IReadOnlyCollection<string> Languages);
+    IReadOnlyCollection<string> Languages,
+    string? PhotoUrl = null);

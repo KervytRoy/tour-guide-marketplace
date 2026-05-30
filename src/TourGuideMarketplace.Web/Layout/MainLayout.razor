@@ -1,5 +1,6 @@
 @inherits LayoutComponentBase
 @inject AuthSessionService AuthSession
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject CurrentUserState CurrentUser
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
@@ -9,11 +10,25 @@
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
         <MudText Typo="Typo.h6" Class="brand-title">Tour Guide Marketplace</MudText>
         <MudSpacer />
-        <MudText Typo="Typo.body2" Class="user-name">@(_currentUser?.FullName ?? "Cuenta")</MudText>
-        <MudMenu Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit">
-            <MudMenuItem Href="/profile" Icon="@Icons.Material.Filled.Person">Perfil</MudMenuItem>
-            <MudMenuItem OnClick="LogoutAsync" Icon="@Icons.Material.Filled.Logout">Cerrar sesion</MudMenuItem>
-        </MudMenu>
+        @if (_isAuthenticated)
+        {
+            <MudText Typo="Typo.body2" Class="user-name">@(_currentUser?.FullName ?? _displayName ?? "Cuenta")</MudText>
+            <MudMenu Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit">
+                <MudMenuItem Href="/profile" Icon="@Icons.Material.Filled.Person">Perfil</MudMenuItem>
+                <MudMenuItem OnClick="LogoutAsync" Icon="@Icons.Material.Filled.Logout">Cerrar sesion</MudMenuItem>
+            </MudMenu>
+        }
+        else
+        {
+            <div class="public-actions">
+                <MudButton Href="/login" Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Login">
+                    Ingresar
+                </MudButton>
+                <MudButton Href="/register" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PersonAdd">
+                    Crear cuenta
+                </MudButton>
+            </div>
+        }
     </MudAppBar>
 
     <MudDrawer @bind-Open="_drawerOpen" Variant="DrawerVariant.Responsive" Breakpoint="Breakpoint.Md" Elevation="0" Class="app-drawer">
@@ -26,9 +41,17 @@
         </div>
 
         <MudNavMenu Class="nav-menu">
-            <MudNavLink Href="/dashboard" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.SpaceDashboard">
-                Dashboard
+            <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Explore">
+                Inicio
             </MudNavLink>
+
+            <AuthorizeView>
+                <Authorized>
+                    <MudNavLink Href="/dashboard" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.SpaceDashboard">
+                        Dashboard
+                    </MudNavLink>
+                </Authorized>
+            </AuthorizeView>
 
             <AuthorizeView Roles="@AppRoles.Tourist">
                 <Authorized>
@@ -58,10 +81,23 @@
                 </Authorized>
             </AuthorizeView>
 
-            <MudDivider Class="my-3" />
-            <MudNavLink Href="/profile" Icon="@Icons.Material.Filled.Person">
-                Perfil
-            </MudNavLink>
+            <AuthorizeView>
+                <Authorized>
+                    <MudDivider Class="my-3" />
+                    <MudNavLink Href="/profile" Icon="@Icons.Material.Filled.Person">
+                        Perfil
+                    </MudNavLink>
+                </Authorized>
+                <NotAuthorized>
+                    <MudDivider Class="my-3" />
+                    <MudNavLink Href="/login" Icon="@Icons.Material.Filled.Login">
+                        Ingresar
+                    </MudNavLink>
+                    <MudNavLink Href="/register" Icon="@Icons.Material.Filled.PersonAdd">
+                        Crear cuenta
+                    </MudNavLink>
+                </NotAuthorized>
+            </AuthorizeView>
         </MudNavMenu>
     </MudDrawer>
 
@@ -74,14 +110,23 @@
 
 @code {
     private bool _drawerOpen = true;
+    private bool _isAuthenticated;
     private CurrentUserResponse? _currentUser;
+    private string? _displayName;
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await CurrentUser.LoadAsync();
-        if (result.Succeeded)
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        _isAuthenticated = authState.User.Identity?.IsAuthenticated == true;
+        _displayName = authState.User.Identity?.Name;
+
+        if (_isAuthenticated)
         {
-            _currentUser = result.Value;
+            var result = await CurrentUser.LoadAsync();
+            if (result.Succeeded)
+            {
+                _currentUser = result.Value;
+            }
         }
     }
 
@@ -95,6 +140,6 @@
         await AuthSession.LogoutAsync();
         CurrentUser.Clear();
         Snackbar.Add("Sesion cerrada.", Severity.Info);
-        Navigation.NavigateTo("/login");
+        Navigation.NavigateTo("/");
     }
 }
