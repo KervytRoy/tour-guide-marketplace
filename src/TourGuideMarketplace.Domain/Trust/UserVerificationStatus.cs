@@ -7,5 +7,6 @@ public enum UserVerificationStatus
     IdentityVerified = 2,
     ProfileValidated = 3,
     InReview = 4,
-    Suspended = 5
+    Suspended = 5,
+    ProfileChangesRequested = 6
 }
