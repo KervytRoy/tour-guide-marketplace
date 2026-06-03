@@ -1,0 +1,149 @@
+@page "/guides/{GuideId:guid}"
+@attribute [AllowAnonymous]
+@inject GuidesApiClient GuidesApi
+
+<MudStack Spacing="3">
+    @if (_isBusy)
+    {
+        <div class="app-loading">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        </div>
+    }
+    else if (_errors.Count > 0)
+    {
+        <MudPaper Class="state-panel" Elevation="0">
+            <MudIcon Icon="@Icons.Material.Filled.CloudOff" Color="Color.Secondary" Size="Size.Large" />
+            <MudText Typo="Typo.h6">No pudimos cargar el perfil</MudText>
+            <MudText Color="Color.Secondary">@string.Join(" ", _errors)</MudText>
+            <MudButton Href="/" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack">
+                Volver al inicio
+            </MudButton>
+        </MudPaper>
+    }
+    else if (_guide is not null)
+    {
+        <MudButton Href="/" Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack" Class="guide-profile-back">
+            Volver al inicio
+        </MudButton>
+
+        <MudPaper Class="public-guide-profile" Elevation="0">
+            <div class="public-guide-photo">
+                @if (!string.IsNullOrWhiteSpace(_guide.PhotoUrl))
+                {
+                    <img src="@_guide.PhotoUrl" alt="@($"Foto de {_guide.GuideName}")" />
+                }
+                else
+                {
+                    <MudAvatar Color="Color.Primary">@GetInitials(_guide.GuideName)</MudAvatar>
+                }
+            </div>
+
+            <div class="public-guide-main">
+                <div class="public-guide-heading">
+                    <div>
+                        <MudText Typo="Typo.h3">@_guide.GuideName</MudText>
+                        <MudText Typo="Typo.subtitle1" Color="Color.Secondary">@_guide.City, @_guide.Country</MudText>
+                    </div>
+
+                    @if (_guide.IsVerified)
+                    {
+                        <MudChip T="string" Color="Color.Success" Variant="Variant.Filled" Icon="@Icons.Material.Filled.Verified">
+                            Guia verificado
+                        </MudChip>
+                    }
+                </div>
+
+                <div class="public-guide-stats">
+                    <div>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">Tarifa</MudText>
+                        <MudText Typo="Typo.subtitle1">@_guide.Currency @_guide.HourlyRate / hora</MudText>
+                    </div>
+                    <div>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">Rating</MudText>
+                        <MudText Typo="Typo.subtitle1">@_guide.AverageRating (@_guide.ReviewsCount resenas)</MudText>
+                    </div>
+                    <div>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">Disponibilidad</MudText>
+                        <MudText Typo="Typo.subtitle1">@(_guide.AvailableNow ? "Disponible ahora" : "Consultar disponibilidad")</MudText>
+                    </div>
+                </div>
+
+                <MudDivider />
+
+                <div>
+                    <MudText Typo="Typo.h6">Sobre el guia</MudText>
+                    <MudText Typo="Typo.body1" Class="public-guide-bio">@_guide.Bio</MudText>
+                </div>
+
+                <div class="public-guide-list">
+                    <MudText Typo="Typo.subtitle2">Especialidades</MudText>
+                    <div class="guide-meta">
+                        @foreach (var specialty in _guide.Specialties)
+                        {
+                            <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined">@specialty</MudChip>
+                        }
+                    </div>
+                </div>
+
+                <div class="public-guide-list">
+                    <MudText Typo="Typo.subtitle2">Idiomas</MudText>
+                    <div class="guide-meta">
+                        @foreach (var language in _guide.Languages)
+                        {
+                            <MudChip T="string" Color="Color.Secondary" Variant="Variant.Outlined">@language</MudChip>
+                        }
+                    </div>
+                </div>
+
+                <div class="public-guide-actions">
+                    <MudButton Href="/login" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.EventAvailable">
+                        Iniciar sesion para reservar
+                    </MudButton>
+                    <MudButton Href="/guides" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.TravelExplore">
+                        Ver mas guias
+                    </MudButton>
+                </div>
+            </div>
+        </MudPaper>
+    }
+</MudStack>
+
+@code {
+    [Parameter]
+    public Guid GuideId { get; set; }
+
+    private bool _isBusy;
+    private GuideProfileResponse? _guide;
+    private IReadOnlyCollection<string> _errors = [];
+
+    protected override Task OnParametersSetAsync()
+    {
+        return LoadGuideAsync();
+    }
+
+    private async Task LoadGuideAsync()
+    {
+        _isBusy = true;
+        _errors = [];
+
+        var result = await GuidesApi.GetByIdAsync(GuideId);
+        _isBusy = false;
+
+        if (!result.Succeeded)
+        {
+            _errors = result.Errors;
+            _guide = null;
+            return;
+        }
+
+        _guide = result.Value;
+    }
+
+    private static string GetInitials(string value)
+    {
+        var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return parts.Length == 0
+            ? "GM"
+            : string.Concat(parts.Take(2).Select(part => part[0])).ToUpperInvariant();
+    }
+}

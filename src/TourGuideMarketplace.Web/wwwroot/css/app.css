@@ -51,6 +51,327 @@ a {
     padding-top: 32px;
 }
 
+.market-home {
+    background: #f7f9fb;
+    min-height: 100vh;
+}
+
+.market-home-header {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.96);
+    border-bottom: 1px solid #e5ebf2;
+    display: grid;
+    gap: 18px;
+    grid-template-columns: minmax(220px, 1fr) auto minmax(280px, 1fr);
+    min-height: 90px;
+    padding: 16px 32px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+.market-brand {
+    align-items: center;
+    color: #1f7a8c;
+    display: inline-flex;
+    font-size: 1.05rem;
+    font-weight: 800;
+    gap: 10px;
+    min-width: 0;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.market-brand:hover {
+    color: #176475;
+}
+
+.market-brand-mark {
+    align-items: center;
+    background: #e9f5f7;
+    border-radius: 8px;
+    display: inline-flex;
+    height: 38px;
+    justify-content: center;
+    width: 38px;
+}
+
+.market-home-tabs {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.market-home-tab {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    color: #596577;
+    cursor: pointer;
+    display: inline-flex;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    gap: 8px;
+    height: 56px;
+    justify-content: center;
+    min-width: 120px;
+    padding: 0 12px;
+}
+
+.market-home-tab:hover {
+    color: #18212f;
+}
+
+.market-home-tab.is-active {
+    border-bottom-color: #18212f;
+    color: #18212f;
+}
+
+.market-home-tab .mud-icon-root {
+    font-size: 1.35rem;
+}
+
+.market-home-actions {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    min-width: 0;
+}
+
+.market-guide-link {
+    border-radius: 999px;
+    font-weight: 700;
+    min-height: 42px;
+    white-space: nowrap;
+}
+
+.market-language-picker {
+    align-items: center;
+    display: inline-flex;
+    gap: 6px;
+}
+
+.market-language-picker span {
+    color: #3e4a59;
+    font-size: 0.78rem;
+    font-weight: 800;
+    min-width: 20px;
+}
+
+.market-round-menu .mud-button-root,
+.market-round-menu .mud-icon-button {
+    background: #f0f3f6;
+    border-radius: 999px;
+    height: 44px;
+    min-width: 44px;
+    width: 44px;
+}
+
+.market-round-menu .mud-button-root:hover,
+.market-round-menu .mud-icon-button:hover {
+    background: #e5ebf2;
+}
+
+.market-search-band {
+    background: #ffffff;
+    border-bottom: 1px solid #edf1f5;
+    display: flex;
+    justify-content: center;
+    padding: 0 24px 26px;
+}
+
+.market-search-card {
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #dce4ec;
+    border-radius: 999px;
+    box-shadow: 0 16px 36px rgba(24, 33, 47, 0.12);
+    display: grid;
+    gap: 0;
+    grid-template-columns: minmax(180px, 1.1fr) minmax(170px, 0.9fr) minmax(170px, 0.9fr) 58px;
+    margin-top: -1px;
+    max-width: 920px;
+    min-height: 72px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.market-search-field {
+    border-right: 1px solid #dfe6ee;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    justify-content: center;
+    min-height: 54px;
+    min-width: 0;
+    padding: 12px 28px;
+}
+
+.market-search-field span {
+    color: #18212f;
+    font-size: 0.78rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.market-search-field input {
+    background: transparent;
+    border: 0;
+    color: #3e4a59;
+    font: inherit;
+    font-size: 0.95rem;
+    min-width: 0;
+    outline: 0;
+    width: 100%;
+}
+
+.market-search-field input::placeholder {
+    color: #657386;
+}
+
+.market-search-button.mud-icon-button {
+    align-self: center;
+    background: #d62828;
+    border-radius: 999px;
+    color: #ffffff;
+    height: 48px;
+    justify-self: center;
+    width: 48px;
+}
+
+.market-search-button.mud-icon-button:hover {
+    background: #b91f1f;
+}
+
+.market-home-content {
+    margin: 0 auto;
+    max-width: 1200px;
+    padding: 38px 32px 56px;
+}
+
+.market-section-heading {
+    align-items: flex-start;
+    display: flex;
+    gap: 18px;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.travel-friend-grid,
+.destination-grid {
+    display: grid;
+    gap: 22px;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+.travel-friend-card,
+.destination-card {
+    background: #ffffff;
+    border: 1px solid #e5ebf2;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.travel-friend-card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 230px;
+    padding: 22px;
+}
+
+.travel-friend-top {
+    align-items: center;
+    display: flex;
+    gap: 14px;
+}
+
+.travel-friend-style {
+    color: #3e4a59;
+    min-height: 40px;
+}
+
+.place-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 22px;
+}
+
+.place-filter {
+    background: #ffffff;
+    border: 1px solid #dce4ec;
+    border-radius: 999px;
+    color: #3e4a59;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    min-height: 40px;
+    padding: 0 16px;
+}
+
+.place-filter:hover,
+.place-filter.is-active {
+    background: #183642;
+    border-color: #183642;
+    color: #ffffff;
+}
+
+.destination-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 350px;
+}
+
+.destination-image-shell {
+    aspect-ratio: 16 / 10;
+    background: #dfe8ef;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+
+.destination-image-shell.is-missing::after {
+    background:
+        radial-gradient(circle at 25% 28%, rgba(244, 162, 97, 0.45), transparent 28%),
+        linear-gradient(135deg, #dfe8ef 0%, #f5f8fb 48%, #d7ecef 100%);
+    content: "";
+    inset: 0;
+    position: absolute;
+}
+
+.destination-image-shell.is-missing .destination-image {
+    display: none;
+}
+
+.destination-image {
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+}
+
+.destination-card-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+}
+
+.destination-meta {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 10px;
+}
+
 .public-actions {
     align-items: center;
     display: flex;
@@ -148,6 +469,33 @@ a {
     padding: 22px;
 }
 
+.guide-card-link,
+.home-guide-card-link {
+    color: inherit;
+    display: block;
+    height: 100%;
+    text-decoration: none;
+}
+
+.guide-card-link:focus-visible,
+.home-guide-card-link:focus-visible {
+    border-radius: 8px;
+    outline: 3px solid rgba(31, 122, 140, 0.28);
+    outline-offset: 4px;
+}
+
+.guide-card-link .guide-card,
+.home-guide-card-link .home-guide-card {
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.guide-card-link:hover .guide-card,
+.home-guide-card-link:hover .home-guide-card {
+    border-color: rgba(31, 122, 140, 0.45);
+    box-shadow: 0 14px 34px rgba(24, 33, 47, 0.12);
+    transform: translateY(-2px);
+}
+
 .guide-card-header {
     align-items: center;
     display: flex;
@@ -164,6 +512,85 @@ a {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+}
+
+.guide-profile-back {
+    align-self: flex-start;
+}
+
+.public-guide-profile {
+    background: #ffffff;
+    border: 1px solid #e5ebf2;
+    border-radius: 8px;
+    display: grid;
+    gap: 28px;
+    grid-template-columns: minmax(260px, 0.38fr) minmax(0, 1fr);
+    overflow: hidden;
+}
+
+.public-guide-photo {
+    align-items: center;
+    background: #dfe8ef;
+    display: flex;
+    justify-content: center;
+    min-height: 460px;
+}
+
+.public-guide-photo img {
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+}
+
+.public-guide-photo .mud-avatar {
+    font-size: 2rem;
+    height: 104px;
+    width: 104px;
+}
+
+.public-guide-main {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    padding: 32px 32px 32px 0;
+}
+
+.public-guide-heading {
+    align-items: flex-start;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+.public-guide-stats {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.public-guide-stats > div {
+    background: #f7f9fb;
+    border: 1px solid #e5ebf2;
+    border-radius: 8px;
+    padding: 14px;
+}
+
+.public-guide-bio {
+    color: #3e4a59;
+    margin-top: 8px;
+    max-width: 760px;
+}
+
+.public-guide-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.public-guide-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
 .home-page {
@@ -370,6 +797,31 @@ a {
 }
 
 @media (max-width: 900px) {
+    .market-home-header {
+        grid-template-columns: 1fr auto;
+        padding: 14px 20px;
+    }
+
+    .market-home-tabs {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 2px;
+    }
+
+    .market-home-tab {
+        min-width: max-content;
+    }
+
+    .market-search-card {
+        grid-template-columns: 1fr 1fr 58px;
+        max-width: 760px;
+    }
+
+    .market-search-field:first-child {
+        grid-column: 1 / -1;
+    }
+
     .auth-shell {
         grid-template-columns: 1fr;
     }
@@ -397,6 +849,26 @@ a {
         flex-direction: column;
     }
 
+    .public-guide-profile {
+        grid-template-columns: 1fr;
+    }
+
+    .public-guide-photo {
+        min-height: 320px;
+    }
+
+    .public-guide-main {
+        padding: 0 24px 28px;
+    }
+
+    .public-guide-heading {
+        flex-direction: column;
+    }
+
+    .public-guide-stats {
+        grid-template-columns: 1fr;
+    }
+
     .public-actions {
         gap: 4px;
     }
@@ -407,6 +879,55 @@ a {
 }
 
 @media (max-width: 520px) {
+    .market-home-header {
+        gap: 12px;
+        grid-template-columns: 1fr;
+        position: static;
+    }
+
+    .market-brand {
+        white-space: normal;
+    }
+
+    .market-home-actions {
+        justify-content: space-between;
+    }
+
+    .market-guide-link {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .market-search-band {
+        padding: 14px 16px 22px;
+    }
+
+    .market-search-card {
+        border-radius: 8px;
+        grid-template-columns: 1fr;
+        overflow: visible;
+    }
+
+    .market-search-field {
+        border-bottom: 1px solid #e5ebf2;
+        border-right: 0;
+        padding: 14px 18px;
+    }
+
+    .market-search-button.mud-icon-button {
+        margin: 12px 18px 14px;
+        width: calc(100% - 36px);
+    }
+
+    .market-home-content {
+        padding: 28px 16px 40px;
+    }
+
+    .market-section-heading {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
     .content-container {
         padding-left: 16px;
         padding-right: 16px;
