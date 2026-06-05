@@ -126,6 +126,11 @@ public sealed class AdminTrustService : IAdminTrustService
             return Result<AdminVerificationDetailResponse>.Failure("Identity must be verified before validating the profile.");
         }
 
+        if (verification.Status != UserVerificationStatus.InReview)
+        {
+            return Result<AdminVerificationDetailResponse>.Failure("Guide profile must be in review before it can be validated.");
+        }
+
         var profile = await _guideProfileRepository.GetByUserIdAsync(user.Id, asTracking: true, cancellationToken);
         if (profile is null)
         {
@@ -165,15 +170,26 @@ public sealed class AdminTrustService : IAdminTrustService
         var context = result.Value!;
         var user = context.User;
         var verification = context.Verification;
-        var reason = NormalizeReason(request.Reason, "Guide profile requires changes before it can be validated.");
-        var profile = await _guideProfileRepository.GetByUserIdAsync(user.Id, asTracking: true, cancellationToken);
-
-        if (profile is not null)
+        if (!verification.IdentityVerifiedAt.HasValue)
         {
-            profile.IsVerified = false;
+            return Result<AdminVerificationDetailResponse>.Failure("Identity must be verified before requesting profile changes.");
         }
 
-        verification.Status = UserVerificationStatus.InReview;
+        if (verification.Status != UserVerificationStatus.InReview)
+        {
+            return Result<AdminVerificationDetailResponse>.Failure("Guide profile must be in review before requesting changes.");
+        }
+
+        var reason = NormalizeReason(request.Reason, "Guide profile requires changes before it can be validated.");
+        var profile = await _guideProfileRepository.GetByUserIdAsync(user.Id, asTracking: true, cancellationToken);
+        if (profile is null)
+        {
+            return Result<AdminVerificationDetailResponse>.Failure("Guide profile was not found.");
+        }
+
+        profile.IsVerified = false;
+
+        verification.Status = UserVerificationStatus.ProfileChangesRequested;
         verification.InReviewReason = reason;
         verification.ProfileValidatedAt = null;
 
@@ -447,7 +463,7 @@ public sealed class AdminTrustService : IAdminTrustService
             return;
         }
 
-        if (verification.Status == UserVerificationStatus.InReview)
+        if (verification.Status is UserVerificationStatus.InReview or UserVerificationStatus.ProfileChangesRequested)
         {
             return;
         }

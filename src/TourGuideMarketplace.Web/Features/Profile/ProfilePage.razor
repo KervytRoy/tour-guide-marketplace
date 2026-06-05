@@ -2,12 +2,13 @@
 @attribute [Authorize]
 @inject AuthSessionService AuthSession
 @inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResource> L
 
 <MudStack Spacing="3">
     <div class="page-heading">
         <div>
-            <MudText Typo="Typo.h4">Perfil</MudText>
-            <MudText Typo="Typo.body1" Color="Color.Secondary">Datos de identidad y roles de la cuenta autenticada.</MudText>
+            <MudText Typo="Typo.h4">@L["Profile"]</MudText>
+            <MudText Typo="Typo.body1" Color="Color.Secondary">@L["ProfileSubtitle"]</MudText>
         </div>
     </div>
 
@@ -24,7 +25,7 @@
             <div class="profile-fields">
                 <MudText Typo="Typo.h5">@_user.FullName</MudText>
                 <MudText Color="Color.Secondary">@_user.Email</MudText>
-                <MudText Color="Color.Secondary">@(_user.PhoneNumber ?? "Sin telefono")</MudText>
+                <MudText Color="Color.Secondary">@(_user.PhoneNumber ?? L["NoPhone"])</MudText>
                 <div class="guide-meta">
                     @foreach (var role in _user.Roles)
                     {

@@ -2,25 +2,26 @@
 @attribute [Authorize(Roles = AppRoles.Tourist)]
 @inject TouristsApiClient TouristsApi
 @inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResource> L
 
 <MudStack Spacing="3">
     <div class="page-heading">
         <div>
-            <MudText Typo="Typo.h4">Mi perfil turista</MudText>
-            <MudText Typo="Typo.body1" Color="Color.Secondary">Información base para personalizar busquedas y futuras reservas.</MudText>
+            <MudText Typo="Typo.h4">@L["MyTouristProfile"]</MudText>
+            <MudText Typo="Typo.body1" Color="Color.Secondary">@L["MyTouristProfileSubtitle"]</MudText>
         </div>
         <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_isBusy" OnClick="SaveAsync" StartIcon="@Icons.Material.Filled.Save">
-            Guardar
+            @L["Save"]
         </MudButton>
     </div>
 
     <MudPaper Class="form-panel" Elevation="0">
         <MudGrid Spacing="3">
             <MudItem xs="12" md="6">
-                <MudTextField T="string" @bind-Value="_country" Label="Pais" />
+                <MudTextField T="string" @bind-Value="_country" Label="@L["Country"]" />
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudTextField T="string" @bind-Value="_preferredLanguage" Label="Idioma preferido" />
+                <MudTextField T="string" @bind-Value="_preferredLanguage" Label="@L["PreferredLanguage"]" />
             </MudItem>
         </MudGrid>
     </MudPaper>
@@ -51,7 +52,7 @@
         _isBusy = false;
 
         Snackbar.Add(
-            result.Succeeded ? "Perfil turista guardado." : string.Join(" ", result.Errors),
+            result.Succeeded ? L["TouristProfileSaved"] : string.Join(" ", result.Errors),
             result.Succeeded ? Severity.Success : Severity.Error);
     }
 }

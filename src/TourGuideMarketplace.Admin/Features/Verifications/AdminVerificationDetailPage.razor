@@ -1,0 +1,452 @@
+@page "/admin/verifications/{UserId:guid}"
+@attribute [Authorize(Roles = AppRoles.Admin)]
+@inject AdminVerificationsApiClient VerificationsApi
+@inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResource> L
+
+<MudStack Spacing="3">
+    <div class="page-heading">
+        <div>
+            <MudText Typo="Typo.h4">@L["VerificationDetailTitle"]</MudText>
+            <MudText Typo="Typo.body1" Color="Color.Secondary">
+                @L["VerificationDetailSubtitle"]
+            </MudText>
+        </div>
+        <MudStack Row="true" Spacing="2" Class="action-row">
+            <MudButton Href="/admin/verifications" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack">
+                @L["Back"]
+            </MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@_isLoading" OnClick="LoadAsync" StartIcon="@Icons.Material.Filled.Refresh">
+                @L["Refresh"]
+            </MudButton>
+        </MudStack>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="app-loading">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        </div>
+    }
+    else if (_detail is null)
+    {
+        <MudPaper Class="state-panel" Elevation="0">
+            <MudIcon Icon="@Icons.Material.Filled.CloudOff" Color="Color.Warning" Size="Size.Large" />
+            <MudText Typo="Typo.h6">@L["DetailLoadFailed"]</MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="LoadAsync">
+                @L["Retry"]
+            </MudButton>
+        </MudPaper>
+    }
+    else
+    {
+        <MudPaper Class="detail-hero" Elevation="0">
+            <div class="identity-cell">
+                <MudAvatar Color="Color.Primary" Size="Size.Large">@GetInitials(_detail.FullName)</MudAvatar>
+                <div>
+                    <MudText Typo="Typo.h5">@_detail.FullName</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">@_detail.Email</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">@(_detail.PhoneNumber ?? L["NoPhone"])</MudText>
+                </div>
+            </div>
+            <MudChip T="string" Color="@GetStatusColor(_detail.TrustStatus.Status)" Variant="Variant.Filled">
+                @GetStatusLabel(_detail.TrustStatus.Status)
+            </MudChip>
+        </MudPaper>
+
+        <MudGrid Spacing="3">
+            <MudItem xs="12" md="8">
+                <MudStack Spacing="3">
+                    <MudPaper Class="work-panel" Elevation="0">
+                        <div class="panel-heading">
+                            <div>
+                                <MudText Typo="Typo.h6">@L["TrustChecklist"]</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">@L["TrustChecklistSubtitle"]</MudText>
+                            </div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">@L["RequirementsProgress", CompletedRequirements, TotalRequirements]</MudText>
+                        </div>
+
+                        <MudProgressLinear Color="@GetProgressColor()" Value="@CompletionPercent" Min="0" Max="100" Class="mb-4" />
+
+                        <MudGrid Spacing="2">
+                            @foreach (var requirement in _detail.TrustStatus.Requirements)
+                            {
+                                <MudItem xs="12" md="6">
+                                    <div class="requirement-row">
+                                        <MudIcon Icon="@(requirement.IsComplete ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.RadioButtonUnchecked)"
+                                                 Color="@(requirement.IsComplete ? Color.Success : Color.Secondary)" />
+                                        <div>
+                                            <MudText Typo="Typo.subtitle2">@requirement.Label</MudText>
+                                            <MudText Typo="Typo.caption" Color="Color.Secondary">@GetRequirementHelp(requirement)</MudText>
+                                        </div>
+                                    </div>
+                                </MudItem>
+                            }
+                        </MudGrid>
+                    </MudPaper>
+
+                    <MudPaper Class="work-panel" Elevation="0">
+                        <div class="panel-heading">
+                            <div>
+                                <MudText Typo="Typo.h6">@L["IdentityAttempts"]</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">@L["IdentityAttemptsSubtitle"]</MudText>
+                            </div>
+                            <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined">@L["AttemptsCount", _detail.Attempts.Count]</MudChip>
+                        </div>
+
+                        @if (_detail.Attempts.Count == 0)
+                        {
+                            <MudText Color="Color.Secondary">@L["NoIdentityAttempts"]</MudText>
+                        }
+                        else
+                        {
+                            <MudTable Items="_detail.Attempts" Hover="true" Dense="true" Elevation="0">
+                                <HeaderContent>
+                                    <MudTh>@L["Provider"]</MudTh>
+                                    <MudTh>@L["Status"]</MudTh>
+                                    <MudTh>@L["Document"]</MudTh>
+                                    <MudTh>@L["Reference"]</MudTh>
+                                    <MudTh>@L["Date"]</MudTh>
+                                </HeaderContent>
+                                <RowTemplate Context="attempt">
+                                    <MudTd DataLabel="@L["Provider"]">@attempt.Provider</MudTd>
+                                    <MudTd DataLabel="@L["Status"]">
+                                        <MudChip T="string" Color="@GetAttemptColor(attempt.Status)" Variant="Variant.Outlined">
+                                            @GetAttemptLabel(attempt.Status)
+                                        </MudChip>
+                                        @if (!string.IsNullOrWhiteSpace(attempt.FailureReason))
+                                        {
+                                            <MudText Typo="Typo.caption" Color="Color.Secondary">@attempt.FailureReason</MudText>
+                                        }
+                                    </MudTd>
+                                    <MudTd DataLabel="@L["Document"]">
+                                        <MudText Typo="Typo.body2">@attempt.Country / @attempt.DocumentType</MudText>
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">**** @attempt.DocumentNumberLast4</MudText>
+                                    </MudTd>
+                                    <MudTd DataLabel="@L["Reference"]">
+                                        <MudText Typo="Typo.caption" Class="mono">@attempt.ExternalVerificationId</MudText>
+                                    </MudTd>
+                                    <MudTd DataLabel="@L["Date"]">@FormatDate(attempt.RequestedAt)</MudTd>
+                                </RowTemplate>
+                            </MudTable>
+                        }
+                    </MudPaper>
+
+                    <MudPaper Class="work-panel" Elevation="0">
+                        <div class="panel-heading">
+                            <div>
+                                <MudText Typo="Typo.h6">@L["AdminCases"]</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">@L["AdminCasesSubtitle"]</MudText>
+                            </div>
+                            <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined">@L["OpenCasesCount", OpenCaseCount]</MudChip>
+                        </div>
+
+                        @if (_detail.ReviewCases.Count == 0)
+                        {
+                            <MudText Color="Color.Secondary">@L["NoReviewCases"]</MudText>
+                        }
+                        else
+                        {
+                            <MudStack Spacing="2">
+                                @foreach (var reviewCase in _detail.ReviewCases)
+                                {
+                                    <div class="case-row">
+                                        <MudIcon Icon="@(reviewCase.Status == "Open" ? Icons.Material.Filled.PendingActions : Icons.Material.Filled.TaskAlt)"
+                                                 Color="@(reviewCase.Status == "Open" ? Color.Warning : Color.Success)" />
+                                        <div>
+                                            <MudText Typo="Typo.subtitle2">@GetCaseTypeLabel(reviewCase.Type) - @GetCaseStatusLabel(reviewCase.Status)</MudText>
+                                            <MudText Typo="Typo.body2">@reviewCase.Reason</MudText>
+                                            @if (!string.IsNullOrWhiteSpace(reviewCase.Notes))
+                                            {
+                                                <MudText Typo="Typo.caption" Color="Color.Secondary">@reviewCase.Notes</MudText>
+                                            }
+                                            @if (!string.IsNullOrWhiteSpace(reviewCase.Decision))
+                                            {
+                                                <MudText Typo="Typo.caption" Color="Color.Success">@reviewCase.Decision</MudText>
+                                            }
+                                        </div>
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">@FormatDate(reviewCase.CreatedAt)</MudText>
+                                    </div>
+                                }
+                            </MudStack>
+                        }
+                    </MudPaper>
+                </MudStack>
+            </MudItem>
+
+            <MudItem xs="12" md="4">
+                <MudStack Spacing="3">
+                    <MudPaper Class="work-panel" Elevation="0">
+                        <MudText Typo="Typo.h6">@L["QuickStatus"]</MudText>
+                        <div class="quick-status-grid">
+                            <StatusIndicator Label="@L["Email"]" Value="@_detail.TrustStatus.EmailVerified" />
+                            <StatusIndicator Label="@L["Phone"]" Value="@_detail.TrustStatus.PhoneVerified" />
+                            <StatusIndicator Label="@L["Identity"]" Value="@_detail.TrustStatus.IdentityVerified" />
+                            <StatusIndicator Label="@L["Profile"]" Value="@_detail.TrustStatus.ProfileValidated" />
+                            <StatusIndicator Label="@L["Conduct"]" Value="@_detail.TrustStatus.CodeOfConductAccepted" />
+                            <StatusIndicator Label="@L["Safety"]" Value="@_detail.TrustStatus.SafetyRulesAccepted" />
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(_detail.TrustStatus.InReviewReason))
+                        {
+                            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-3">
+                                @_detail.TrustStatus.InReviewReason
+                            </MudAlert>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(_detail.TrustStatus.SuspendedReason))
+                        {
+                            <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Class="mt-3">
+                                @_detail.TrustStatus.SuspendedReason
+                            </MudAlert>
+                        }
+                    </MudPaper>
+
+                    <MudPaper Class="work-panel" Elevation="0">
+                        <MudText Typo="Typo.h6">@L["AdminDecision"]</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                            @L["AdminDecisionSubtitle"]
+                        </MudText>
+
+                        <MudTextField T="string" @bind-Value="_reason" Label="@L["Reason"]" Lines="3" />
+                        <MudTextField T="string" @bind-Value="_notes" Label="@L["InternalNotes"]" Lines="3" />
+
+                        <MudStack Spacing="2" Class="decision-actions">
+                            <MudButton Variant="Variant.Filled" Color="Color.Success" Disabled="@(!CanApprove || IsBusy(ApproveAction))"
+                                       OnClick="@(() => ExecuteDecisionAsync(ApproveAction))" StartIcon="@Icons.Material.Filled.CheckCircle">
+                                @L["ApproveProfile"]
+                            </MudButton>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Warning" Disabled="@(!CanReject || IsBusy(RejectAction))"
+                                       OnClick="@(() => ExecuteDecisionAsync(RejectAction))" StartIcon="@Icons.Material.Filled.ReportProblem">
+                                @L["RequestProfileChanges"]
+                            </MudButton>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Error" Disabled="@(!CanSuspend || IsBusy(SuspendAction))"
+                                       OnClick="@(() => ExecuteDecisionAsync(SuspendAction))" StartIcon="@Icons.Material.Filled.Block">
+                                @L["SuspendAccount"]
+                            </MudButton>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(!CanReactivate || IsBusy(ReactivateAction))"
+                                       OnClick="@(() => ExecuteDecisionAsync(ReactivateAction))" StartIcon="@Icons.Material.Filled.RestartAlt">
+                                @L["ReactivateAccount"]
+                            </MudButton>
+                        </MudStack>
+
+                        @if (RequiresReason)
+                        {
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                @L["ReasonRequiredHelp"]
+                            </MudText>
+                        }
+                    </MudPaper>
+                </MudStack>
+            </MudItem>
+        </MudGrid>
+    }
+</MudStack>
+
+@code {
+    private const string ApproveAction = "approve";
+    private const string RejectAction = "reject";
+    private const string SuspendAction = "suspend";
+    private const string ReactivateAction = "reactivate";
+
+    private AdminVerificationDetailResponse? _detail;
+    private string _reason = string.Empty;
+    private string _notes = string.Empty;
+    private bool _isLoading;
+    private string? _busyAction;
+
+    [Parameter]
+    public Guid UserId { get; set; }
+
+    private int TotalRequirements => _detail?.TrustStatus.Requirements.Count ?? 0;
+    private int CompletedRequirements => _detail?.TrustStatus.Requirements.Count(requirement => requirement.IsComplete) ?? 0;
+    private double CompletionPercent => TotalRequirements == 0 ? 0 : CompletedRequirements * 100d / TotalRequirements;
+    private int OpenCaseCount => _detail?.ReviewCases.Count(reviewCase => reviewCase.Status == "Open") ?? 0;
+    private bool RequiresReason => string.IsNullOrWhiteSpace(_reason);
+    private bool CanApprove => _detail?.TrustStatus is { IdentityVerified: true, ProfileValidated: false, Status: "InReview" };
+    private bool CanReject => _detail?.TrustStatus is { ProfileValidated: false, Status: "InReview" } && !string.IsNullOrWhiteSpace(_reason);
+    private bool CanSuspend => _detail?.TrustStatus.Status != "Suspended" && !string.IsNullOrWhiteSpace(_reason);
+    private bool CanReactivate => _detail?.TrustStatus.Status == "Suspended";
+
+    protected override Task OnInitializedAsync()
+    {
+        return LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _isLoading = true;
+        var result = await VerificationsApi.GetDetailAsync(UserId);
+        _isLoading = false;
+
+        if (!result.Succeeded || result.Value is null)
+        {
+            Snackbar.Add(string.Join(" ", result.Errors), Severity.Error);
+            return;
+        }
+
+        _detail = result.Value;
+    }
+
+    private async Task ExecuteDecisionAsync(string action)
+    {
+        if (_detail is null)
+        {
+            return;
+        }
+
+        await RunAsync(action, async () =>
+        {
+            var request = new AdminReviewDecisionRequest(
+                string.IsNullOrWhiteSpace(_reason) ? null : _reason.Trim(),
+                string.IsNullOrWhiteSpace(_notes) ? null : _notes.Trim());
+
+            var result = action switch
+            {
+                ApproveAction => await VerificationsApi.ApproveProfileAsync(UserId, request),
+                RejectAction => await VerificationsApi.RejectProfileAsync(UserId, request),
+                SuspendAction => await VerificationsApi.SuspendAsync(UserId, request),
+                ReactivateAction => await VerificationsApi.ReactivateAsync(UserId, request),
+                _ => ApiResult<AdminVerificationDetailResponse>.Failure(L["UnknownDecision"].Value)
+            };
+
+            if (!result.Succeeded || result.Value is null)
+            {
+                Snackbar.Add(string.Join(" ", result.Errors), Severity.Error);
+                return;
+            }
+
+            _detail = result.Value;
+            _reason = string.Empty;
+            _notes = string.Empty;
+            Snackbar.Add(L["DecisionRegistered"], Severity.Success);
+        });
+    }
+
+    private async Task RunAsync(string action, Func<Task> work)
+    {
+        try
+        {
+            _busyAction = action;
+            await work();
+        }
+        finally
+        {
+            _busyAction = null;
+        }
+    }
+
+    private bool IsBusy(string action)
+    {
+        return string.Equals(_busyAction, action, StringComparison.Ordinal);
+    }
+
+    private Color GetProgressColor()
+    {
+        if (_detail?.TrustStatus.Status == "Suspended")
+        {
+            return Color.Error;
+        }
+
+        return CompletionPercent >= 100 ? Color.Success : Color.Primary;
+    }
+
+    private static string GetInitials(string value)
+    {
+        var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return string.Concat(parts.Take(2).Select(part => part[0])).ToUpperInvariant();
+    }
+
+    private static Color GetStatusColor(string status)
+    {
+        return status switch
+        {
+            "ProfileValidated" => Color.Success,
+            "IdentityVerified" => Color.Info,
+            "ContactVerified" => Color.Primary,
+            "InReview" => Color.Warning,
+            "ProfileChangesRequested" => Color.Warning,
+            "Suspended" => Color.Error,
+            _ => Color.Secondary
+        };
+    }
+
+    private string GetStatusLabel(string status)
+    {
+        return status switch
+        {
+            "Unverified" => L["StatusUnverified"],
+            "ContactVerified" => L["StatusContactVerified"],
+            "IdentityVerified" => L["StatusIdentityVerified"],
+            "ProfileValidated" => L["StatusProfileValidated"],
+            "InReview" => L["InReview"],
+            "ProfileChangesRequested" => L["StatusProfileChangesRequested"],
+            "Suspended" => L["StatusSuspended"],
+            _ => status
+        };
+    }
+
+    private static Color GetAttemptColor(string status)
+    {
+        return status switch
+        {
+            "Approved" => Color.Success,
+            "Rejected" => Color.Error,
+            _ => Color.Warning
+        };
+    }
+
+    private string GetAttemptLabel(string status)
+    {
+        return status switch
+        {
+            "Approved" => L["Approved"],
+            "Rejected" => L["Rejected"],
+            "InReview" => L["ManualReview"],
+            _ => status
+        };
+    }
+
+    private string GetCaseTypeLabel(string type)
+    {
+        return type switch
+        {
+            "ProfileValidation" => L["ProfileValidation"],
+            "Suspension" => L["Suspension"],
+            _ => type
+        };
+    }
+
+    private string GetCaseStatusLabel(string status)
+    {
+        return status switch
+        {
+            "Open" => L["CaseOpen"],
+            "Resolved" => L["Resolved"],
+            _ => status
+        };
+    }
+
+    private string GetRequirementHelp(TrustRequirementResponse requirement)
+    {
+        if (requirement.IsComplete)
+        {
+            return L["Ready"];
+        }
+
+        return requirement.Action switch
+        {
+            "request-email-code" => L["AdminReqEmailHelp"],
+            "request-phone-code" => L["AdminReqPhoneHelp"],
+            "start-identity-verification" => L["AdminReqIdentityHelp"],
+            "accept-trust-rules" => L["AdminReqRulesHelp"],
+            "submit-guide-profile-review" => L["AdminReqReviewHelp"],
+            _ => L["Pending"]
+        };
+    }
+
+    private static string FormatDate(DateTimeOffset value)
+    {
+        return value.ToLocalTime().ToString("yyyy-MM-dd HH:mm");
+    }
+}

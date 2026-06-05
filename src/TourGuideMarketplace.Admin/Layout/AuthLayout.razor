@@ -1,0 +1,17 @@
+@inherits LayoutComponentBase
+@inject IStringLocalizer<SharedResource> L
+
+<div class="auth-shell">
+    <section class="auth-brand-panel">
+        <div class="auth-brand-mark">
+            <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" />
+        </div>
+        <MudText Typo="Typo.h3">@L["AppName"]</MudText>
+        <MudText Typo="Typo.body1">
+            @L["AuthLayoutSubtitle"]
+        </MudText>
+    </section>
+    <main class="auth-content">
+        @Body
+    </main>
+</div>

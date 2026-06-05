@@ -1,0 +1,13 @@
+<div class="quick-status-item">
+    <MudIcon Icon="@(Value ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.RadioButtonUnchecked)"
+             Color="@(Value ? Color.Success : Color.Secondary)" />
+    <MudText Typo="Typo.body2">@Label</MudText>
+</div>
+
+@code {
+    [Parameter]
+    public string Label { get; set; } = string.Empty;
+
+    [Parameter]
+    public bool Value { get; set; }
+}

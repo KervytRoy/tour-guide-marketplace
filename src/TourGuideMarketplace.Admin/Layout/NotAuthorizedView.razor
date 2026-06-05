@@ -1,0 +1,44 @@
+@inject NavigationManager Navigation
+@inject IStringLocalizer<SharedResource> L
+
+@if (_isAuthenticated)
+{
+    <MudPaper Class="state-panel" Elevation="0">
+        <MudIcon Icon="@Icons.Material.Filled.Lock" Color="Color.Warning" Size="Size.Large" />
+        <MudText Typo="Typo.h5">@L["NotAuthorizedTitle"]</MudText>
+        <MudText Color="Color.Secondary">@L["NotAuthorizedDescription"]</MudText>
+        <MudButton OnClick="GoToLogin" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Login">
+            @L["SwitchAccount"]
+        </MudButton>
+    </MudPaper>
+}
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    private bool _isAuthenticated;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthenticationStateTask is null)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        var authState = await AuthenticationStateTask;
+        _isAuthenticated = authState.User.Identity?.IsAuthenticated == true;
+
+        if (!_isAuthenticated)
+        {
+            var returnUrl = Uri.EscapeDataString(Navigation.ToBaseRelativePath(Navigation.Uri));
+            Navigation.NavigateTo($"/login?returnUrl={returnUrl}");
+        }
+    }
+
+    private void GoToLogin()
+    {
+        Navigation.NavigateTo("/login");
+    }
+}

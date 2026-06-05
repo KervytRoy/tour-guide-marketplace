@@ -2,40 +2,41 @@
 @attribute [Authorize(Roles = AppRoles.Tourist)]
 @inject GuidesApiClient GuidesApi
 @inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResource> L
 
 <MudStack Spacing="3">
     <div class="page-heading">
         <div>
-            <MudText Typo="Typo.h4">Buscar guias</MudText>
-            <MudText Typo="Typo.body1" Color="Color.Secondary">Filtra por ubicacion, idioma, especialidad y disponibilidad.</MudText>
+            <MudText Typo="Typo.h4">@L["SearchGuides"]</MudText>
+            <MudText Typo="Typo.body1" Color="Color.Secondary">@L["SearchGuidesSubtitle"]</MudText>
         </div>
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SearchAsync" StartIcon="@Icons.Material.Filled.Search" Disabled="_isBusy">
-            Buscar
+            @L["Search"]
         </MudButton>
     </div>
 
     <MudPaper Class="filter-panel" Elevation="0">
         <MudGrid Spacing="2">
             <MudItem xs="12" md="3">
-                <MudTextField T="string" @bind-Value="_city" Label="Ciudad" />
+                <MudTextField T="string" @bind-Value="_city" Label="@L["City"]" />
             </MudItem>
             <MudItem xs="12" md="3">
-                <MudTextField T="string" @bind-Value="_country" Label="Pais" />
+                <MudTextField T="string" @bind-Value="_country" Label="@L["Country"]" />
             </MudItem>
             <MudItem xs="12" md="3">
-                <MudTextField T="string" @bind-Value="_specialty" Label="Especialidad" />
+                <MudTextField T="string" @bind-Value="_specialty" Label="@L["Specialty"]" />
             </MudItem>
             <MudItem xs="12" md="3">
-                <MudTextField T="string" @bind-Value="_language" Label="Idioma" />
+                <MudTextField T="string" @bind-Value="_language" Label="@L["Language"]" />
             </MudItem>
             <MudItem xs="12" md="3">
-                <MudNumericField T="decimal?" @bind-Value="_maxHourlyRate" Label="Tarifa maxima" />
+                <MudNumericField T="decimal?" @bind-Value="_maxHourlyRate" Label="@L["MaxHourlyRate"]" />
             </MudItem>
             <MudItem xs="12" md="3">
-                <MudNumericField T="decimal?" @bind-Value="_minRating" Label="Rating minimo" />
+                <MudNumericField T="decimal?" @bind-Value="_minRating" Label="@L["MinRating"]" />
             </MudItem>
             <MudItem xs="12" md="3">
-                <MudSwitch T="bool" @bind-Value="_availableNow" Color="Color.Success" Label="Disponible ahora" />
+                <MudSwitch T="bool" @bind-Value="_availableNow" Color="Color.Success" Label="@L["AvailableNow"]" />
             </MudItem>
         </MudGrid>
     </MudPaper>
@@ -50,8 +51,8 @@
     {
         <MudPaper Class="state-panel" Elevation="0">
             <MudIcon Icon="@Icons.Material.Filled.TravelExplore" Color="Color.Secondary" Size="Size.Large" />
-            <MudText Typo="Typo.h6">No hay guias para los filtros actuales</MudText>
-            <MudText Color="Color.Secondary">Ajusta la busqueda o intenta con menos filtros.</MudText>
+            <MudText Typo="Typo.h6">@L["NoGuidesTitle"]</MudText>
+            <MudText Color="Color.Secondary">@L["NoGuidesDescription"]</MudText>
         </MudPaper>
     }
     else
@@ -72,14 +73,14 @@
 
                             <MudText Typo="Typo.body2" Class="guide-bio">@guide.Bio</MudText>
 
-                            <div class="guide-meta">
-                                <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined">@guide.Currency @guide.HourlyRate / hora</MudChip>
-                                <MudChip T="string" Color="Color.Secondary" Variant="Variant.Outlined">@guide.AverageRating rating</MudChip>
-                                @if (guide.AvailableNow)
-                                {
-                                    <MudChip T="string" Color="Color.Success">Disponible</MudChip>
-                                }
-                            </div>
+                        <div class="guide-meta">
+                            <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined">@L["HourlyRateDisplay", guide.Currency, guide.HourlyRate]</MudChip>
+                            <MudChip T="string" Color="Color.Secondary" Variant="Variant.Outlined">@L["RatingDisplay", guide.AverageRating]</MudChip>
+                            @if (guide.AvailableNow)
+                            {
+                                <MudChip T="string" Color="Color.Success">@L["Available"]</MudChip>
+                            }
+                        </div>
 
                             <MudText Typo="Typo.caption" Color="Color.Secondary">
                                 @string.Join(", ", guide.Specialties.Take(3))

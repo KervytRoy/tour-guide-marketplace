@@ -451,7 +451,7 @@ public sealed class TrustService : ITrustService
             return;
         }
 
-        if (verification.Status == UserVerificationStatus.InReview)
+        if (verification.Status is UserVerificationStatus.InReview or UserVerificationStatus.ProfileChangesRequested)
         {
             return;
         }

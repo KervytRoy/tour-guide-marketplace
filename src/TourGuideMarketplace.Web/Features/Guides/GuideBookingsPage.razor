@@ -1,8 +1,9 @@
 @page "/guide/bookings"
 @attribute [Authorize(Roles = AppRoles.Guide)]
+@inject IStringLocalizer<SharedResource> L
 
 <MudPaper Class="state-panel" Elevation="0">
     <MudIcon Icon="@Icons.Material.Filled.EventNote" Color="Color.Primary" Size="Size.Large" />
-    <MudText Typo="Typo.h5">Reservas recibidas</MudText>
-    <MudText Color="Color.Secondary">Modulo reservado para la gestion de solicitudes y agenda del guia.</MudText>
+    <MudText Typo="Typo.h5">@L["ReceivedBookings"]</MudText>
+    <MudText Color="Color.Secondary">@L["ReceivedBookingsComingSoon"]</MudText>
 </MudPaper>

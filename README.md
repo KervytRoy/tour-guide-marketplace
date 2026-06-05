@@ -10,6 +10,8 @@ This branch starts the .NET 10 API foundation as a modular monolith with clean b
 - `TourGuideMarketplace.Application`: DTOs, contracts, result models and shared security constants.
 - `TourGuideMarketplace.Domain`: business entities for guides, tourists, bookings, payments and reviews.
 - `TourGuideMarketplace.Infrastructure`: SQL Server EF Core persistence, ASP.NET Core Identity, JWT issuing and application service implementations.
+- `TourGuideMarketplace.Web`: Blazor WebAssembly client for tourists and guides.
+- `TourGuideMarketplace.Admin`: Blazor WebAssembly admin console for identity and trust review workflows.
 
 ## Implemented Capabilities
 
@@ -19,6 +21,8 @@ This branch starts the .NET 10 API foundation as a modular monolith with clean b
 - Current-user endpoint.
 - Guide profile upsert for authenticated guides.
 - Guide search with filters for city, country, specialty, language, rate, rating and immediate availability.
+- Guide identity/trust flow with contact verification, mock identity provider, rule acceptance and profile review submission.
+- Admin verification console for listing, reviewing, approving, rejecting, suspending and reactivating guide verification cases.
 - EF Core Code First model and initial SQL Server migration.
 - Local `dotnet-ef` tool manifest.
 
@@ -29,6 +33,8 @@ dotnet tool restore
 dotnet build TourGuideMarketplace.slnx
 dotnet tool run dotnet-ef database update --project src\TourGuideMarketplace.Infrastructure\TourGuideMarketplace.Infrastructure.csproj --startup-project src\TourGuideMarketplace.Api\TourGuideMarketplace.Api.csproj
 dotnet run --project src\TourGuideMarketplace.Api\TourGuideMarketplace.Api.csproj --launch-profile http
+dotnet run --project src\TourGuideMarketplace.Web\TourGuideMarketplace.Web.csproj --launch-profile http
+dotnet run --project src\TourGuideMarketplace.Admin\TourGuideMarketplace.Admin.csproj --launch-profile http
 ```
 
 The default development connection string uses SQL Server LocalDB:

@@ -1,3 +1,5 @@
+@inject IStringLocalizer<SharedResource> L
+
 <MudThemeProvider Theme="_theme" />
 <MudPopoverProvider />
 <MudDialogProvider />
@@ -20,6 +22,12 @@
         </Found>
     </Router>
 </CascadingAuthenticationState>
+
+<div id="blazor-error-ui">
+    @L["UnexpectedError"]
+    <a href="." class="reload">@L["Reload"]</a>
+    <span class="dismiss">x</span>
+</div>
 
 @code {
     private readonly MudTheme _theme = new()
