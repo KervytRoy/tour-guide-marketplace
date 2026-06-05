@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AdminCases" xml:space="preserve"><value>Casos administrativos</value></data>
+  <data name="AdminCasesSubtitle" xml:space="preserve"><value>Trazabilidad de revision, suspension y resolucion.</value></data>
+  <data name="AdminDecision" xml:space="preserve"><value>Decision administrativa</value></data>
+  <data name="AdminDecisionSubtitle" xml:space="preserve"><value>Las decisiones se registran en los casos del usuario.</value></data>
+  <data name="AdminFallback" xml:space="preserve"><value>Administrador</value></data>
+  <data name="AdminLoginSubtitle" xml:space="preserve"><value>Ingresa con una cuenta que tenga rol Admin.</value></data>
+  <data name="Administration" xml:space="preserve"><value>Administracion</value></data>
+  <data name="AdminReqEmailHelp" xml:space="preserve"><value>El guia debe confirmar email.</value></data>
+  <data name="AdminReqIdentityHelp" xml:space="preserve"><value>El guia debe iniciar validacion documental.</value></data>
+  <data name="AdminReqPhoneHelp" xml:space="preserve"><value>El guia debe confirmar telefono.</value></data>
+  <data name="AdminReqReviewHelp" xml:space="preserve"><value>El guia debe enviar el perfil a revision.</value></data>
+  <data name="AdminReqRulesHelp" xml:space="preserve"><value>El guia debe aceptar reglas de confianza.</value></data>
+  <data name="AdminRoleRequiredError" xml:space="preserve"><value>La cuenta autenticada no tiene permisos de administrador.</value></data>
+  <data name="AdminWelcome" xml:space="preserve"><value>Bienvenido a la consola admin.</value></data>
+  <data name="All" xml:space="preserve"><value>Todos</value></data>
+  <data name="ApiConnectionError" xml:space="preserve"><value>No se pudo conectar con la API.</value></data>
+  <data name="ApiEmptyResponse" xml:space="preserve"><value>La API devolvio una respuesta vacia.</value></data>
+  <data name="ApiStatusFailure" xml:space="preserve"><value>La solicitud fallo con estado {0}.</value></data>
+  <data name="AppName" xml:space="preserve"><value>Trust Admin</value></data>
+  <data name="ApplyFilters" xml:space="preserve"><value>Aplicar filtros</value></data>
+  <data name="ApproveProfile" xml:space="preserve"><value>Aprobar perfil</value></data>
+  <data name="Approved" xml:space="preserve"><value>Aprobado</value></data>
+  <data name="AttemptsCount" xml:space="preserve"><value>{0} intentos</value></data>
+  <data name="AuthLayoutSubtitle" xml:space="preserve"><value>Consola para revisar validaciones de identidad, resolver casos administrativos y mantener perfiles confiables.</value></data>
+  <data name="Back" xml:space="preserve"><value>Volver</value></data>
+  <data name="CaseOpen" xml:space="preserve"><value>Abierto</value></data>
+  <data name="Conduct" xml:space="preserve"><value>Conducta</value></data>
+  <data name="Contact" xml:space="preserve"><value>Contacto</value></data>
+  <data name="Date" xml:space="preserve"><value>Fecha</value></data>
+  <data name="DecisionRegistered" xml:space="preserve"><value>Decision registrada.</value></data>
+  <data name="DetailLoadFailed" xml:space="preserve"><value>No se pudo cargar el detalle</value></data>
+  <data name="Document" xml:space="preserve"><value>Documento</value></data>
+  <data name="Email" xml:space="preserve"><value>Email</value></data>
+  <data name="GoToVerifications" xml:space="preserve"><value>Ir a verificaciones</value></data>
+  <data name="Guide" xml:space="preserve"><value>Guia</value></data>
+  <data name="Identity" xml:space="preserve"><value>Identidad</value></data>
+  <data name="IdentityAttempts" xml:space="preserve"><value>Intentos de identidad</value></data>
+  <data name="IdentityAttemptsSubtitle" xml:space="preserve"><value>Historial devuelto por el proveedor configurado.</value></data>
+  <data name="IdentityTrust" xml:space="preserve"><value>Identidad y confianza</value></data>
+  <data name="InReview" xml:space="preserve"><value>En revision</value></data>
+  <data name="InternalNotes" xml:space="preserve"><value>Notas internas</value></data>
+  <data name="Login" xml:space="preserve"><value>Ingresar</value></data>
+  <data name="LoginLoading" xml:space="preserve"><value>Ingresando...</value></data>
+  <data name="LoginRequiredError" xml:space="preserve"><value>Email y contrasena son requeridos.</value></data>
+  <data name="LoginTitle" xml:space="preserve"><value>Acceso administrativo</value></data>
+  <data name="Logout" xml:space="preserve"><value>Cerrar sesion</value></data>
+  <data name="LogoutSuccess" xml:space="preserve"><value>Sesion cerrada.</value></data>
+  <data name="ManualReview" xml:space="preserve"><value>Revision manual</value></data>
+  <data name="NoAttempts" xml:space="preserve"><value>Sin intentos</value></data>
+  <data name="NoIdentityAttempts" xml:space="preserve"><value>Este usuario aun no tiene intentos de validacion.</value></data>
+  <data name="NoPhone" xml:space="preserve"><value>Sin telefono</value></data>
+  <data name="NoReviewCases" xml:space="preserve"><value>No hay casos registrados para este usuario.</value></data>
+  <data name="NoVerificationsDescription" xml:space="preserve"><value>Ajusta el estado o actualiza la lista.</value></data>
+  <data name="NoVerificationsTitle" xml:space="preserve"><value>No hay verificaciones para los filtros actuales</value></data>
+  <data name="NotAuthorizedDescription" xml:space="preserve"><value>Tu cuenta no tiene el rol requerido para administrar verificaciones.</value></data>
+  <data name="NotAuthorizedTitle" xml:space="preserve"><value>No tienes acceso a la consola admin</value></data>
+  <data name="NotFoundDescription" xml:space="preserve"><value>La ruta que intentaste abrir no existe en la consola administrativa.</value></data>
+  <data name="NotFoundTitle" xml:space="preserve"><value>Pagina no encontrada</value></data>
+  <data name="OnThisPage" xml:space="preserve"><value>En esta pagina</value></data>
+  <data name="OpenButton" xml:space="preserve"><value>Abrir</value></data>
+  <data name="OpenCasesCount" xml:space="preserve"><value>{0} abiertos</value></data>
+  <data name="PageOf" xml:space="preserve"><value>Pagina {0} de {1}</value></data>
+  <data name="PageSize" xml:space="preserve"><value>Tamano de pagina</value></data>
+  <data name="Password" xml:space="preserve"><value>Contrasena</value></data>
+  <data name="Pending" xml:space="preserve"><value>Pendiente</value></data>
+  <data name="Phone" xml:space="preserve"><value>Telefono</value></data>
+  <data name="Profile" xml:space="preserve"><value>Perfil</value></data>
+  <data name="ProfileValidation" xml:space="preserve"><value>Validacion de perfil</value></data>
+  <data name="Provider" xml:space="preserve"><value>Proveedor</value></data>
+  <data name="QuickStatus" xml:space="preserve"><value>Estado rapido</value></data>
+  <data name="Ready" xml:space="preserve"><value>Listo</value></data>
+  <data name="RecordsFound" xml:space="preserve"><value>Registros encontrados</value></data>
+  <data name="Reference" xml:space="preserve"><value>Referencia</value></data>
+  <data name="Refresh" xml:space="preserve"><value>Actualizar</value></data>
+  <data name="Rejected" xml:space="preserve"><value>Rechazado</value></data>
+  <data name="Reason" xml:space="preserve"><value>Motivo</value></data>
+  <data name="ReasonRequiredHelp" xml:space="preserve"><value>Rechazar y suspender requieren un motivo para orientar el seguimiento.</value></data>
+  <data name="ReactivateAccount" xml:space="preserve"><value>Reactivar cuenta</value></data>
+  <data name="Reload" xml:space="preserve"><value>Recargar</value></data>
+  <data name="RequestProfileChanges" xml:space="preserve"><value>Solicitar cambios de perfil</value></data>
+  <data name="RequireFollowUp" xml:space="preserve"><value>Requieren seguimiento</value></data>
+  <data name="RequirementsProgress" xml:space="preserve"><value>{0} de {1} requisitos</value></data>
+  <data name="Resolved" xml:space="preserve"><value>Resuelto</value></data>
+  <data name="Retry" xml:space="preserve"><value>Reintentar</value></data>
+  <data name="Safety" xml:space="preserve"><value>Seguridad</value></data>
+  <data name="Status" xml:space="preserve"><value>Estado</value></data>
+  <data name="StatusContactVerified" xml:space="preserve"><value>Contacto verificado</value></data>
+  <data name="StatusIdentityVerified" xml:space="preserve"><value>Identidad verificada</value></data>
+  <data name="StatusProfileChangesRequested" xml:space="preserve"><value>Perfil requiere cambios</value></data>
+  <data name="StatusProfileValidated" xml:space="preserve"><value>Perfil validado</value></data>
+  <data name="StatusSuspended" xml:space="preserve"><value>Suspendido</value></data>
+  <data name="StatusUnverified" xml:space="preserve"><value>Sin verificar</value></data>
+  <data name="SuspendAccount" xml:space="preserve"><value>Suspender cuenta</value></data>
+  <data name="Suspension" xml:space="preserve"><value>Suspension</value></data>
+  <data name="SwitchAccount" xml:space="preserve"><value>Cambiar cuenta</value></data>
+  <data name="TotalFiltered" xml:space="preserve"><value>Total filtrado</value></data>
+  <data name="TrustChecklist" xml:space="preserve"><value>Checklist de confianza</value></data>
+  <data name="TrustChecklistSubtitle" xml:space="preserve"><value>Estado calculado desde el flujo del guia.</value></data>
+  <data name="UnexpectedError" xml:space="preserve"><value>Ocurrio un error inesperado.</value></data>
+  <data name="UnknownDecision" xml:space="preserve"><value>Decision desconocida.</value></data>
+  <data name="Updated" xml:space="preserve"><value>Actualizado</value></data>
+  <data name="VerificationDetailSubtitle" xml:space="preserve"><value>Revisa evidencia, casos y decision administrativa.</value></data>
+  <data name="VerificationDetailTitle" xml:space="preserve"><value>Detalle de verificacion</value></data>
+  <data name="VerificationListSubtitle" xml:space="preserve"><value>Revisa el estado de identidad y perfil de los guias.</value></data>
+  <data name="Verifications" xml:space="preserve"><value>Verificaciones</value></data>
+  <data name="VisibleCases" xml:space="preserve"><value>Casos visibles</value></data>
+  <data name="VisiblePending" xml:space="preserve"><value>Pendientes visibles</value></data>
+</root>

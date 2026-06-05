@@ -4,10 +4,11 @@
 @inject AuthSessionService AuthSession
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResource> L
 
 <MudPaper Class="auth-card" Elevation="0">
-    <MudText Typo="Typo.h4">Crea tu cuenta</MudText>
-    <MudText Typo="Typo.body2" Color="Color.Secondary">Elige el tipo de cuenta con el que usaras el marketplace.</MudText>
+    <MudText Typo="Typo.h4">@L["RegisterTitle"]</MudText>
+    <MudText Typo="Typo.body2" Color="Color.Secondary">@L["RegisterSubtitle"]</MudText>
 
     @if (_errors.Count > 0)
     {
@@ -19,33 +20,33 @@
     <div class="role-picker">
         <MudButton Variant="@GetRoleVariant(AppRoles.Tourist)" Color="Color.Primary" OnClick="@(() => _role = AppRoles.Tourist)"
                    StartIcon="@Icons.Material.Filled.TravelExplore">
-            Turista
+            @L["Tourist"]
         </MudButton>
         <MudButton Variant="@GetRoleVariant(AppRoles.Guide)" Color="Color.Secondary" OnClick="@(() => _role = AppRoles.Guide)"
                    StartIcon="@Icons.Material.Filled.Badge">
-            Guia
+            @L["Guide"]
         </MudButton>
     </div>
 
-    <MudTextField T="string" @bind-Value="_fullName" Label="Nombre completo"
+    <MudTextField T="string" @bind-Value="_fullName" Label="@L["FullName"]"
                   Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Person" />
-    <MudTextField T="string" @bind-Value="_email" Label="Email" InputType="InputType.Email"
+    <MudTextField T="string" @bind-Value="_email" Label="@L["Email"]" InputType="InputType.Email"
                   Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Email" />
-    <MudTextField T="string" @bind-Value="_phoneNumber" Label="Telefono" InputType="InputType.Telephone"
+    <MudTextField T="string" @bind-Value="_phoneNumber" Label="@L["Phone"]" InputType="InputType.Telephone"
                   Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Phone" />
-    <MudTextField T="string" @bind-Value="_password" Label="Contrasena" InputType="InputType.Password"
+    <MudTextField T="string" @bind-Value="_password" Label="@L["Password"]" InputType="InputType.Password"
                   Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Lock" />
 
     <MudButton FullWidth="true" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
                Disabled="_isBusy" OnClick="RegisterAsync" StartIcon="@Icons.Material.Filled.PersonAdd">
-        @(_isBusy ? "Creando cuenta..." : "Crear cuenta")
+        @(_isBusy ? L["RegisterLoading"] : L["CreateAccount"])
     </MudButton>
 
     <MudDivider />
 
     <MudText Typo="Typo.body2">
-        Ya tienes cuenta?
-        <MudLink Href="/login">Ingresar</MudLink>
+        @L["HaveAccountQuestion"]
+        <MudLink Href="/login">@L["Login"]</MudLink>
     </MudText>
 </MudPaper>
 
@@ -69,7 +70,7 @@
 
         if (string.IsNullOrWhiteSpace(_fullName) || string.IsNullOrWhiteSpace(_email) || string.IsNullOrWhiteSpace(_password))
         {
-            _errors = ["Nombre, email y contrasena son requeridos."];
+            _errors = [L["RegisterRequiredError"]];
             return;
         }
 
@@ -88,7 +89,7 @@
             return;
         }
 
-        Snackbar.Add("Cuenta creada.", Severity.Success);
+        Snackbar.Add(L["AccountCreatedSuccess"], Severity.Success);
         Navigation.NavigateTo("/dashboard");
     }
 }

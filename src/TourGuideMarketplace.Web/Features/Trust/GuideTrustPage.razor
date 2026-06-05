@@ -2,17 +2,18 @@
 @attribute [Authorize(Roles = AppRoles.Guide)]
 @inject TrustApiClient TrustApi
 @inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResource> L
 
 <MudStack Spacing="3">
     <div class="page-heading">
         <div>
-            <MudText Typo="Typo.h4">Validacion de identidad</MudText>
+            <MudText Typo="Typo.h4">@L["IdentityValidation"]</MudText>
             <MudText Typo="Typo.body1" Color="Color.Secondary">
-                Completa los pasos necesarios para que tu perfil de guia pueda pasar a revision.
+                @L["IdentityValidationSubtitle"]
             </MudText>
         </div>
         <MudButton Variant="Variant.Outlined" Color="Color.Primary" Disabled="@_isLoading" OnClick="LoadStatusAsync" StartIcon="@Icons.Material.Filled.Refresh">
-            Actualizar
+            @L["Refresh"]
         </MudButton>
     </div>
 
@@ -26,9 +27,9 @@
     {
         <MudPaper Class="state-panel" Elevation="0">
             <MudIcon Icon="@Icons.Material.Filled.CloudOff" Color="Color.Warning" Size="Size.Large" />
-            <MudText Typo="Typo.h6">No se pudo cargar el estado de validacion</MudText>
+            <MudText Typo="Typo.h6">@L["StatusLoadFailed"]</MudText>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="LoadStatusAsync">
-                Reintentar
+                @L["Retry"]
             </MudButton>
         </MudPaper>
     }
@@ -36,7 +37,7 @@
     {
         <MudPaper Class="trust-summary-panel" Elevation="0">
             <div>
-                <MudText Typo="Typo.overline">Estado</MudText>
+                <MudText Typo="Typo.overline">@L["Status"]</MudText>
                 <MudText Typo="Typo.h5">@GetStatusLabel(_status.Status)</MudText>
                 @if (!string.IsNullOrWhiteSpace(_status.InReviewReason))
                 {
@@ -48,7 +49,7 @@
                 }
             </div>
             <div class="trust-progress">
-                <MudText Typo="Typo.caption" Color="Color.Secondary">@CompletedRequirements de @TotalRequirements requisitos</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">@L["RequirementsProgress", CompletedRequirements, TotalRequirements]</MudText>
                 <MudProgressLinear Color="@GetProgressColor()" Value="@CompletionPercent" Min="0" Max="100" />
             </div>
         </MudPaper>
@@ -56,20 +57,20 @@
         @if (NeedsProfileChanges)
         {
             <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined">
-                Tu perfil requiere cambios antes de ser validado. Corrige tu perfil y vuelve a enviarlo a revision.
+                @L["ProfileChangesAlert"]
             </MudAlert>
         }
         else if (IsProfileInReview)
         {
             <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
-                Tu perfil ya esta en revision administrativa. Las validaciones completadas se conservan mientras esperas la decision.
+                @L["ProfileInReviewAlert"]
             </MudAlert>
         }
 
         <MudGrid Spacing="3">
             <MudItem xs="12" lg="4">
                 <MudPaper Class="trust-panel" Elevation="0">
-                    <MudText Typo="Typo.h6">Checklist</MudText>
+                    <MudText Typo="Typo.h6">@L["Checklist"]</MudText>
                     <MudStack Spacing="2">
                         @foreach (var requirement in _status.Requirements)
                         {
@@ -91,48 +92,48 @@
                     <MudPaper Class="trust-panel" Elevation="0">
                         <div class="trust-panel-heading">
                             <div>
-                                <MudText Typo="Typo.h6">Contacto</MudText>
-                                <MudText Typo="Typo.body2" Color="Color.Secondary">El flujo mock devuelve el codigo para probar la confirmacion.</MudText>
+                                <MudText Typo="Typo.h6">@L["Contact"]</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">@L["ContactSubtitle"]</MudText>
                             </div>
                             <MudChip T="string" Color="@(_status.EmailVerified && _status.PhoneVerified ? Color.Success : Color.Warning)" Variant="Variant.Outlined">
-                                @(_status.EmailVerified && _status.PhoneVerified ? "Completo" : "Pendiente")
+                                @(_status.EmailVerified && _status.PhoneVerified ? L["Complete"] : L["Pending"])
                             </MudChip>
                         </div>
 
                         <MudGrid Spacing="3">
                             <MudItem xs="12" md="6">
                                 <MudStack Spacing="2">
-                                    <MudText Typo="Typo.subtitle2">Email</MudText>
+                                    <MudText Typo="Typo.subtitle2">@L["Email"]</MudText>
                                     <MudButton Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(_status.EmailVerified || IsBusy(EmailRequestAction))" OnClick="RequestEmailAsync" StartIcon="@Icons.Material.Filled.MarkEmailRead">
-                                        Solicitar codigo
+                                        @L["RequestCode"]
                                     </MudButton>
                                     @if (_emailRequest?.MockCode is not null)
                                     {
                                         <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true">
-                                            Codigo mock: <strong>@_emailRequest.MockCode</strong>
+                                            @L["MockCodeLabel"] <strong>@_emailRequest.MockCode</strong>
                                         </MudAlert>
                                     }
-                                    <MudTextField T="string" @bind-Value="_emailCode" Label="Codigo email" Disabled="@_status.EmailVerified" MaxLength="6" Immediate="true" />
+                                    <MudTextField T="string" @bind-Value="_emailCode" Label="@L["EmailCode"]" Disabled="@_status.EmailVerified" MaxLength="6" Immediate="true" />
                                     <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(_status.EmailVerified || string.IsNullOrWhiteSpace(_emailCode) || IsBusy(EmailConfirmAction))" OnClick="ConfirmEmailAsync">
-                                        Confirmar email
+                                        @L["ConfirmEmail"]
                                     </MudButton>
                                 </MudStack>
                             </MudItem>
                             <MudItem xs="12" md="6">
                                 <MudStack Spacing="2">
-                                    <MudText Typo="Typo.subtitle2">Telefono</MudText>
+                                    <MudText Typo="Typo.subtitle2">@L["Phone"]</MudText>
                                     <MudButton Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(_status.PhoneVerified || IsBusy(PhoneRequestAction))" OnClick="RequestPhoneAsync" StartIcon="@Icons.Material.Filled.PhoneIphone">
-                                        Solicitar codigo
+                                        @L["RequestCode"]
                                     </MudButton>
                                     @if (_phoneRequest?.MockCode is not null)
                                     {
                                         <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true">
-                                            Codigo mock: <strong>@_phoneRequest.MockCode</strong>
+                                            @L["MockCodeLabel"] <strong>@_phoneRequest.MockCode</strong>
                                         </MudAlert>
                                     }
-                                    <MudTextField T="string" @bind-Value="_phoneCode" Label="Codigo telefono" Disabled="@_status.PhoneVerified" MaxLength="6" Immediate="true" />
+                                    <MudTextField T="string" @bind-Value="_phoneCode" Label="@L["PhoneCode"]" Disabled="@_status.PhoneVerified" MaxLength="6" Immediate="true" />
                                     <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(_status.PhoneVerified || string.IsNullOrWhiteSpace(_phoneCode) || IsBusy(PhoneConfirmAction))" OnClick="ConfirmPhoneAsync">
-                                        Confirmar telefono
+                                        @L["ConfirmPhone"]
                                     </MudButton>
                                 </MudStack>
                             </MudItem>
@@ -142,43 +143,43 @@
                     <MudPaper Class="trust-panel" Elevation="0">
                         <div class="trust-panel-heading">
                             <div>
-                                <MudText Typo="Typo.h6">Identidad</MudText>
-                                <MudText Typo="Typo.body2" Color="Color.Secondary">Simula el envio a MetaMap con datos basicos del documento.</MudText>
+                                <MudText Typo="Typo.h6">@L["Identity"]</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">@L["IdentitySubtitle"]</MudText>
                             </div>
                             <MudChip T="string" Color="@(_status.IdentityVerified ? Color.Success : Color.Warning)" Variant="Variant.Outlined">
-                                @(_status.IdentityVerified ? "Verificada" : "Pendiente")
+                                @(_status.IdentityVerified ? L["Verified"] : L["Pending"])
                             </MudChip>
                         </div>
 
                         @if (!CanStartIdentity)
                         {
                             <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined">
-                                Primero confirma email y telefono.
+                                @L["FirstConfirmContact"]
                             </MudAlert>
                         }
 
                         <MudGrid Spacing="3">
                             <MudItem xs="12" md="4">
-                                <MudTextField T="string" @bind-Value="_identityCountry" Label="Pais del documento" Disabled="@_status.IdentityVerified" />
+                                <MudTextField T="string" @bind-Value="_identityCountry" Label="@L["DocumentCountry"]" Disabled="@_status.IdentityVerified" />
                             </MudItem>
                             <MudItem xs="12" md="4">
-                                <MudSelect T="string" @bind-Value="_documentType" Label="Tipo de documento" Disabled="@_status.IdentityVerified">
-                                    <MudSelectItem T="string" Value="@("Passport")">Pasaporte</MudSelectItem>
-                                    <MudSelectItem T="string" Value="@("NationalId")">Documento nacional</MudSelectItem>
-                                    <MudSelectItem T="string" Value="@("ResidenceCard")">Tarjeta de residencia</MudSelectItem>
+                                <MudSelect T="string" @bind-Value="_documentType" Label="@L["DocumentType"]" Disabled="@_status.IdentityVerified">
+                                    <MudSelectItem T="string" Value="@("Passport")">@L["Passport"]</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("NationalId")">@L["NationalId"]</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("ResidenceCard")">@L["ResidenceCard"]</MudSelectItem>
                                 </MudSelect>
                             </MudItem>
                             <MudItem xs="12" md="4">
-                                <MudTextField T="string" @bind-Value="_documentNumber" Label="Numero de documento" Disabled="@_status.IdentityVerified" />
+                                <MudTextField T="string" @bind-Value="_documentNumber" Label="@L["DocumentNumber"]" Disabled="@_status.IdentityVerified" />
                             </MudItem>
                             <MudItem xs="12" md="6">
-                                <MudDatePicker @bind-Date="_dateOfBirth" Label="Fecha de nacimiento" DateFormat="yyyy-MM-dd" Disabled="@_status.IdentityVerified" />
+                                <MudDatePicker @bind-Date="_dateOfBirth" Label="@L["BirthDate"]" DateFormat="yyyy-MM-dd" Disabled="@_status.IdentityVerified" />
                             </MudItem>
                             <MudItem xs="12" md="6">
-                                <MudSelect T="string" @bind-Value="_requestedMockOutcome" Label="Resultado mock" Clearable="true" Disabled="@_status.IdentityVerified">
-                                    <MudSelectItem T="string" Value="@("Approved")">Aprobado</MudSelectItem>
-                                    <MudSelectItem T="string" Value="@("InReview")">Revision manual</MudSelectItem>
-                                    <MudSelectItem T="string" Value="@("Rejected")">Rechazado</MudSelectItem>
+                                <MudSelect T="string" @bind-Value="_requestedMockOutcome" Label="@L["MockResult"]" Clearable="true" Disabled="@_status.IdentityVerified">
+                                    <MudSelectItem T="string" Value="@("Approved")">@L["Approved"]</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("InReview")">@L["ManualReview"]</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("Rejected")">@L["Rejected"]</MudSelectItem>
                                 </MudSelect>
                             </MudItem>
                         </MudGrid>
@@ -186,7 +187,7 @@
                         @if (_lastIdentityResponse is not null)
                         {
                             <MudAlert Severity="@GetIdentitySeverity(_lastIdentityResponse.Status)" Variant="Variant.Outlined" Class="mt-3">
-                                Proveedor @_lastIdentityResponse.Provider: @_lastIdentityResponse.Status
+                                @L["ProviderStatus", _lastIdentityResponse.Provider, _lastIdentityResponse.Status]
                                 @if (!string.IsNullOrWhiteSpace(_lastIdentityResponse.FailureReason))
                                 {
                                     <span>- @_lastIdentityResponse.FailureReason</span>
@@ -196,7 +197,7 @@
 
                         <MudStack Row="true" Spacing="2" Class="action-row">
                             <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!CanStartIdentity || _status.IdentityVerified || IsBusy(IdentityAction))" OnClick="StartIdentityAsync" StartIcon="@Icons.Material.Filled.Fingerprint">
-                                Validar identidad
+                                @L["ValidateIdentity"]
                             </MudButton>
                         </MudStack>
                     </MudPaper>
@@ -204,23 +205,23 @@
                     <MudPaper Class="trust-panel" Elevation="0">
                         <div class="trust-panel-heading">
                             <div>
-                                <MudText Typo="Typo.h6">Reglas y revision</MudText>
+                                <MudText Typo="Typo.h6">@L["RulesReview"]</MudText>
                                 <MudText Typo="Typo.body2" Color="Color.Secondary">@GetReviewHelpText()</MudText>
                             </div>
                             <MudChip T="string" Color="@(_status.ProfileValidated ? Color.Success : Color.Warning)" Variant="Variant.Outlined">
-                                @(_status.ProfileValidated ? "Perfil validado" : "Sin validar")
+                                @(_status.ProfileValidated ? L["ProfileValidated"] : L["Unvalidated"])
                             </MudChip>
                         </div>
 
                         <MudStack Spacing="2">
-                            <MudCheckBox T="bool" @bind-Value="_acceptCodeOfConduct" Disabled="@_status.CodeOfConductAccepted" Label="Acepto el codigo de conducta" Color="Color.Primary" />
-                            <MudCheckBox T="bool" @bind-Value="_acceptSafetyRules" Disabled="@_status.SafetyRulesAccepted" Label="Acepto las reglas de seguridad" Color="Color.Primary" />
+                            <MudCheckBox T="bool" @bind-Value="_acceptCodeOfConduct" Disabled="@_status.CodeOfConductAccepted" Label="@L["AcceptCodeOfConduct"]" Color="Color.Primary" />
+                            <MudCheckBox T="bool" @bind-Value="_acceptSafetyRules" Disabled="@_status.SafetyRulesAccepted" Label="@L["AcceptSafetyRules"]" Color="Color.Primary" />
                             <MudStack Row="true" Spacing="2" Class="action-row">
                                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!CanAcceptRules || IsBusy(RulesAction))" OnClick="AcceptRulesAsync" StartIcon="@Icons.Material.Filled.Rule">
-                                    Guardar aceptacion
+                                    @L["SaveAcceptance"]
                                 </MudButton>
                                 <MudButton Href="/guide/profile" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Badge">
-                                    Editar perfil
+                                    @L["EditProfile"]
                                 </MudButton>
                                 <MudButton Variant="Variant.Filled" Color="Color.Success" Disabled="@(!CanSubmitReview || IsBusy(ReviewAction))" OnClick="SubmitReviewAsync" StartIcon="@Icons.Material.Filled.Send">
                                     @GetReviewButtonText()
@@ -308,7 +309,7 @@
 
             _emailRequest = result.Value;
             _emailCode = result.Value.MockCode ?? string.Empty;
-            Snackbar.Add("Codigo mock de email generado.", Severity.Success);
+            Snackbar.Add(L["EmailMockCodeGenerated"], Severity.Success);
         });
     }
 
@@ -326,7 +327,7 @@
             _emailRequest = null;
             _emailCode = string.Empty;
             ApplyStatus(result.Value);
-            Snackbar.Add("Email confirmado.", Severity.Success);
+            Snackbar.Add(L["EmailConfirmedSuccess"], Severity.Success);
         });
     }
 
@@ -343,7 +344,7 @@
 
             _phoneRequest = result.Value;
             _phoneCode = result.Value.MockCode ?? string.Empty;
-            Snackbar.Add("Codigo mock de telefono generado.", Severity.Success);
+            Snackbar.Add(L["PhoneMockCodeGenerated"], Severity.Success);
         });
     }
 
@@ -361,7 +362,7 @@
             _phoneRequest = null;
             _phoneCode = string.Empty;
             ApplyStatus(result.Value);
-            Snackbar.Add("Telefono confirmado.", Severity.Success);
+            Snackbar.Add(L["PhoneConfirmedSuccess"], Severity.Success);
         });
     }
 
@@ -384,7 +385,7 @@
 
             _lastIdentityResponse = result.Value;
             ApplyStatus(result.Value.TrustStatus);
-            Snackbar.Add("Respuesta mock recibida desde proveedor.", Severity.Success);
+            Snackbar.Add(L["MockProviderResponseReceived"], Severity.Success);
         });
     }
 
@@ -400,7 +401,7 @@
             }
 
             ApplyStatus(result.Value);
-            Snackbar.Add("Reglas aceptadas.", Severity.Success);
+            Snackbar.Add(L["RulesAccepted"], Severity.Success);
         });
     }
 
@@ -417,7 +418,7 @@
             }
 
             ApplyStatus(result.Value);
-            Snackbar.Add(wasResubmission ? "Perfil reenviado a revision administrativa." : "Perfil enviado a revision administrativa.", Severity.Success);
+            Snackbar.Add(wasResubmission ? L["ProfileResubmittedReview"] : L["ProfileSubmittedReview"], Severity.Success);
         });
     }
 
@@ -470,30 +471,30 @@
     {
         if (NeedsProfileChanges)
         {
-            return "Corrige tu perfil y reenvialo a validacion administrativa.";
+            return L["ReviewHelpChanges"];
         }
 
         if (IsProfileInReview)
         {
-            return "Tu perfil esta en revision administrativa.";
+            return L["ReviewHelpInReview"];
         }
 
-        return "Acepta las reglas y envia tu perfil para validacion administrativa.";
+        return L["ReviewHelpDefault"];
     }
 
     private string GetReviewButtonText()
     {
         if (NeedsProfileChanges)
         {
-            return "Reenviar a revision";
+            return L["ResubmitReview"];
         }
 
         if (IsProfileInReview)
         {
-            return "En revision";
+            return L["InReview"];
         }
 
-        return "Enviar a revision";
+        return L["SubmitReview"];
     }
 
     private static Severity GetIdentitySeverity(string status)
@@ -506,36 +507,36 @@
         };
     }
 
-    private static string GetStatusLabel(string status)
+    private string GetStatusLabel(string status)
     {
         return status switch
         {
-            "Unverified" => "Sin verificar",
-            "ContactVerified" => "Contacto verificado",
-            "IdentityVerified" => "Identidad verificada",
-            "ProfileValidated" => "Perfil validado",
-            "InReview" => "En revision",
-            "ProfileChangesRequested" => "Perfil requiere cambios",
-            "Suspended" => "Suspendido",
+            "Unverified" => L["StatusUnverified"],
+            "ContactVerified" => L["StatusContactVerified"],
+            "IdentityVerified" => L["StatusIdentityVerified"],
+            "ProfileValidated" => L["StatusProfileValidated"],
+            "InReview" => L["InReview"],
+            "ProfileChangesRequested" => L["StatusProfileChangesRequested"],
+            "Suspended" => L["StatusSuspended"],
             _ => status
         };
     }
 
-    private static string GetRequirementHelp(TrustRequirementResponse requirement)
+    private string GetRequirementHelp(TrustRequirementResponse requirement)
     {
         if (requirement.IsComplete)
         {
-            return "Listo";
+            return L["Ready"];
         }
 
         return requirement.Action switch
         {
-            "request-email-code" => "Solicita y confirma el codigo de email.",
-            "request-phone-code" => "Solicita y confirma el codigo de telefono.",
-            "start-identity-verification" => "Completa el formulario de documento.",
-            "accept-trust-rules" => "Acepta el codigo de conducta y reglas de seguridad.",
-            "submit-guide-profile-review" => "Completa o corrige tu perfil y envialo a revision.",
-            _ => "Pendiente"
+            "request-email-code" => L["ReqEmailHelp"],
+            "request-phone-code" => L["ReqPhoneHelp"],
+            "start-identity-verification" => L["ReqIdentityHelp"],
+            "accept-trust-rules" => L["ReqRulesHelp"],
+            "submit-guide-profile-review" => L["ReqReviewHelp"],
+            _ => L["Pending"]
         };
     }
 }
