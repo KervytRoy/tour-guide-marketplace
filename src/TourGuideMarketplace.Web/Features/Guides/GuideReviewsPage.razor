@@ -1,8 +1,9 @@
 @page "/guide/reviews"
 @attribute [Authorize(Roles = AppRoles.Guide)]
+@inject IStringLocalizer<SharedResource> L
 
 <MudPaper Class="state-panel" Elevation="0">
     <MudIcon Icon="@Icons.Material.Filled.RateReview" Color="Color.Primary" Size="Size.Large" />
-    <MudText Typo="Typo.h5">Resenas</MudText>
-    <MudText Color="Color.Secondary">Aqui vivira el resumen de valoraciones cuando el modulo este disponible en la API.</MudText>
+    <MudText Typo="Typo.h5">@L["Reviews"]</MudText>
+    <MudText Color="Color.Secondary">@L["ReviewsComingSoon"]</MudText>
 </MudPaper>

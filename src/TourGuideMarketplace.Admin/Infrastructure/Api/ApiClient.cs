@@ -2,9 +2,11 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.Extensions.Localization;
 using TourGuideMarketplace.Contracts.Auth;
 using TourGuideMarketplace.Contracts.Common;
 using TourGuideMarketplace.Admin.Infrastructure.Auth;
+using TourGuideMarketplace.Admin.Resources;
 
 namespace TourGuideMarketplace.Admin.Infrastructure.Api;
 
@@ -14,15 +16,18 @@ public sealed class ApiClient
 
     private readonly HttpClient _httpClient;
     private readonly JwtAuthenticationStateProvider _authenticationStateProvider;
+    private readonly IStringLocalizer<SharedResource> _localizer;
     private readonly TokenStorage _tokenStorage;
 
     public ApiClient(
         HttpClient httpClient,
         JwtAuthenticationStateProvider authenticationStateProvider,
+        IStringLocalizer<SharedResource> localizer,
         TokenStorage tokenStorage)
     {
         _httpClient = httpClient;
         _authenticationStateProvider = authenticationStateProvider;
+        _localizer = localizer;
         _tokenStorage = tokenStorage;
     }
 
@@ -82,7 +87,7 @@ public sealed class ApiClient
         }
         catch (HttpRequestException)
         {
-            return ApiResult<TResponse>.Failure("No se pudo conectar con la API.");
+            return ApiResult<TResponse>.Failure(_localizer["ApiConnectionError"].Value);
         }
 
         using (response)
@@ -91,7 +96,7 @@ public sealed class ApiClient
             {
                 var value = await response.Content.ReadFromJsonAsync<TResponse>(JsonOptions, cancellationToken);
                 return value is null
-                    ? ApiResult<TResponse>.Failure("The API returned an empty response.")
+                    ? ApiResult<TResponse>.Failure(_localizer["ApiEmptyResponse"].Value)
                     : ApiResult<TResponse>.Success(value);
             }
 
@@ -112,7 +117,7 @@ public sealed class ApiClient
         }
         catch (HttpRequestException)
         {
-            return ApiResult.Failure("No se pudo conectar con la API.");
+            return ApiResult.Failure(_localizer["ApiConnectionError"].Value);
         }
 
         using (response)
@@ -215,12 +220,12 @@ public sealed class ApiClient
         };
     }
 
-    private static async Task<IReadOnlyCollection<string>> ReadErrorsAsync(
+    private async Task<IReadOnlyCollection<string>> ReadErrorsAsync(
         HttpResponseMessage response,
         CancellationToken cancellationToken)
     {
         var fallback = string.IsNullOrWhiteSpace(response.ReasonPhrase)
-            ? $"Request failed with status {(int)response.StatusCode}."
+            ? _localizer["ApiStatusFailure", (int)response.StatusCode].Value
             : response.ReasonPhrase;
 
         try

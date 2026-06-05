@@ -2,19 +2,20 @@
 @attribute [Authorize(Roles = AppRoles.Guide)]
 @inject GuidesApiClient GuidesApi
 @inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResource> L
 
 <MudStack Spacing="3">
     <div class="page-heading">
         <div>
-            <MudText Typo="Typo.h4">Mi perfil de guia</MudText>
-            <MudText Typo="Typo.body1" Color="Color.Secondary">Estos datos alimentan tu ficha publica para turistas.</MudText>
+            <MudText Typo="Typo.h4">@L["MyGuideProfile"]</MudText>
+            <MudText Typo="Typo.body1" Color="Color.Secondary">@L["MyGuideProfileSubtitle"]</MudText>
         </div>
         <MudStack Row="true" Spacing="2" Class="action-row">
             <MudButton Href="/guide/trust" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.VerifiedUser">
-                Validacion
+                @L["Validation"]
             </MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_isBusy" OnClick="SaveAsync" StartIcon="@Icons.Material.Filled.Save">
-                Guardar
+                @L["Save"]
             </MudButton>
         </MudStack>
     </div>
@@ -22,41 +23,41 @@
     @if (_loadErrors.Count > 0)
     {
         <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
-            Aun no tienes perfil publicado. Completa el formulario para crearlo.
+            @L["NoGuideProfileInfo"]
         </MudAlert>
     }
 
     <MudPaper Class="form-panel" Elevation="0">
         <MudGrid Spacing="3">
             <MudItem xs="12">
-                <MudTextField T="string" @bind-Value="_bio" Label="Biografia" Lines="5" />
+                <MudTextField T="string" @bind-Value="_bio" Label="@L["Biography"]" Lines="5" />
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudTextField T="string" @bind-Value="_city" Label="Ciudad" />
+                <MudTextField T="string" @bind-Value="_city" Label="@L["City"]" />
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudTextField T="string" @bind-Value="_country" Label="Pais" />
+                <MudTextField T="string" @bind-Value="_country" Label="@L["Country"]" />
             </MudItem>
             <MudItem xs="12" md="4">
-                <MudNumericField T="decimal" @bind-Value="_hourlyRate" Label="Tarifa por hora" />
+                <MudNumericField T="decimal" @bind-Value="_hourlyRate" Label="@L["HourlyRate"]" />
             </MudItem>
             <MudItem xs="12" md="4">
-                <MudTextField T="string" @bind-Value="_currency" Label="Moneda" HelperText="Ejemplo: USD, COP, EUR" />
+                <MudTextField T="string" @bind-Value="_currency" Label="@L["Currency"]" HelperText="@L["CurrencyHelper"]" />
             </MudItem>
             <MudItem xs="12" md="4">
-                <MudSwitch T="bool" @bind-Value="_availableNow" Color="Color.Success" Label="Disponible ahora" />
+                <MudSwitch T="bool" @bind-Value="_availableNow" Color="Color.Success" Label="@L["AvailableNow"]" />
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudNumericField T="decimal?" @bind-Value="_latitude" Label="Latitud" />
+                <MudNumericField T="decimal?" @bind-Value="_latitude" Label="@L["Latitude"]" />
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudNumericField T="decimal?" @bind-Value="_longitude" Label="Longitud" />
+                <MudNumericField T="decimal?" @bind-Value="_longitude" Label="@L["Longitude"]" />
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudTextField T="string" @bind-Value="_specialtiesCsv" Label="Especialidades" HelperText="Separadas por coma" />
+                <MudTextField T="string" @bind-Value="_specialtiesCsv" Label="@L["Specialties"]" HelperText="@L["SpecialtiesHelper"]" />
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudTextField T="string" @bind-Value="_languagesCsv" Label="Idiomas" HelperText="Separados por coma" />
+                <MudTextField T="string" @bind-Value="_languagesCsv" Label="@L["Languages"]" HelperText="@L["LanguagesHelper"]" />
             </MudItem>
         </MudGrid>
     </MudPaper>
@@ -121,7 +122,7 @@
         }
 
         _loadErrors = [];
-        Snackbar.Add("Perfil de guia guardado.", Severity.Success);
+        Snackbar.Add(L["GuideProfileSaved"], Severity.Success);
     }
 
     private static IReadOnlyCollection<string> ParseCsv(string value)

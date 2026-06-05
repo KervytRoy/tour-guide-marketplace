@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Account" xml:space="preserve"><value>Cuenta</value></data>
+  <data name="AccountCreatedSuccess" xml:space="preserve"><value>Cuenta creada.</value></data>
+  <data name="AccountFallback" xml:space="preserve"><value>Cuenta</value></data>
+  <data name="AcceptCodeOfConduct" xml:space="preserve"><value>Acepto el codigo de conducta</value></data>
+  <data name="AcceptSafetyRules" xml:space="preserve"><value>Acepto las reglas de seguridad</value></data>
+  <data name="Activity" xml:space="preserve"><value>Actividad</value></data>
+  <data name="ApiConnectionError" xml:space="preserve"><value>No se pudo conectar con la API.</value></data>
+  <data name="ApiEmptyResponse" xml:space="preserve"><value>La API devolvio una respuesta vacia.</value></data>
+  <data name="ApiStatusFailure" xml:space="preserve"><value>La solicitud fallo con estado {0}.</value></data>
+  <data name="AppName" xml:space="preserve"><value>Tour Guide Marketplace</value></data>
+  <data name="Approved" xml:space="preserve"><value>Aprobado</value></data>
+  <data name="AuthLayoutSubtitle" xml:space="preserve"><value>Gestiona experiencias locales, perfiles y reservas desde un punto de trabajo claro.</value></data>
+  <data name="Available" xml:space="preserve"><value>Disponible</value></data>
+  <data name="AvailableNow" xml:space="preserve"><value>Disponible ahora</value></data>
+  <data name="BackToDashboard" xml:space="preserve"><value>Volver al dashboard</value></data>
+  <data name="Biography" xml:space="preserve"><value>Biografia</value></data>
+  <data name="BirthDate" xml:space="preserve"><value>Fecha de nacimiento</value></data>
+  <data name="Bookings" xml:space="preserve"><value>Reservas</value></data>
+  <data name="Checklist" xml:space="preserve"><value>Checklist</value></data>
+  <data name="City" xml:space="preserve"><value>Ciudad</value></data>
+  <data name="Complete" xml:space="preserve"><value>Completo</value></data>
+  <data name="CompleteProfile" xml:space="preserve"><value>Completar perfil</value></data>
+  <data name="ConfirmEmail" xml:space="preserve"><value>Confirmar email</value></data>
+  <data name="ConfirmPhone" xml:space="preserve"><value>Confirmar telefono</value></data>
+  <data name="Contact" xml:space="preserve"><value>Contacto</value></data>
+  <data name="ContactSubtitle" xml:space="preserve"><value>El flujo mock devuelve el codigo para probar la confirmacion.</value></data>
+  <data name="Country" xml:space="preserve"><value>Pais</value></data>
+  <data name="CreateAccount" xml:space="preserve"><value>Crear cuenta</value></data>
+  <data name="Currency" xml:space="preserve"><value>Moneda</value></data>
+  <data name="CurrencyHelper" xml:space="preserve"><value>Ejemplo: USD, COP, EUR</value></data>
+  <data name="Dashboard" xml:space="preserve"><value>Dashboard</value></data>
+  <data name="DashboardGreeting" xml:space="preserve"><value>Hola, {0}. Este es tu punto de inicio.</value></data>
+  <data name="DocumentCountry" xml:space="preserve"><value>Pais del documento</value></data>
+  <data name="DocumentNumber" xml:space="preserve"><value>Numero de documento</value></data>
+  <data name="DocumentType" xml:space="preserve"><value>Tipo de documento</value></data>
+  <data name="EditProfile" xml:space="preserve"><value>Editar perfil</value></data>
+  <data name="Email" xml:space="preserve"><value>Email</value></data>
+  <data name="EmailCode" xml:space="preserve"><value>Codigo email</value></data>
+  <data name="EmailConfirmedSuccess" xml:space="preserve"><value>Email confirmado.</value></data>
+  <data name="EmailMockCodeGenerated" xml:space="preserve"><value>Codigo mock de email generado.</value></data>
+  <data name="FirstConfirmContact" xml:space="preserve"><value>Primero confirma email y telefono.</value></data>
+  <data name="FullName" xml:space="preserve"><value>Nombre completo</value></data>
+  <data name="GoToDashboard" xml:space="preserve"><value>Ir al dashboard</value></data>
+  <data name="Guide" xml:space="preserve"><value>Guia</value></data>
+  <data name="GuideProfileSaved" xml:space="preserve"><value>Perfil de guia guardado.</value></data>
+  <data name="GuideStartDescription" xml:space="preserve"><value>Mant&#x00E9;n tu perfil publicado y listo para recibir solicitudes.</value></data>
+  <data name="GuideStartTitle" xml:space="preserve"><value>Inicio para guias</value></data>
+  <data name="HaveAccountQuestion" xml:space="preserve"><value>Ya tienes cuenta?</value></data>
+  <data name="HourlyRate" xml:space="preserve"><value>Tarifa por hora</value></data>
+  <data name="HourlyRateDisplay" xml:space="preserve"><value>{0} {1} / hora</value></data>
+  <data name="Identity" xml:space="preserve"><value>Identidad</value></data>
+  <data name="IdentitySubtitle" xml:space="preserve"><value>Simula el envio a MetaMap con datos basicos del documento.</value></data>
+  <data name="IdentityValidation" xml:space="preserve"><value>Validacion de identidad</value></data>
+  <data name="IdentityValidationSubtitle" xml:space="preserve"><value>Completa los pasos necesarios para que tu perfil de guia pueda pasar a revision.</value></data>
+  <data name="InReview" xml:space="preserve"><value>En revision</value></data>
+  <data name="Language" xml:space="preserve"><value>Idioma</value></data>
+  <data name="Languages" xml:space="preserve"><value>Idiomas</value></data>
+  <data name="LanguagesHelper" xml:space="preserve"><value>Separados por coma</value></data>
+  <data name="Latitude" xml:space="preserve"><value>Latitud</value></data>
+  <data name="Login" xml:space="preserve"><value>Ingresar</value></data>
+  <data name="LoginLoading" xml:space="preserve"><value>Ingresando...</value></data>
+  <data name="LoginRequiredError" xml:space="preserve"><value>Email y contrasena son requeridos.</value></data>
+  <data name="LoginSubtitle" xml:space="preserve"><value>Usa tus credenciales para continuar como turista o guia.</value></data>
+  <data name="LoginTitle" xml:space="preserve"><value>Ingresa a tu cuenta</value></data>
+  <data name="Logout" xml:space="preserve"><value>Cerrar sesion</value></data>
+  <data name="LogoutSuccess" xml:space="preserve"><value>Sesion cerrada.</value></data>
+  <data name="Longitude" xml:space="preserve"><value>Longitud</value></data>
+  <data name="ManualReview" xml:space="preserve"><value>Revision manual</value></data>
+  <data name="Marketplace" xml:space="preserve"><value>Marketplace</value></data>
+  <data name="MaxHourlyRate" xml:space="preserve"><value>Tarifa maxima</value></data>
+  <data name="MinRating" xml:space="preserve"><value>Rating minimo</value></data>
+  <data name="MockCodeLabel" xml:space="preserve"><value>Codigo mock:</value></data>
+  <data name="MockProviderResponseReceived" xml:space="preserve"><value>Respuesta mock recibida desde proveedor.</value></data>
+  <data name="MockResult" xml:space="preserve"><value>Resultado mock</value></data>
+  <data name="MyBookings" xml:space="preserve"><value>Mis reservas</value></data>
+  <data name="MyBookingsComingSoon" xml:space="preserve"><value>Esta pantalla queda lista para conectar cuando agreguemos los endpoints de reservas.</value></data>
+  <data name="MyGuideProfile" xml:space="preserve"><value>Mi perfil de guia</value></data>
+  <data name="MyGuideProfileSubtitle" xml:space="preserve"><value>Estos datos alimentan tu ficha publica para turistas.</value></data>
+  <data name="MyTouristProfile" xml:space="preserve"><value>Mi perfil turista</value></data>
+  <data name="MyTouristProfileSubtitle" xml:space="preserve"><value>Informaci&#x00F3;n base para personalizar busquedas y futuras reservas.</value></data>
+  <data name="NationalId" xml:space="preserve"><value>Documento nacional</value></data>
+  <data name="NoAccountQuestion" xml:space="preserve"><value>Aun no tienes cuenta?</value></data>
+  <data name="NoGuideProfileInfo" xml:space="preserve"><value>Aun no tienes perfil publicado. Completa el formulario para crearlo.</value></data>
+  <data name="NoGuidesDescription" xml:space="preserve"><value>Ajusta la busqueda o intenta con menos filtros.</value></data>
+  <data name="NoGuidesTitle" xml:space="preserve"><value>No hay guias para los filtros actuales</value></data>
+  <data name="NoPendingAlerts" xml:space="preserve"><value>Sin alertas pendientes</value></data>
+  <data name="NoPhone" xml:space="preserve"><value>Sin telefono</value></data>
+  <data name="NotAuthorizedDescription" xml:space="preserve"><value>Tu cuenta no tiene el rol requerido para abrir esta pagina.</value></data>
+  <data name="NotAuthorizedTitle" xml:space="preserve"><value>No tienes acceso a esta seccion</value></data>
+  <data name="NotFoundDescription" xml:space="preserve"><value>La ruta que intentaste abrir no existe en este sitio.</value></data>
+  <data name="NotFoundTitle" xml:space="preserve"><value>Pagina no encontrada</value></data>
+  <data name="Passport" xml:space="preserve"><value>Pasaporte</value></data>
+  <data name="Password" xml:space="preserve"><value>Contrasena</value></data>
+  <data name="Pending" xml:space="preserve"><value>Pendiente</value></data>
+  <data name="Phone" xml:space="preserve"><value>Telefono</value></data>
+  <data name="PhoneCode" xml:space="preserve"><value>Codigo telefono</value></data>
+  <data name="PhoneConfirmedSuccess" xml:space="preserve"><value>Telefono confirmado.</value></data>
+  <data name="PhoneMockCodeGenerated" xml:space="preserve"><value>Codigo mock de telefono generado.</value></data>
+  <data name="PreferredLanguage" xml:space="preserve"><value>Idioma preferido</value></data>
+  <data name="Profile" xml:space="preserve"><value>Perfil</value></data>
+  <data name="ProfileChangesAlert" xml:space="preserve"><value>Tu perfil requiere cambios antes de ser validado. Corrige tu perfil y vuelve a enviarlo a revision.</value></data>
+  <data name="ProfileInReviewAlert" xml:space="preserve"><value>Tu perfil ya esta en revision administrativa. Las validaciones completadas se conservan mientras esperas la decision.</value></data>
+  <data name="ProfileResubmittedReview" xml:space="preserve"><value>Perfil reenviado a revision administrativa.</value></data>
+  <data name="ProfileSubmittedReview" xml:space="preserve"><value>Perfil enviado a revision administrativa.</value></data>
+  <data name="ProfileSubtitle" xml:space="preserve"><value>Datos de identidad y roles de la cuenta autenticada.</value></data>
+  <data name="ProfileValidated" xml:space="preserve"><value>Perfil validado</value></data>
+  <data name="ProviderStatus" xml:space="preserve"><value>Proveedor {0}: {1}</value></data>
+  <data name="RatingDisplay" xml:space="preserve"><value>{0} rating</value></data>
+  <data name="Ready" xml:space="preserve"><value>Listo</value></data>
+  <data name="ReadyForNextModules" xml:space="preserve"><value>Preparado para proximos modulos</value></data>
+  <data name="ReceivedBookings" xml:space="preserve"><value>Reservas recibidas</value></data>
+  <data name="ReceivedBookingsComingSoon" xml:space="preserve"><value>Modulo reservado para la gestion de solicitudes y agenda del guia.</value></data>
+  <data name="Refresh" xml:space="preserve"><value>Actualizar</value></data>
+  <data name="RegisterLoading" xml:space="preserve"><value>Creando cuenta...</value></data>
+  <data name="RegisterRequiredError" xml:space="preserve"><value>Nombre, email y contrasena son requeridos.</value></data>
+  <data name="RegisterSubtitle" xml:space="preserve"><value>Elige el tipo de cuenta con el que usaras el marketplace.</value></data>
+  <data name="RegisterTitle" xml:space="preserve"><value>Crea tu cuenta</value></data>
+  <data name="Rejected" xml:space="preserve"><value>Rechazado</value></data>
+  <data name="ReqEmailHelp" xml:space="preserve"><value>Solicita y confirma el codigo de email.</value></data>
+  <data name="ReqIdentityHelp" xml:space="preserve"><value>Completa el formulario de documento.</value></data>
+  <data name="ReqPhoneHelp" xml:space="preserve"><value>Solicita y confirma el codigo de telefono.</value></data>
+  <data name="ReqReviewHelp" xml:space="preserve"><value>Completa o corrige tu perfil y envialo a revision.</value></data>
+  <data name="ReqRulesHelp" xml:space="preserve"><value>Acepta el codigo de conducta y reglas de seguridad.</value></data>
+  <data name="RequirementsProgress" xml:space="preserve"><value>{0} de {1} requisitos</value></data>
+  <data name="RequestCode" xml:space="preserve"><value>Solicitar codigo</value></data>
+  <data name="ResidenceCard" xml:space="preserve"><value>Tarjeta de residencia</value></data>
+  <data name="ResubmitReview" xml:space="preserve"><value>Reenviar a revision</value></data>
+  <data name="Retry" xml:space="preserve"><value>Reintentar</value></data>
+  <data name="ReviewHelpChanges" xml:space="preserve"><value>Corrige tu perfil y reenvialo a validacion administrativa.</value></data>
+  <data name="ReviewHelpDefault" xml:space="preserve"><value>Acepta las reglas y envia tu perfil para validacion administrativa.</value></data>
+  <data name="ReviewHelpInReview" xml:space="preserve"><value>Tu perfil esta en revision administrativa.</value></data>
+  <data name="Reviews" xml:space="preserve"><value>Resenas</value></data>
+  <data name="ReviewsComingSoon" xml:space="preserve"><value>Aqui vivira el resumen de valoraciones cuando el modulo este disponible en la API.</value></data>
+  <data name="RulesAccepted" xml:space="preserve"><value>Reglas aceptadas.</value></data>
+  <data name="RulesReview" xml:space="preserve"><value>Reglas y revision</value></data>
+  <data name="Save" xml:space="preserve"><value>Guardar</value></data>
+  <data name="SaveAcceptance" xml:space="preserve"><value>Guardar aceptacion</value></data>
+  <data name="Search" xml:space="preserve"><value>Buscar</value></data>
+  <data name="SearchGuides" xml:space="preserve"><value>Buscar guias</value></data>
+  <data name="SearchGuidesSubtitle" xml:space="preserve"><value>Filtra por ubicacion, idioma, especialidad y disponibilidad.</value></data>
+  <data name="Specialties" xml:space="preserve"><value>Especialidades</value></data>
+  <data name="SpecialtiesHelper" xml:space="preserve"><value>Separadas por coma</value></data>
+  <data name="Specialty" xml:space="preserve"><value>Especialidad</value></data>
+  <data name="Status" xml:space="preserve"><value>Estado</value></data>
+  <data name="StatusContactVerified" xml:space="preserve"><value>Contacto verificado</value></data>
+  <data name="StatusIdentityVerified" xml:space="preserve"><value>Identidad verificada</value></data>
+  <data name="StatusLoadFailed" xml:space="preserve"><value>No se pudo cargar el estado de validacion</value></data>
+  <data name="StatusProfileChangesRequested" xml:space="preserve"><value>Perfil requiere cambios</value></data>
+  <data name="StatusProfileValidated" xml:space="preserve"><value>Perfil validado</value></data>
+  <data name="StatusSuspended" xml:space="preserve"><value>Suspendido</value></data>
+  <data name="StatusUnverified" xml:space="preserve"><value>Sin verificar</value></data>
+  <data name="SubmitReview" xml:space="preserve"><value>Enviar a revision</value></data>
+  <data name="Tourist" xml:space="preserve"><value>Turista</value></data>
+  <data name="TouristProfileSaved" xml:space="preserve"><value>Perfil turista guardado.</value></data>
+  <data name="TouristStartDescription" xml:space="preserve"><value>Explora guias disponibles y completa tu perfil para futuras reservas.</value></data>
+  <data name="TouristStartTitle" xml:space="preserve"><value>Inicio para turistas</value></data>
+  <data name="TouristsAndGuides" xml:space="preserve"><value>Turistas y guias</value></data>
+  <data name="Unvalidated" xml:space="preserve"><value>Sin validar</value></data>
+  <data name="Reload" xml:space="preserve"><value>Recargar</value></data>
+  <data name="UnexpectedError" xml:space="preserve"><value>Ocurrio un error inesperado.</value></data>
+  <data name="ValidateIdentity" xml:space="preserve"><value>Validar identidad</value></data>
+  <data name="Validation" xml:space="preserve"><value>Validacion</value></data>
+  <data name="Verified" xml:space="preserve"><value>Verificada</value></data>
+  <data name="WelcomeFallback" xml:space="preserve"><value>bienvenido</value></data>
+  <data name="WelcomeSuccess" xml:space="preserve"><value>Bienvenido.</value></data>
+</root>

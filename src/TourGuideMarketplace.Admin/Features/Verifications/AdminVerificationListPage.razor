@@ -3,36 +3,37 @@
 @attribute [Authorize(Roles = AppRoles.Admin)]
 @inject AdminVerificationsApiClient VerificationsApi
 @inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResource> L
 
 <MudStack Spacing="3">
     <div class="page-heading">
         <div>
-            <MudText Typo="Typo.h4">Verificaciones</MudText>
+            <MudText Typo="Typo.h4">@L["Verifications"]</MudText>
             <MudText Typo="Typo.body1" Color="Color.Secondary">
-                Revisa el estado de identidad y perfil de los guias.
+                @L["VerificationListSubtitle"]
             </MudText>
         </div>
         <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@_isLoading" OnClick="SearchAsync" StartIcon="@Icons.Material.Filled.Refresh">
-            Actualizar
+            @L["Refresh"]
         </MudButton>
     </div>
 
     <MudPaper Class="filter-panel" Elevation="0">
         <MudGrid Spacing="2">
             <MudItem xs="12" md="4">
-                <MudSelect T="string" @bind-Value="_statusFilter" Label="Estado">
-                    <MudSelectItem T="string" Value="@("")">Todos</MudSelectItem>
-                    <MudSelectItem T="string" Value="@("Unverified")">Sin verificar</MudSelectItem>
-                    <MudSelectItem T="string" Value="@("ContactVerified")">Contacto verificado</MudSelectItem>
-                    <MudSelectItem T="string" Value="@("IdentityVerified")">Identidad verificada</MudSelectItem>
-                    <MudSelectItem T="string" Value="@("InReview")">En revision</MudSelectItem>
-                    <MudSelectItem T="string" Value="@("ProfileChangesRequested")">Perfil requiere cambios</MudSelectItem>
-                    <MudSelectItem T="string" Value="@("ProfileValidated")">Perfil validado</MudSelectItem>
-                    <MudSelectItem T="string" Value="@("Suspended")">Suspendido</MudSelectItem>
+                <MudSelect T="string" @bind-Value="_statusFilter" Label="@L["Status"]">
+                    <MudSelectItem T="string" Value="@("")">@L["All"]</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("Unverified")">@L["StatusUnverified"]</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("ContactVerified")">@L["StatusContactVerified"]</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("IdentityVerified")">@L["StatusIdentityVerified"]</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("InReview")">@L["InReview"]</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("ProfileChangesRequested")">@L["StatusProfileChangesRequested"]</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("ProfileValidated")">@L["StatusProfileValidated"]</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("Suspended")">@L["StatusSuspended"]</MudSelectItem>
                 </MudSelect>
             </MudItem>
             <MudItem xs="12" md="3">
-                <MudSelect T="int" @bind-Value="_pageSize" Label="Tamano de pagina">
+                <MudSelect T="int" @bind-Value="_pageSize" Label="@L["PageSize"]">
                     <MudSelectItem T="int" Value="10">10</MudSelectItem>
                     <MudSelectItem T="int" Value="20">20</MudSelectItem>
                     <MudSelectItem T="int" Value="50">50</MudSelectItem>
@@ -40,7 +41,7 @@
             </MudItem>
             <MudItem xs="12" md="3" Class="filter-actions">
                 <MudButton FullWidth="true" Variant="Variant.Outlined" Color="Color.Primary" Disabled="@_isLoading" OnClick="ApplyFiltersAsync" StartIcon="@Icons.Material.Filled.FilterAlt">
-                    Aplicar filtros
+                    @L["ApplyFilters"]
                 </MudButton>
             </MudItem>
         </MudGrid>
@@ -51,23 +52,23 @@
         <MudGrid Spacing="3">
             <MudItem xs="12" md="4">
                 <MudPaper Class="metric-card" Elevation="0">
-                    <MudText Typo="Typo.overline">Total filtrado</MudText>
+                    <MudText Typo="Typo.overline">@L["TotalFiltered"]</MudText>
                     <MudText Typo="Typo.h4">@_result.TotalCount</MudText>
-                    <MudText Typo="Typo.caption" Color="Color.Secondary">Registros encontrados</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">@L["RecordsFound"]</MudText>
                 </MudPaper>
             </MudItem>
             <MudItem xs="12" md="4">
                 <MudPaper Class="metric-card" Elevation="0">
-                    <MudText Typo="Typo.overline">En esta pagina</MudText>
+                    <MudText Typo="Typo.overline">@L["OnThisPage"]</MudText>
                     <MudText Typo="Typo.h4">@_items.Count</MudText>
-                    <MudText Typo="Typo.caption" Color="Color.Secondary">Casos visibles</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">@L["VisibleCases"]</MudText>
                 </MudPaper>
             </MudItem>
             <MudItem xs="12" md="4">
                 <MudPaper Class="metric-card" Elevation="0">
-                    <MudText Typo="Typo.overline">Pendientes visibles</MudText>
+                    <MudText Typo="Typo.overline">@L["VisiblePending"]</MudText>
                     <MudText Typo="Typo.h4">@VisiblePendingCount</MudText>
-                    <MudText Typo="Typo.caption" Color="Color.Secondary">Requieren seguimiento</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">@L["RequireFollowUp"]</MudText>
                 </MudPaper>
             </MudItem>
         </MudGrid>
@@ -83,8 +84,8 @@
     {
         <MudPaper Class="state-panel" Elevation="0">
             <MudIcon Icon="@Icons.Material.Filled.VerifiedUser" Color="Color.Secondary" Size="Size.Large" />
-            <MudText Typo="Typo.h6">No hay verificaciones para los filtros actuales</MudText>
-            <MudText Color="Color.Secondary">Ajusta el estado o actualiza la lista.</MudText>
+            <MudText Typo="Typo.h6">@L["NoVerificationsTitle"]</MudText>
+            <MudText Color="Color.Secondary">@L["NoVerificationsDescription"]</MudText>
         </MudPaper>
     }
     else
@@ -92,17 +93,17 @@
         <MudPaper Class="table-panel" Elevation="0">
             <MudTable Items="_items" Hover="true" Dense="true" Elevation="0">
                 <HeaderContent>
-                    <MudTh>Guia</MudTh>
-                    <MudTh>Estado</MudTh>
-                    <MudTh>Contacto</MudTh>
-                    <MudTh>Identidad</MudTh>
-                    <MudTh>Perfil</MudTh>
-                    <MudTh>Proveedor</MudTh>
-                    <MudTh>Actualizado</MudTh>
+                    <MudTh>@L["Guide"]</MudTh>
+                    <MudTh>@L["Status"]</MudTh>
+                    <MudTh>@L["Contact"]</MudTh>
+                    <MudTh>@L["Identity"]</MudTh>
+                    <MudTh>@L["Profile"]</MudTh>
+                    <MudTh>@L["Provider"]</MudTh>
+                    <MudTh>@L["Updated"]</MudTh>
                     <MudTh></MudTh>
                 </HeaderContent>
                 <RowTemplate Context="item">
-                    <MudTd DataLabel="Guia">
+                    <MudTd DataLabel="@L["Guide"]">
                         <div class="identity-cell">
                             <MudAvatar Color="Color.Primary">@GetInitials(item.FullName)</MudAvatar>
                             <div>
@@ -111,35 +112,35 @@
                             </div>
                         </div>
                     </MudTd>
-                    <MudTd DataLabel="Estado">
+                    <MudTd DataLabel="@L["Status"]">
                         <MudChip T="string" Color="@GetStatusColor(item.Status)" Variant="Variant.Outlined">
                             @GetStatusLabel(item.Status)
                         </MudChip>
                     </MudTd>
-                    <MudTd DataLabel="Contacto">
+                    <MudTd DataLabel="@L["Contact"]">
                         <div class="indicator-row">
                             <MudIcon Icon="@GetBooleanIcon(item.EmailVerified)" Color="@GetBooleanColor(item.EmailVerified)" Size="Size.Small" />
-                            <MudText Typo="Typo.caption">Email</MudText>
+                            <MudText Typo="Typo.caption">@L["Email"]</MudText>
                             <MudIcon Icon="@GetBooleanIcon(item.PhoneVerified)" Color="@GetBooleanColor(item.PhoneVerified)" Size="Size.Small" />
-                            <MudText Typo="Typo.caption">Telefono</MudText>
+                            <MudText Typo="Typo.caption">@L["Phone"]</MudText>
                         </div>
                     </MudTd>
-                    <MudTd DataLabel="Identidad">
+                    <MudTd DataLabel="@L["Identity"]">
                         <MudIcon Icon="@GetBooleanIcon(item.IdentityVerified)" Color="@GetBooleanColor(item.IdentityVerified)" />
                     </MudTd>
-                    <MudTd DataLabel="Perfil">
+                    <MudTd DataLabel="@L["Profile"]">
                         <MudIcon Icon="@GetBooleanIcon(item.ProfileValidated)" Color="@GetBooleanColor(item.ProfileValidated)" />
                     </MudTd>
-                    <MudTd DataLabel="Proveedor">
+                    <MudTd DataLabel="@L["Provider"]">
                         <MudText Typo="Typo.body2">@(item.IdentityProvider ?? "-")</MudText>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">@(item.LastAttemptStatus ?? "Sin intentos")</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">@(item.LastAttemptStatus ?? L["NoAttempts"])</MudText>
                     </MudTd>
-                    <MudTd DataLabel="Actualizado">
+                    <MudTd DataLabel="@L["Updated"]">
                         <MudText Typo="Typo.body2">@FormatDate(item.UpdatedAt ?? item.CreatedAt)</MudText>
                     </MudTd>
                     <MudTd>
                         <MudButton Href="@($"/admin/verifications/{item.UserId}")" Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small" StartIcon="@Icons.Material.Filled.OpenInNew">
-                            Abrir
+                            @L["OpenButton"]
                         </MudButton>
                     </MudTd>
                 </RowTemplate>
@@ -147,7 +148,7 @@
 
             <div class="pager-row">
                 <MudText Typo="Typo.caption" Color="Color.Secondary">
-                    Pagina @_pageNumber de @TotalPages
+                    @L["PageOf", _pageNumber, TotalPages]
                 </MudText>
                 <MudStack Row="true" Spacing="1">
                     <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft" Color="Color.Primary" Disabled="@(_pageNumber <= 1 || _isLoading)" OnClick="PreviousPageAsync" />
@@ -251,17 +252,17 @@
         };
     }
 
-    private static string GetStatusLabel(string status)
+    private string GetStatusLabel(string status)
     {
         return status switch
         {
-            "Unverified" => "Sin verificar",
-            "ContactVerified" => "Contacto verificado",
-            "IdentityVerified" => "Identidad verificada",
-            "ProfileValidated" => "Perfil validado",
-            "InReview" => "En revision",
-            "ProfileChangesRequested" => "Perfil requiere cambios",
-            "Suspended" => "Suspendido",
+            "Unverified" => L["StatusUnverified"],
+            "ContactVerified" => L["StatusContactVerified"],
+            "IdentityVerified" => L["StatusIdentityVerified"],
+            "ProfileValidated" => L["StatusProfileValidated"],
+            "InReview" => L["InReview"],
+            "ProfileChangesRequested" => L["StatusProfileChangesRequested"],
+            "Suspended" => L["StatusSuspended"],
             _ => status
         };
     }

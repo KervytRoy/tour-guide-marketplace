@@ -5,10 +5,11 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResource> L
 
 <MudPaper Class="auth-card" Elevation="0">
-    <MudText Typo="Typo.h4">Ingresa a tu cuenta</MudText>
-    <MudText Typo="Typo.body2" Color="Color.Secondary">Usa tus credenciales para continuar como turista o guia.</MudText>
+    <MudText Typo="Typo.h4">@L["LoginTitle"]</MudText>
+    <MudText Typo="Typo.body2" Color="Color.Secondary">@L["LoginSubtitle"]</MudText>
 
     @if (_errors.Count > 0)
     {
@@ -17,21 +18,21 @@
         </MudAlert>
     }
 
-    <MudTextField T="string" @bind-Value="_email" Label="Email" InputType="InputType.Email"
+    <MudTextField T="string" @bind-Value="_email" Label="@L["Email"]" InputType="InputType.Email"
                   Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Email" />
-    <MudTextField T="string" @bind-Value="_password" Label="Contrasena" InputType="InputType.Password"
+    <MudTextField T="string" @bind-Value="_password" Label="@L["Password"]" InputType="InputType.Password"
                   Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Lock" />
 
     <MudButton FullWidth="true" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
                Disabled="_isBusy" OnClick="LoginAsync" StartIcon="@Icons.Material.Filled.Login">
-        @(_isBusy ? "Ingresando..." : "Ingresar")
+        @(_isBusy ? L["LoginLoading"] : L["Login"])
     </MudButton>
 
     <MudDivider />
 
     <MudText Typo="Typo.body2">
-        Aun no tienes cuenta?
-        <MudLink Href="/register">Crear cuenta</MudLink>
+        @L["NoAccountQuestion"]
+        <MudLink Href="/register">@L["CreateAccount"]</MudLink>
     </MudText>
 </MudPaper>
 
@@ -59,7 +60,7 @@
 
         if (string.IsNullOrWhiteSpace(_email) || string.IsNullOrWhiteSpace(_password))
         {
-            _errors = ["Email y contrasena son requeridos."];
+            _errors = [L["LoginRequiredError"]];
             return;
         }
 
@@ -73,7 +74,7 @@
             return;
         }
 
-        Snackbar.Add("Bienvenido.", Severity.Success);
+        Snackbar.Add(L["WelcomeSuccess"], Severity.Success);
         Navigation.NavigateTo(GetReturnUrl());
     }
 

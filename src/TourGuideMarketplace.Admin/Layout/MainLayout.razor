@@ -4,15 +4,16 @@
 @inject CurrentUserState CurrentUser
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResource> L
 
 <MudLayout Class="admin-shell">
     <MudAppBar Class="admin-topbar" Elevation="0">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
-        <MudText Typo="Typo.h6" Class="brand-title">Trust Admin</MudText>
+        <MudText Typo="Typo.h6" Class="brand-title">@L["AppName"]</MudText>
         <MudSpacer />
-        <MudText Typo="Typo.body2" Class="user-name">@(_currentUser?.FullName ?? "Administrador")</MudText>
+        <MudText Typo="Typo.body2" Class="user-name">@(_currentUser?.FullName ?? L["AdminFallback"])</MudText>
         <MudMenu Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit">
-            <MudMenuItem OnClick="LogoutAsync" Icon="@Icons.Material.Filled.Logout">Cerrar sesion</MudMenuItem>
+            <MudMenuItem OnClick="LogoutAsync" Icon="@Icons.Material.Filled.Logout">@L["Logout"]</MudMenuItem>
         </MudMenu>
     </MudAppBar>
 
@@ -20,14 +21,14 @@
         <div class="drawer-brand">
             <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" Color="Color.Primary" />
             <div>
-                <MudText Typo="Typo.subtitle1">Administracion</MudText>
-                <MudText Typo="Typo.caption" Color="Color.Secondary">Identidad y confianza</MudText>
+                <MudText Typo="Typo.subtitle1">@L["Administration"]</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">@L["IdentityTrust"]</MudText>
             </div>
         </div>
 
         <MudNavMenu Class="nav-menu">
             <MudNavLink Href="/admin/verifications" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.VerifiedUser">
-                Verificaciones
+                @L["Verifications"]
             </MudNavLink>
         </MudNavMenu>
     </MudDrawer>
@@ -67,7 +68,7 @@
     {
         await AuthSession.LogoutAsync();
         CurrentUser.Clear();
-        Snackbar.Add("Sesion cerrada.", Severity.Info);
+        Snackbar.Add(L["LogoutSuccess"], Severity.Info);
         Navigation.NavigateTo("/login");
     }
 }

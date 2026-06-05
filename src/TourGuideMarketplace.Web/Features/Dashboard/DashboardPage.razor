@@ -1,13 +1,14 @@
 @page "/dashboard"
 @attribute [Authorize]
 @inject CurrentUserState CurrentUser
+@inject IStringLocalizer<SharedResource> L
 
 <MudStack Spacing="3">
     <div class="page-heading">
         <div>
-            <MudText Typo="Typo.h4">Dashboard</MudText>
+            <MudText Typo="Typo.h4">@L["Dashboard"]</MudText>
             <MudText Typo="Typo.body1" Color="Color.Secondary">
-                Hola, @(_user?.FullName ?? "bienvenido"). Este es tu punto de inicio.
+                @L["DashboardGreeting", _user?.FullName ?? L["WelcomeFallback"]]
             </MudText>
         </div>
     </div>
@@ -16,22 +17,22 @@
         <MudItem xs="12" md="4">
             <MudPaper Class="metric-card" Elevation="0">
                 <MudIcon Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Primary" />
-                <MudText Typo="Typo.subtitle2">Cuenta</MudText>
+                <MudText Typo="Typo.subtitle2">@L["Account"]</MudText>
                 <MudText Typo="Typo.h6">@string.Join(", ", _user?.Roles ?? [])</MudText>
             </MudPaper>
         </MudItem>
         <MudItem xs="12" md="4">
             <MudPaper Class="metric-card" Elevation="0">
                 <MudIcon Icon="@Icons.Material.Filled.EventAvailable" Color="Color.Secondary" />
-                <MudText Typo="Typo.subtitle2">Reservas</MudText>
-                <MudText Typo="Typo.h6">Preparado para proximos modulos</MudText>
+                <MudText Typo="Typo.subtitle2">@L["Bookings"]</MudText>
+                <MudText Typo="Typo.h6">@L["ReadyForNextModules"]</MudText>
             </MudPaper>
         </MudItem>
         <MudItem xs="12" md="4">
             <MudPaper Class="metric-card" Elevation="0">
                 <MudIcon Icon="@Icons.Material.Filled.NotificationsActive" Color="Color.Success" />
-                <MudText Typo="Typo.subtitle2">Actividad</MudText>
-                <MudText Typo="Typo.h6">Sin alertas pendientes</MudText>
+                <MudText Typo="Typo.subtitle2">@L["Activity"]</MudText>
+                <MudText Typo="Typo.h6">@L["NoPendingAlerts"]</MudText>
             </MudPaper>
         </MudItem>
     </MudGrid>
@@ -39,14 +40,14 @@
     <AuthorizeView Roles="@AppRoles.Tourist">
         <Authorized>
             <MudPaper Class="work-panel" Elevation="0">
-                <MudText Typo="Typo.h6">Inicio para turistas</MudText>
-                <MudText Color="Color.Secondary">Explora guias disponibles y completa tu perfil para futuras reservas.</MudText>
+                <MudText Typo="Typo.h6">@L["TouristStartTitle"]</MudText>
+                <MudText Color="Color.Secondary">@L["TouristStartDescription"]</MudText>
                 <MudStack Row="true" Spacing="2" Class="action-row">
                     <MudButton Href="/guides" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.TravelExplore">
-                        Buscar guias
+                        @L["SearchGuides"]
                     </MudButton>
                     <MudButton Href="/tourist/profile" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ManageAccounts">
-                        Completar perfil
+                        @L["CompleteProfile"]
                     </MudButton>
                 </MudStack>
             </MudPaper>
@@ -56,17 +57,17 @@
     <AuthorizeView Roles="@AppRoles.Guide">
         <Authorized>
             <MudPaper Class="work-panel" Elevation="0">
-                <MudText Typo="Typo.h6">Inicio para guias</MudText>
-                <MudText Color="Color.Secondary">Mantén tu perfil publicado y listo para recibir solicitudes.</MudText>
+                <MudText Typo="Typo.h6">@L["GuideStartTitle"]</MudText>
+                <MudText Color="Color.Secondary">@L["GuideStartDescription"]</MudText>
                 <MudStack Row="true" Spacing="2" Class="action-row">
                     <MudButton Href="/guide/trust" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.VerifiedUser">
-                        Validar identidad
+                        @L["ValidateIdentity"]
                     </MudButton>
                     <MudButton Href="/guide/profile" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Badge">
-                        Mi perfil de guia
+                        @L["MyGuideProfile"]
                     </MudButton>
                     <MudButton Href="/guide/bookings" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.EventNote">
-                        Reservas recibidas
+                        @L["ReceivedBookings"]
                     </MudButton>
                 </MudStack>
             </MudPaper>

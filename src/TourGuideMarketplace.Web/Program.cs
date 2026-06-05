@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -18,6 +19,7 @@ var apiBaseUrl = builder.Configuration["Api:BaseUrl"]
     ?? throw new InvalidOperationException("API base URL was not configured.");
 
 builder.Services.AddMudServices();
+builder.Services.AddLocalization();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(apiBaseUrl) });
 builder.Services.AddScoped<TokenStorage>();
@@ -31,4 +33,9 @@ builder.Services.AddScoped<GuidesApiClient>();
 builder.Services.AddScoped<TouristsApiClient>();
 builder.Services.AddScoped<TrustApiClient>();
 
-await builder.Build().RunAsync();
+var host = builder.Build();
+
+CultureInfo.DefaultThreadCurrentCulture = CultureInfo.CurrentCulture;
+CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.CurrentUICulture;
+
+await host.RunAsync();

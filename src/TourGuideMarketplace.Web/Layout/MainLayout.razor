@@ -3,16 +3,17 @@
 @inject CurrentUserState CurrentUser
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResource> L
 
 <MudLayout Class="app-shell">
     <MudAppBar Class="app-topbar" Elevation="0">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
-        <MudText Typo="Typo.h6" Class="brand-title">Tour Guide Marketplace</MudText>
+        <MudText Typo="Typo.h6" Class="brand-title">@L["AppName"]</MudText>
         <MudSpacer />
-        <MudText Typo="Typo.body2" Class="user-name">@(_currentUser?.FullName ?? "Cuenta")</MudText>
+        <MudText Typo="Typo.body2" Class="user-name">@(_currentUser?.FullName ?? L["AccountFallback"])</MudText>
         <MudMenu Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit">
-            <MudMenuItem Href="/profile" Icon="@Icons.Material.Filled.Person">Perfil</MudMenuItem>
-            <MudMenuItem OnClick="LogoutAsync" Icon="@Icons.Material.Filled.Logout">Cerrar sesion</MudMenuItem>
+            <MudMenuItem Href="/profile" Icon="@Icons.Material.Filled.Person">@L["Profile"]</MudMenuItem>
+            <MudMenuItem OnClick="LogoutAsync" Icon="@Icons.Material.Filled.Logout">@L["Logout"]</MudMenuItem>
         </MudMenu>
     </MudAppBar>
 
@@ -20,26 +21,26 @@
         <div class="drawer-brand">
             <MudIcon Icon="@Icons.Material.Filled.Explore" Color="Color.Primary" />
             <div>
-                <MudText Typo="Typo.subtitle1">Marketplace</MudText>
-                <MudText Typo="Typo.caption" Color="Color.Secondary">Turistas y guias</MudText>
+                <MudText Typo="Typo.subtitle1">@L["Marketplace"]</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">@L["TouristsAndGuides"]</MudText>
             </div>
         </div>
 
         <MudNavMenu Class="nav-menu">
             <MudNavLink Href="/dashboard" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.SpaceDashboard">
-                Dashboard
+                @L["Dashboard"]
             </MudNavLink>
 
             <AuthorizeView Roles="@AppRoles.Tourist">
                 <Authorized>
                     <MudNavLink Href="/guides" Icon="@Icons.Material.Filled.TravelExplore">
-                        Buscar guias
+                        @L["SearchGuides"]
                     </MudNavLink>
                     <MudNavLink Href="/tourist/profile" Icon="@Icons.Material.Filled.ManageAccounts">
-                        Mi perfil turista
+                        @L["MyTouristProfile"]
                     </MudNavLink>
                     <MudNavLink Href="/bookings" Icon="@Icons.Material.Filled.EventAvailable">
-                        Mis reservas
+                        @L["MyBookings"]
                     </MudNavLink>
                 </Authorized>
             </AuthorizeView>
@@ -47,23 +48,23 @@
             <AuthorizeView Roles="@AppRoles.Guide">
                 <Authorized>
                     <MudNavLink Href="/guide/profile" Icon="@Icons.Material.Filled.Badge">
-                        Mi perfil de guia
+                        @L["MyGuideProfile"]
                     </MudNavLink>
                     <MudNavLink Href="/guide/trust" Icon="@Icons.Material.Filled.VerifiedUser">
-                        Validacion de identidad
+                        @L["IdentityValidation"]
                     </MudNavLink>
                     <MudNavLink Href="/guide/bookings" Icon="@Icons.Material.Filled.EventNote">
-                        Reservas recibidas
+                        @L["ReceivedBookings"]
                     </MudNavLink>
                     <MudNavLink Href="/guide/reviews" Icon="@Icons.Material.Filled.RateReview">
-                        Resenas
+                        @L["Reviews"]
                     </MudNavLink>
                 </Authorized>
             </AuthorizeView>
 
             <MudDivider Class="my-3" />
             <MudNavLink Href="/profile" Icon="@Icons.Material.Filled.Person">
-                Perfil
+                @L["Profile"]
             </MudNavLink>
         </MudNavMenu>
     </MudDrawer>
@@ -97,7 +98,7 @@
     {
         await AuthSession.LogoutAsync();
         CurrentUser.Clear();
-        Snackbar.Add("Sesion cerrada.", Severity.Info);
+        Snackbar.Add(L["LogoutSuccess"], Severity.Info);
         Navigation.NavigateTo("/login");
     }
 }

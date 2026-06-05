@@ -1,13 +1,14 @@
 @inject NavigationManager Navigation
+@inject IStringLocalizer<SharedResource> L
 
 @if (_isAuthenticated)
 {
     <MudPaper Class="state-panel" Elevation="0">
         <MudIcon Icon="@Icons.Material.Filled.Lock" Color="Color.Warning" Size="Size.Large" />
-        <MudText Typo="Typo.h5">No tienes acceso a esta seccion</MudText>
-        <MudText Color="Color.Secondary">Tu cuenta no tiene el rol requerido para abrir esta pagina.</MudText>
+        <MudText Typo="Typo.h5">@L["NotAuthorizedTitle"]</MudText>
+        <MudText Color="Color.Secondary">@L["NotAuthorizedDescription"]</MudText>
         <MudButton Href="/dashboard" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.SpaceDashboard">
-            Volver al dashboard
+            @L["BackToDashboard"]
         </MudButton>
     </MudPaper>
 }

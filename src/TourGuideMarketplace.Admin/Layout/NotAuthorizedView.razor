@@ -1,13 +1,14 @@
 @inject NavigationManager Navigation
+@inject IStringLocalizer<SharedResource> L
 
 @if (_isAuthenticated)
 {
     <MudPaper Class="state-panel" Elevation="0">
         <MudIcon Icon="@Icons.Material.Filled.Lock" Color="Color.Warning" Size="Size.Large" />
-        <MudText Typo="Typo.h5">No tienes acceso a la consola admin</MudText>
-        <MudText Color="Color.Secondary">Tu cuenta no tiene el rol requerido para administrar verificaciones.</MudText>
+        <MudText Typo="Typo.h5">@L["NotAuthorizedTitle"]</MudText>
+        <MudText Color="Color.Secondary">@L["NotAuthorizedDescription"]</MudText>
         <MudButton OnClick="GoToLogin" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Login">
-            Cambiar cuenta
+            @L["SwitchAccount"]
         </MudButton>
     </MudPaper>
 }
