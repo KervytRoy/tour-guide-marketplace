@@ -1,19 +1,22 @@
 @page "/"
 @layout PublicHomeLayout
 @attribute [AllowAnonymous]
+@using System.Globalization
 @inject GuidesApiClient GuidesApi
+@inject IStringLocalizer<SharedResource> L
+@inject IJSRuntime JSRuntime
 @inject NavigationManager Navigation
 
 <div class="market-home">
     <header class="market-home-header">
-        <a class="market-brand" href="/" aria-label="Tour Guide Marketplace inicio">
+        <a class="market-brand" href="/" aria-label="@L["HomeBrandAriaLabel"]">
             <span class="market-brand-mark">
                 <MudIcon Icon="@Icons.Material.Filled.Explore" />
             </span>
-            <span>Tour Guide Marketplace</span>
+            <span>@L["AppName"]</span>
         </a>
 
-        <nav class="market-home-tabs" aria-label="Secciones principales">
+        <nav class="market-home-tabs" aria-label="@L["HomeMainSectionsAriaLabel"]">
             @foreach (var tab in _tabs)
             {
                 <button type="button" class="@GetTabClass(tab.Section)" @onclick="@(() => SelectSection(tab.Section))">
@@ -25,27 +28,27 @@
 
         <div class="market-home-actions">
             <MudButton Href="/register?role=Guide" Variant="Variant.Text" Color="Color.Inherit" Class="market-guide-link">
-                @T("Conviertete en Guia", "Become a Guide")
+                @L["BecomeGuide"]
             </MudButton>
 
             <div class="market-language-picker">
                 <MudMenu Icon="@Icons.Material.Filled.Language" Color="Color.Inherit" Dense="true" Class="market-round-menu" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
-                    <MudMenuItem OnClick="@SetLanguageEs">Espanol</MudMenuItem>
-                    <MudMenuItem OnClick="@SetLanguageEn">English</MudMenuItem>
+                    <MudMenuItem OnClick="SetLanguageEsAsync">@L["LanguageSpanish"]</MudMenuItem>
+                    <MudMenuItem OnClick="SetLanguageEnAsync">@L["LanguageEnglish"]</MudMenuItem>
                 </MudMenu>
-                <span>@_language</span>
+                <span>@CurrentLanguageLabel</span>
             </div>
 
             <MudMenu Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Dense="true" Class="market-round-menu" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
-                <MudMenuItem Href="/help" Icon="@Icons.Material.Filled.HelpOutline">@T("Centro de ayuda", "Help center")</MudMenuItem>
-                <MudMenuItem Href="/register?role=Guide" Icon="@Icons.Material.Filled.Badge">@T("Conviertete en Guia", "Become a Guide")</MudMenuItem>
-                <MudMenuItem Href="/login" Icon="@Icons.Material.Filled.Login">@T("Iniciar sesion/registrarse", "Log in/sign up")</MudMenuItem>
+                <MudMenuItem Href="/help" Icon="@Icons.Material.Filled.HelpOutline">@L["HelpCenter"]</MudMenuItem>
+                <MudMenuItem Href="/register?role=Guide" Icon="@Icons.Material.Filled.Badge">@L["BecomeGuide"]</MudMenuItem>
+                <MudMenuItem Href="/login" Icon="@Icons.Material.Filled.Login">@L["LoginOrRegister"]</MudMenuItem>
             </MudMenu>
         </div>
     </header>
 
     <main>
-        <section class="market-search-band" aria-label="Busqueda principal">
+        <section class="market-search-band" aria-label="@L["HomeMainSearchAriaLabel"]">
             <div class="market-search-card">
                 <label class="market-search-field">
                     <span>@GetPrimaryLabel()</span>
@@ -91,43 +94,61 @@
         Places
     }
 
+    private const string CultureStorageKey = "tourGuideMarketplaceCulture";
+    private const string PlaceFilterAll = "HomePlaceFilterAll";
+    private const string PlaceFilterBeach = "HomePlaceFilterBeach";
+    private const string PlaceFilterCulture = "HomePlaceFilterCulture";
+    private const string PlaceFilterAdventure = "HomePlaceFilterAdventure";
+    private const string PlaceFilterFood = "HomePlaceFilterFood";
+    private const string PlaceFilterNature = "HomePlaceFilterNature";
+    private const string BudgetMedium = "HomeBudgetMedium";
+    private const string BudgetAccessible = "HomeBudgetAccessible";
+    private const string BudgetUpperMedium = "HomeBudgetUpperMedium";
+
     private HomeSection _activeSection = HomeSection.Guides;
-    private string _language = "ES";
     private string? _primarySearch;
     private string? _secondarySearch;
     private string? _tertiarySearch;
-    private string _activePlaceFilter = "Todos";
+    private string _activePlaceFilter = PlaceFilterAll;
     private bool _isBusy;
     private IReadOnlyCollection<GuideProfileResponse> _guides = [];
     private IReadOnlyCollection<string> _errors = [];
 
     private readonly IReadOnlyList<HomeTab> _tabs =
     [
-        new(HomeSection.Guides, "GUIAS", "GUIDES", Icons.Material.Filled.TravelExplore),
-        new(HomeSection.TravelFriends, "AMIGOS DE VIAJE", "TRAVEL FRIENDS", Icons.Material.Filled.Groups),
-        new(HomeSection.Places, "LUGARES", "PLACES", Icons.Material.Filled.LocationOn)
+        new(HomeSection.Guides, "HomeTabGuides", Icons.Material.Filled.TravelExplore),
+        new(HomeSection.TravelFriends, "HomeTabTravelFriends", Icons.Material.Filled.Groups),
+        new(HomeSection.Places, "HomeTabPlaces", Icons.Material.Filled.LocationOn)
     ];
 
     private readonly IReadOnlyList<TravelFriendPreview> _travelFriends =
     [
-        new("Ana y Diego", "Cusco, Peru", "Cultura y fotografia", "Culture and photography", "Junio 2026", "June 2026", ["Espanol", "Flexible"], ["Spanish", "Flexible"]),
-        new("Marco", "Cartagena, Colombia", "Gastronomia local", "Local food", "Julio 2026", "July 2026", ["Ingles", "Grupo pequeno"], ["English", "Small group"]),
-        new("Lucia", "Oaxaca, Mexico", "Mercados y caminatas", "Markets and walks", "Agosto 2026", "August 2026", ["Espanol", "Presupuesto medio"], ["Spanish", "Mid budget"])
+        new("Ana y Diego", "Cusco, Peru", "HomeTravelFriendAnaStyle", "HomeTravelFriendAnaWindow", ["HomeTagSpanish", "HomeTagFlexible"]),
+        new("Marco", "Cartagena, Colombia", "HomeTravelFriendMarcoStyle", "HomeTravelFriendMarcoWindow", ["HomeTagEnglish", "HomeTagSmallGroup"]),
+        new("Lucia", "Oaxaca, Mexico", "HomeTravelFriendLuciaStyle", "HomeTravelFriendLuciaWindow", ["HomeTagSpanish", "HomeTagMidBudget"])
     ];
 
-    private readonly IReadOnlyList<string> _placeFilters = ["Todos", "Playa", "Cultura", "Aventura", "Gastronomia", "Naturaleza"];
+    private readonly IReadOnlyList<string> _placeFilters =
+    [
+        PlaceFilterAll,
+        PlaceFilterBeach,
+        PlaceFilterCulture,
+        PlaceFilterAdventure,
+        PlaceFilterFood,
+        PlaceFilterNature
+    ];
 
     private readonly IReadOnlyList<DestinationRecommendation> _destinations =
     [
-        new("Cusco", "Peru", "Cultura", "Medio", "Mayo a septiembre", "May to September", "https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=900&q=80"),
-        new("Cartagena", "Colombia", "Playa", "Medio", "Diciembre a abril", "December to April", "https://images.unsplash.com/photo-1666977461267-c0e924696510?auto=format&fit=crop&w=900&q=80"),
-        new("Oaxaca", "Mexico", "Gastronomia", "Accesible", "Octubre a marzo", "October to March", "https://images.unsplash.com/photo-1598057049437-d905bf389631?auto=format&fit=crop&w=900&q=80"),
-        new("Bariloche", "Argentina", "Naturaleza", "Medio alto", "Noviembre a marzo", "November to March", "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Mountains_and_Lake_in_Bariloche_%28Unsplash%29.jpg/960px-Mountains_and_Lake_in_Bariloche_%28Unsplash%29.jpg"),
-        new("San Pedro de Atacama", "Chile", "Aventura", "Medio alto", "Marzo a mayo", "March to May", "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Abandoned_bus_in_San_Pedro_de_Atacama_%28Unsplash%29.jpg/960px-Abandoned_bus_in_San_Pedro_de_Atacama_%28Unsplash%29.jpg")
+        new("Cusco", "Peru", PlaceFilterCulture, BudgetMedium, "HomeSeasonCusco", "https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=900&q=80"),
+        new("Cartagena", "Colombia", PlaceFilterBeach, BudgetMedium, "HomeSeasonCartagena", "https://images.unsplash.com/photo-1666977461267-c0e924696510?auto=format&fit=crop&w=900&q=80"),
+        new("Oaxaca", "Mexico", PlaceFilterFood, BudgetAccessible, "HomeSeasonOaxaca", "https://images.unsplash.com/photo-1598057049437-d905bf389631?auto=format&fit=crop&w=900&q=80"),
+        new("Bariloche", "Argentina", PlaceFilterNature, BudgetUpperMedium, "HomeSeasonBariloche", "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Mountains_and_Lake_in_Bariloche_%28Unsplash%29.jpg/960px-Mountains_and_Lake_in_Bariloche_%28Unsplash%29.jpg"),
+        new("San Pedro de Atacama", "Chile", PlaceFilterAdventure, BudgetUpperMedium, "HomeSeasonAtacama", "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Abandoned_bus_in_San_Pedro_de_Atacama_%28Unsplash%29.jpg/960px-Abandoned_bus_in_San_Pedro_de_Atacama_%28Unsplash%29.jpg")
     ];
 
     private IEnumerable<DestinationRecommendation> FilteredDestinations =>
-        _activePlaceFilter == "Todos"
+        _activePlaceFilter == PlaceFilterAll
             ? _destinations
             : _destinations.Where(destination => destination.Category == _activePlaceFilter);
 
@@ -139,13 +160,13 @@
     private RenderFragment RenderGuidesSection() => @<div>
         <div class="market-section-heading">
             <div>
-                <MudText Typo="Typo.h4">@T("Guias verificados", "Verified guides")</MudText>
+                <MudText Typo="Typo.h4">@L["HomeVerifiedGuidesTitle"]</MudText>
                 <MudText Typo="Typo.body1" Color="Color.Secondary">
-                    @T("Encuentra expertos locales listos para ayudarte a descubrir tu proximo destino.", "Find local experts ready to help you discover your next destination.")
+                    @L["HomeVerifiedGuidesSubtitle"]
                 </MudText>
             </div>
             <MudButton Href="/register?role=Guide" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Badge">
-                @T("Conviertete en Guia", "Become a Guide")
+                @L["BecomeGuide"]
             </MudButton>
         </div>
 
@@ -159,10 +180,10 @@
         {
             <MudPaper Class="state-panel" Elevation="0">
                 <MudIcon Icon="@Icons.Material.Filled.CloudOff" Color="Color.Secondary" Size="Size.Large" />
-                <MudText Typo="Typo.h6">@T("No pudimos cargar los guias", "We could not load the guides")</MudText>
+                <MudText Typo="Typo.h6">@L["HomeGuidesLoadFailed"]</MudText>
                 <MudText Color="Color.Secondary">@GetGuideErrorText()</MudText>
                 <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="LoadVerifiedGuidesAsync" StartIcon="@Icons.Material.Filled.Refresh">
-                    @T("Reintentar", "Retry")
+                    @L["Retry"]
                 </MudButton>
             </MudPaper>
         }
@@ -170,8 +191,8 @@
         {
             <MudPaper Class="state-panel" Elevation="0">
                 <MudIcon Icon="@Icons.Material.Filled.TravelExplore" Color="Color.Secondary" Size="Size.Large" />
-                <MudText Typo="Typo.h6">@T("Aun no hay guias verificados", "There are no verified guides yet")</MudText>
-                <MudText Color="Color.Secondary">@T("Vuelve pronto para explorar nuevos perfiles aprobados.", "Come back soon to explore newly approved profiles.")</MudText>
+                <MudText Typo="Typo.h6">@L["HomeNoVerifiedGuidesTitle"]</MudText>
+                <MudText Color="Color.Secondary">@L["HomeNoVerifiedGuidesDescription"]</MudText>
             </MudPaper>
         }
         else
@@ -179,12 +200,12 @@
             <div class="home-guide-grid">
                 @foreach (var guide in _guides)
                 {
-                    <a class="home-guide-card-link" href="@GetGuideProfileUrl(guide.Id)" aria-label="@($"Ver perfil de {guide.GuideName}")">
+                    <a class="home-guide-card-link" href="@GetGuideProfileUrl(guide.Id)" aria-label="@L["ViewGuideProfileAria", guide.GuideName]">
                         <MudPaper Class="home-guide-card" Elevation="0">
                             <div class="home-guide-photo">
                                 @if (!string.IsNullOrWhiteSpace(guide.PhotoUrl))
                                 {
-                                    <img src="@guide.PhotoUrl" alt="@($"Foto de {guide.GuideName}")" class="home-guide-image" />
+                                    <img src="@guide.PhotoUrl" alt="@L["GuidePhotoAlt", guide.GuideName]" class="home-guide-image" />
                                 }
                                 else
                                 {
@@ -213,12 +234,12 @@
     private RenderFragment RenderTravelFriendsSection() => @<div>
         <div class="market-section-heading">
             <div>
-                <MudText Typo="Typo.h4">@T("Amigos de viaje", "Travel friends")</MudText>
+                <MudText Typo="Typo.h4">@L["HomeTravelFriendsTitle"]</MudText>
                 <MudText Typo="Typo.body1" Color="Color.Secondary">
-                    @T("Coincide con personas que quieren explorar rutas similares.", "Match with people who want to explore similar routes.")
+                    @L["HomeTravelFriendsSubtitle"]
                 </MudText>
             </div>
-            <MudChip T="string" Color="Color.Secondary" Variant="Variant.Filled">@T("Proxima instancia", "Future release")</MudChip>
+            <MudChip T="string" Color="Color.Secondary" Variant="Variant.Filled">@L["HomeFutureRelease"]</MudChip>
         </div>
 
         <div class="travel-friend-grid">
@@ -248,14 +269,14 @@
     private RenderFragment RenderPlacesSection() => @<div>
         <div class="market-section-heading">
             <div>
-                <MudText Typo="Typo.h4">@T("Lugares recomendados", "Recommended places")</MudText>
+                <MudText Typo="Typo.h4">@L["HomeRecommendedPlacesTitle"]</MudText>
                 <MudText Typo="Typo.body1" Color="Color.Secondary">
-                    @T("Explora destinos por estilo de viaje cuando aun no tienes un plan cerrado.", "Explore destinations by travel style when you do not have a fixed plan yet.")
+                    @L["HomeRecommendedPlacesSubtitle"]
                 </MudText>
             </div>
         </div>
 
-        <div class="place-filter-row" aria-label="Filtros de lugares">
+        <div class="place-filter-row" aria-label="@L["HomePlaceFiltersAriaLabel"]">
             @foreach (var filter in _placeFilters)
             {
                 <button type="button" class="@GetPlaceFilterClass(filter)" @onclick="@(() => _activePlaceFilter = filter)">
@@ -326,26 +347,29 @@
         }
     }
 
-    private void SetLanguageEs()
-    {
-        _language = "ES";
-    }
+    private string CurrentLanguageLabel =>
+        CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("en", StringComparison.OrdinalIgnoreCase)
+            ? "EN"
+            : "ES";
 
-    private void SetLanguageEn()
-    {
-        _language = "EN";
-    }
+    private Task SetLanguageEsAsync() => SetCultureAsync("es");
 
-    private bool IsEnglish => _language == "EN";
+    private Task SetLanguageEnAsync() => SetCultureAsync("en");
 
-    private string T(string spanish, string english)
+    private async Task SetCultureAsync(string cultureName)
     {
-        return IsEnglish ? english : spanish;
+        var culture = CultureInfo.GetCultureInfo(cultureName);
+        CultureInfo.CurrentCulture = culture;
+        CultureInfo.CurrentUICulture = culture;
+        CultureInfo.DefaultThreadCurrentCulture = culture;
+        CultureInfo.DefaultThreadCurrentUICulture = culture;
+
+        await JSRuntime.InvokeVoidAsync("localStorage.setItem", CultureStorageKey, culture.Name);
     }
 
     private string GetTabLabel(HomeTab tab)
     {
-        return T(tab.SpanishLabel, tab.EnglishLabel);
+        return L[tab.LabelKey].Value;
     }
 
     private string GetTabClass(HomeSection section)
@@ -362,9 +386,9 @@
     {
         return _activeSection switch
         {
-            HomeSection.Guides => T("Donde", "Where"),
-            HomeSection.TravelFriends => T("Destino", "Destination"),
-            _ => T("Lugar", "Place")
+            HomeSection.Guides => L["HomePrimaryGuidesLabel"].Value,
+            HomeSection.TravelFriends => L["HomePrimaryTravelFriendsLabel"].Value,
+            _ => L["HomePrimaryPlacesLabel"].Value
         };
     }
 
@@ -372,9 +396,9 @@
     {
         return _activeSection switch
         {
-            HomeSection.Guides => T("Explora destinos", "Explore destinations"),
-            HomeSection.TravelFriends => T("A donde quieres viajar?", "Where do you want to travel?"),
-            _ => T("Ciudad, pais o estilo", "City, country or style")
+            HomeSection.Guides => L["HomePrimaryGuidesPlaceholder"].Value,
+            HomeSection.TravelFriends => L["HomePrimaryTravelFriendsPlaceholder"].Value,
+            _ => L["HomePrimaryPlacesPlaceholder"].Value
         };
     }
 
@@ -382,9 +406,9 @@
     {
         return _activeSection switch
         {
-            HomeSection.Guides => T("Fechas", "Dates"),
-            HomeSection.TravelFriends => T("Fechas", "Dates"),
-            _ => T("Presupuesto", "Budget")
+            HomeSection.Guides => L["HomeSecondaryGuidesLabel"].Value,
+            HomeSection.TravelFriends => L["HomeSecondaryTravelFriendsLabel"].Value,
+            _ => L["HomeSecondaryPlacesLabel"].Value
         };
     }
 
@@ -392,9 +416,9 @@
     {
         return _activeSection switch
         {
-            HomeSection.Guides => T("Agrega fechas", "Add dates"),
-            HomeSection.TravelFriends => T("Ventana flexible", "Flexible window"),
-            _ => T("Bajo, medio o alto", "Low, medium or high")
+            HomeSection.Guides => L["HomeSecondaryGuidesPlaceholder"].Value,
+            HomeSection.TravelFriends => L["HomeSecondaryTravelFriendsPlaceholder"].Value,
+            _ => L["HomeSecondaryPlacesPlaceholder"].Value
         };
     }
 
@@ -402,9 +426,9 @@
     {
         return _activeSection switch
         {
-            HomeSection.Guides => T("Quien", "Who"),
-            HomeSection.TravelFriends => T("Afinidad", "Fit"),
-            _ => T("Filtro", "Filter")
+            HomeSection.Guides => L["HomeTertiaryGuidesLabel"].Value,
+            HomeSection.TravelFriends => L["HomeTertiaryTravelFriendsLabel"].Value,
+            _ => L["HomeTertiaryPlacesLabel"].Value
         };
     }
 
@@ -412,9 +436,9 @@
     {
         return _activeSection switch
         {
-            HomeSection.Guides => T("Cuantos?", "How many?"),
-            HomeSection.TravelFriends => T("Intereses o ritmo", "Interests or pace"),
-            _ => T("Playa, cultura, aventura", "Beach, culture, adventure")
+            HomeSection.Guides => L["HomeTertiaryGuidesPlaceholder"].Value,
+            HomeSection.TravelFriends => L["HomeTertiaryTravelFriendsPlaceholder"].Value,
+            _ => L["HomeTertiaryPlacesPlaceholder"].Value
         };
     }
 
@@ -422,24 +446,20 @@
     {
         return _activeSection switch
         {
-            HomeSection.Guides => T("Buscar guias", "Search guides"),
-            HomeSection.TravelFriends => T("Buscar amigos de viaje", "Search travel friends"),
-            _ => T("Buscar lugares", "Search places")
+            HomeSection.Guides => L["SearchGuides"].Value,
+            HomeSection.TravelFriends => L["HomeSearchTravelFriendsLabel"].Value,
+            _ => L["HomeSearchPlacesLabel"].Value
         };
     }
 
     private string GetTravelFriendStyle(TravelFriendPreview friend)
     {
-        return T(friend.StyleEs, friend.StyleEn);
+        return L[friend.StyleKey].Value;
     }
 
     private string GetGuideErrorText()
     {
-        var errorText = string.Join(" ", _errors);
-
-        return IsEnglish && errorText == "No se pudo conectar con la API."
-            ? "Could not connect to the API."
-            : errorText;
+        return string.Join(" ", _errors);
     }
 
     private static string GetGuideProfileUrl(Guid guideId)
@@ -449,55 +469,32 @@
 
     private string GetTravelFriendWindow(TravelFriendPreview friend)
     {
-        return T(friend.TravelWindowEs, friend.TravelWindowEn);
+        return L[friend.TravelWindowKey].Value;
     }
 
-    private IReadOnlyList<string> GetTravelFriendTags(TravelFriendPreview friend)
+    private IEnumerable<string> GetTravelFriendTags(TravelFriendPreview friend)
     {
-        return IsEnglish ? friend.TagsEn : friend.TagsEs;
+        return friend.TagKeys.Select(key => L[key].Value);
     }
 
     private string GetPlaceFilterLabel(string filter)
     {
-        return filter switch
-        {
-            "Todos" => T("Todos", "All"),
-            "Playa" => T("Playa", "Beach"),
-            "Cultura" => T("Cultura", "Culture"),
-            "Aventura" => T("Aventura", "Adventure"),
-            "Gastronomia" => T("Gastronomia", "Food"),
-            "Naturaleza" => T("Naturaleza", "Nature"),
-            _ => filter
-        };
+        return L[filter].Value;
     }
 
     private string GetCategoryLabel(string category)
     {
-        return category switch
-        {
-            "Playa" => T("Playa", "Beach"),
-            "Cultura" => T("Cultura", "Culture"),
-            "Aventura" => T("Aventura", "Adventure"),
-            "Gastronomia" => T("Gastronomia", "Food"),
-            "Naturaleza" => T("Naturaleza", "Nature"),
-            _ => category
-        };
+        return L[category].Value;
     }
 
     private string GetBudgetLabel(string budget)
     {
-        return budget switch
-        {
-            "Medio" => T("Medio", "Medium"),
-            "Accesible" => T("Accesible", "Accessible"),
-            "Medio alto" => T("Medio alto", "Upper medium"),
-            _ => budget
-        };
+        return L[budget].Value;
     }
 
     private string GetSeasonLabel(DestinationRecommendation destination)
     {
-        return T(destination.SeasonEs, destination.SeasonEn);
+        return L[destination.SeasonKey].Value;
     }
 
     private static string GetInitials(string value)
@@ -508,24 +505,20 @@
             : string.Concat(parts.Take(2).Select(part => part[0])).ToUpperInvariant();
     }
 
-    private sealed record HomeTab(HomeSection Section, string SpanishLabel, string EnglishLabel, string Icon);
+    private sealed record HomeTab(HomeSection Section, string LabelKey, string Icon);
 
     private sealed record TravelFriendPreview(
         string Name,
         string Destination,
-        string StyleEs,
-        string StyleEn,
-        string TravelWindowEs,
-        string TravelWindowEn,
-        IReadOnlyList<string> TagsEs,
-        IReadOnlyList<string> TagsEn);
+        string StyleKey,
+        string TravelWindowKey,
+        IReadOnlyList<string> TagKeys);
 
     private sealed record DestinationRecommendation(
         string Name,
         string Country,
         string Category,
         string Budget,
-        string SeasonEs,
-        string SeasonEn,
+        string SeasonKey,
         string ImageUrl);
 }

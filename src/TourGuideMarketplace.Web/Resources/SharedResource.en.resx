@@ -147,6 +147,85 @@
   <data name="ReviewsComingSoon" xml:space="preserve"><value>The ratings summary will live here when the module is available in the API.</value></data>
   <data name="RulesAccepted" xml:space="preserve"><value>Rules accepted.</value></data>
   <data name="RulesReview" xml:space="preserve"><value>Rules and review</value></data>
+  <data name="AboutGuide" xml:space="preserve"><value>About the guide</value></data>
+  <data name="AskAvailability" xml:space="preserve"><value>Ask about availability</value></data>
+  <data name="Availability" xml:space="preserve"><value>Availability</value></data>
+  <data name="BackToHome" xml:space="preserve"><value>Back home</value></data>
+  <data name="BecomeGuide" xml:space="preserve"><value>Become a Guide</value></data>
+  <data name="GuidePhotoAlt" xml:space="preserve"><value>Photo of {0}</value></data>
+  <data name="HelpCenter" xml:space="preserve"><value>Help center</value></data>
+  <data name="HomeBrandAriaLabel" xml:space="preserve"><value>Tour Guide Marketplace home</value></data>
+  <data name="HomeBudgetAccessible" xml:space="preserve"><value>Accessible</value></data>
+  <data name="HomeBudgetMedium" xml:space="preserve"><value>Medium</value></data>
+  <data name="HomeBudgetUpperMedium" xml:space="preserve"><value>Upper medium</value></data>
+  <data name="HomeFutureRelease" xml:space="preserve"><value>Future release</value></data>
+  <data name="HomeGuidesLoadFailed" xml:space="preserve"><value>We could not load the guides</value></data>
+  <data name="HomeMainSearchAriaLabel" xml:space="preserve"><value>Main search</value></data>
+  <data name="HomeMainSectionsAriaLabel" xml:space="preserve"><value>Main sections</value></data>
+  <data name="HomeNoVerifiedGuidesDescription" xml:space="preserve"><value>Come back soon to explore newly approved profiles.</value></data>
+  <data name="HomeNoVerifiedGuidesTitle" xml:space="preserve"><value>There are no verified guides yet</value></data>
+  <data name="HomePlaceFiltersAriaLabel" xml:space="preserve"><value>Place filters</value></data>
+  <data name="HomePlaceFilterAdventure" xml:space="preserve"><value>Adventure</value></data>
+  <data name="HomePlaceFilterAll" xml:space="preserve"><value>All</value></data>
+  <data name="HomePlaceFilterBeach" xml:space="preserve"><value>Beach</value></data>
+  <data name="HomePlaceFilterCulture" xml:space="preserve"><value>Culture</value></data>
+  <data name="HomePlaceFilterFood" xml:space="preserve"><value>Food</value></data>
+  <data name="HomePlaceFilterNature" xml:space="preserve"><value>Nature</value></data>
+  <data name="HomePrimaryGuidesLabel" xml:space="preserve"><value>Where</value></data>
+  <data name="HomePrimaryGuidesPlaceholder" xml:space="preserve"><value>Explore destinations</value></data>
+  <data name="HomePrimaryPlacesLabel" xml:space="preserve"><value>Place</value></data>
+  <data name="HomePrimaryPlacesPlaceholder" xml:space="preserve"><value>City, country or style</value></data>
+  <data name="HomePrimaryTravelFriendsLabel" xml:space="preserve"><value>Destination</value></data>
+  <data name="HomePrimaryTravelFriendsPlaceholder" xml:space="preserve"><value>Where do you want to travel?</value></data>
+  <data name="HomeRecommendedPlacesSubtitle" xml:space="preserve"><value>Explore destinations by travel style when you do not have a fixed plan yet.</value></data>
+  <data name="HomeRecommendedPlacesTitle" xml:space="preserve"><value>Recommended places</value></data>
+  <data name="HomeSearchPlacesLabel" xml:space="preserve"><value>Search places</value></data>
+  <data name="HomeSearchTravelFriendsLabel" xml:space="preserve"><value>Search travel friends</value></data>
+  <data name="HomeSeasonAtacama" xml:space="preserve"><value>March to May</value></data>
+  <data name="HomeSeasonBariloche" xml:space="preserve"><value>November to March</value></data>
+  <data name="HomeSeasonCartagena" xml:space="preserve"><value>December to April</value></data>
+  <data name="HomeSeasonCusco" xml:space="preserve"><value>May to September</value></data>
+  <data name="HomeSeasonOaxaca" xml:space="preserve"><value>October to March</value></data>
+  <data name="HomeSecondaryGuidesLabel" xml:space="preserve"><value>Dates</value></data>
+  <data name="HomeSecondaryGuidesPlaceholder" xml:space="preserve"><value>Add dates</value></data>
+  <data name="HomeSecondaryPlacesLabel" xml:space="preserve"><value>Budget</value></data>
+  <data name="HomeSecondaryPlacesPlaceholder" xml:space="preserve"><value>Low, medium or high</value></data>
+  <data name="HomeSecondaryTravelFriendsLabel" xml:space="preserve"><value>Dates</value></data>
+  <data name="HomeSecondaryTravelFriendsPlaceholder" xml:space="preserve"><value>Flexible window</value></data>
+  <data name="HomeTabGuides" xml:space="preserve"><value>GUIDES</value></data>
+  <data name="HomeTabPlaces" xml:space="preserve"><value>PLACES</value></data>
+  <data name="HomeTabTravelFriends" xml:space="preserve"><value>TRAVEL FRIENDS</value></data>
+  <data name="HomeTagEnglish" xml:space="preserve"><value>English</value></data>
+  <data name="HomeTagFlexible" xml:space="preserve"><value>Flexible</value></data>
+  <data name="HomeTagMidBudget" xml:space="preserve"><value>Mid budget</value></data>
+  <data name="HomeTagSmallGroup" xml:space="preserve"><value>Small group</value></data>
+  <data name="HomeTagSpanish" xml:space="preserve"><value>Spanish</value></data>
+  <data name="HomeTertiaryGuidesLabel" xml:space="preserve"><value>Who</value></data>
+  <data name="HomeTertiaryGuidesPlaceholder" xml:space="preserve"><value>How many?</value></data>
+  <data name="HomeTertiaryPlacesLabel" xml:space="preserve"><value>Filter</value></data>
+  <data name="HomeTertiaryPlacesPlaceholder" xml:space="preserve"><value>Beach, culture, adventure</value></data>
+  <data name="HomeTertiaryTravelFriendsLabel" xml:space="preserve"><value>Fit</value></data>
+  <data name="HomeTertiaryTravelFriendsPlaceholder" xml:space="preserve"><value>Interests or pace</value></data>
+  <data name="HomeTravelFriendAnaStyle" xml:space="preserve"><value>Culture and photography</value></data>
+  <data name="HomeTravelFriendAnaWindow" xml:space="preserve"><value>June 2026</value></data>
+  <data name="HomeTravelFriendLuciaStyle" xml:space="preserve"><value>Markets and walks</value></data>
+  <data name="HomeTravelFriendLuciaWindow" xml:space="preserve"><value>August 2026</value></data>
+  <data name="HomeTravelFriendMarcoStyle" xml:space="preserve"><value>Local food</value></data>
+  <data name="HomeTravelFriendMarcoWindow" xml:space="preserve"><value>July 2026</value></data>
+  <data name="HomeTravelFriendsSubtitle" xml:space="preserve"><value>Match with people who want to explore similar routes.</value></data>
+  <data name="HomeTravelFriendsTitle" xml:space="preserve"><value>Travel friends</value></data>
+  <data name="HomeVerifiedGuidesSubtitle" xml:space="preserve"><value>Find local experts ready to help you discover your next destination.</value></data>
+  <data name="HomeVerifiedGuidesTitle" xml:space="preserve"><value>Verified guides</value></data>
+  <data name="LanguageEnglish" xml:space="preserve"><value>English</value></data>
+  <data name="LanguageSpanish" xml:space="preserve"><value>Spanish</value></data>
+  <data name="LoginOrRegister" xml:space="preserve"><value>Log in/sign up</value></data>
+  <data name="LoginToBook" xml:space="preserve"><value>Log in to book</value></data>
+  <data name="PublicGuideLoadFailed" xml:space="preserve"><value>We could not load the profile</value></data>
+  <data name="PublicGuideRatingDisplay" xml:space="preserve"><value>{0} ({1} reviews)</value></data>
+  <data name="Rating" xml:space="preserve"><value>Rating</value></data>
+  <data name="VerifiedGuide" xml:space="preserve"><value>Verified guide</value></data>
+  <data name="ViewGuideProfileAria" xml:space="preserve"><value>View profile for {0}</value></data>
+  <data name="ViewMoreGuides" xml:space="preserve"><value>View more guides</value></data>
   <data name="Save" xml:space="preserve"><value>Save</value></data>
   <data name="SaveAcceptance" xml:space="preserve"><value>Save acceptance</value></data>
   <data name="Search" xml:space="preserve"><value>Search</value></data>

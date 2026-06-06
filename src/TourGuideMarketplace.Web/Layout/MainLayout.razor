@@ -13,20 +13,20 @@
         <MudSpacer />
         @if (_isAuthenticated)
         {
-            <MudText Typo="Typo.body2" Class="user-name">@(_currentUser?.FullName ?? _displayName ?? "Cuenta")</MudText>
+            <MudText Typo="Typo.body2" Class="user-name">@(_currentUser?.FullName ?? _displayName ?? L["AccountFallback"])</MudText>
             <MudMenu Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit">
-                <MudMenuItem Href="/profile" Icon="@Icons.Material.Filled.Person">Perfil</MudMenuItem>
-                <MudMenuItem OnClick="LogoutAsync" Icon="@Icons.Material.Filled.Logout">Cerrar sesion</MudMenuItem>
+                <MudMenuItem Href="/profile" Icon="@Icons.Material.Filled.Person">@L["Profile"]</MudMenuItem>
+                <MudMenuItem OnClick="LogoutAsync" Icon="@Icons.Material.Filled.Logout">@L["Logout"]</MudMenuItem>
             </MudMenu>
         }
         else
         {
             <div class="public-actions">
                 <MudButton Href="/login" Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Login">
-                    Ingresar
+                    @L["Login"]
                 </MudButton>
                 <MudButton Href="/register" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PersonAdd">
-                    Crear cuenta
+                    @L["CreateAccount"]
                 </MudButton>
             </div>
         }
@@ -43,7 +43,7 @@
 
         <MudNavMenu Class="nav-menu">
             <MudNavLink Href="/dashboard" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.SpaceDashboard">
-                Dashboard
+                @L["Dashboard"]
             </MudNavLink>
 
             <AuthorizeView Roles="@AppRoles.Tourist">
@@ -79,7 +79,7 @@
 
             <MudDivider Class="my-3" />
             <MudNavLink Href="/profile" Icon="@Icons.Material.Filled.Person">
-                Perfil
+                @L["Profile"]
             </MudNavLink>
         </MudNavMenu>
     </MudDrawer>
@@ -122,7 +122,7 @@
     {
         await AuthSession.LogoutAsync();
         CurrentUser.Clear();
-        Snackbar.Add("Sesion cerrada.", Severity.Info);
+        Snackbar.Add(L["LogoutSuccess"], Severity.Info);
         Navigation.NavigateTo("/login");
     }
 }

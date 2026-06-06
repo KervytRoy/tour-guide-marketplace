@@ -1,6 +1,7 @@
 @page "/guides/{GuideId:guid}"
 @attribute [AllowAnonymous]
 @inject GuidesApiClient GuidesApi
+@inject IStringLocalizer<SharedResource> L
 
 <MudStack Spacing="3">
     @if (_isBusy)
@@ -13,24 +14,24 @@
     {
         <MudPaper Class="state-panel" Elevation="0">
             <MudIcon Icon="@Icons.Material.Filled.CloudOff" Color="Color.Secondary" Size="Size.Large" />
-            <MudText Typo="Typo.h6">No pudimos cargar el perfil</MudText>
+            <MudText Typo="Typo.h6">@L["PublicGuideLoadFailed"]</MudText>
             <MudText Color="Color.Secondary">@string.Join(" ", _errors)</MudText>
             <MudButton Href="/" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack">
-                Volver al inicio
+                @L["BackToHome"]
             </MudButton>
         </MudPaper>
     }
     else if (_guide is not null)
     {
         <MudButton Href="/" Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack" Class="guide-profile-back">
-            Volver al inicio
+            @L["BackToHome"]
         </MudButton>
 
         <MudPaper Class="public-guide-profile" Elevation="0">
             <div class="public-guide-photo">
                 @if (!string.IsNullOrWhiteSpace(_guide.PhotoUrl))
                 {
-                    <img src="@_guide.PhotoUrl" alt="@($"Foto de {_guide.GuideName}")" />
+                    <img src="@_guide.PhotoUrl" alt="@L["GuidePhotoAlt", _guide.GuideName]" />
                 }
                 else
                 {
@@ -48,35 +49,35 @@
                     @if (_guide.IsVerified)
                     {
                         <MudChip T="string" Color="Color.Success" Variant="Variant.Filled" Icon="@Icons.Material.Filled.Verified">
-                            Guia verificado
+                            @L["VerifiedGuide"]
                         </MudChip>
                     }
                 </div>
 
                 <div class="public-guide-stats">
                     <div>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">Tarifa</MudText>
-                        <MudText Typo="Typo.subtitle1">@_guide.Currency @_guide.HourlyRate / hora</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">@L["HourlyRate"]</MudText>
+                        <MudText Typo="Typo.subtitle1">@L["HourlyRateDisplay", _guide.Currency, _guide.HourlyRate]</MudText>
                     </div>
                     <div>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">Rating</MudText>
-                        <MudText Typo="Typo.subtitle1">@_guide.AverageRating (@_guide.ReviewsCount resenas)</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">@L["Rating"]</MudText>
+                        <MudText Typo="Typo.subtitle1">@L["PublicGuideRatingDisplay", _guide.AverageRating, _guide.ReviewsCount]</MudText>
                     </div>
                     <div>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">Disponibilidad</MudText>
-                        <MudText Typo="Typo.subtitle1">@(_guide.AvailableNow ? "Disponible ahora" : "Consultar disponibilidad")</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">@L["Availability"]</MudText>
+                        <MudText Typo="Typo.subtitle1">@(_guide.AvailableNow ? L["AvailableNow"] : L["AskAvailability"])</MudText>
                     </div>
                 </div>
 
                 <MudDivider />
 
                 <div>
-                    <MudText Typo="Typo.h6">Sobre el guia</MudText>
+                    <MudText Typo="Typo.h6">@L["AboutGuide"]</MudText>
                     <MudText Typo="Typo.body1" Class="public-guide-bio">@_guide.Bio</MudText>
                 </div>
 
                 <div class="public-guide-list">
-                    <MudText Typo="Typo.subtitle2">Especialidades</MudText>
+                    <MudText Typo="Typo.subtitle2">@L["Specialties"]</MudText>
                     <div class="guide-meta">
                         @foreach (var specialty in _guide.Specialties)
                         {
@@ -86,7 +87,7 @@
                 </div>
 
                 <div class="public-guide-list">
-                    <MudText Typo="Typo.subtitle2">Idiomas</MudText>
+                    <MudText Typo="Typo.subtitle2">@L["Languages"]</MudText>
                     <div class="guide-meta">
                         @foreach (var language in _guide.Languages)
                         {
@@ -97,10 +98,10 @@
 
                 <div class="public-guide-actions">
                     <MudButton Href="/login" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.EventAvailable">
-                        Iniciar sesion para reservar
+                        @L["LoginToBook"]
                     </MudButton>
                     <MudButton Href="/guides" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.TravelExplore">
-                        Ver mas guias
+                        @L["ViewMoreGuides"]
                     </MudButton>
                 </div>
             </div>

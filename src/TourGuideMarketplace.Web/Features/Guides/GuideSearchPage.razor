@@ -61,7 +61,7 @@
             @foreach (var guide in _guides)
             {
                 <MudItem xs="12" md="6" xl="4">
-                    <a class="guide-card-link" href="@GetGuideProfileUrl(guide.Id)" aria-label="@($"Ver perfil de {guide.GuideName}")">
+                    <a class="guide-card-link" href="@GetGuideProfileUrl(guide.Id)" aria-label="@L["ViewGuideProfileAria", guide.GuideName]">
                         <MudPaper Class="guide-card" Elevation="0">
                             <div class="guide-card-header">
                                 <MudAvatar Color="Color.Primary">@GetInitials(guide.GuideName)</MudAvatar>
