@@ -2,6 +2,7 @@ using System.Globalization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.JSInterop;
 using MudBlazor.Services;
 using TourGuideMarketplace.Admin;
 using TourGuideMarketplace.Admin.Features.Verifications;
@@ -31,7 +32,32 @@ builder.Services.AddScoped<AdminVerificationsApiClient>();
 
 var host = builder.Build();
 
-CultureInfo.DefaultThreadCurrentCulture = CultureInfo.CurrentCulture;
-CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.CurrentUICulture;
+var culture = await LoadCultureAsync(host.Services);
+CultureInfo.CurrentCulture = culture;
+CultureInfo.CurrentUICulture = culture;
+CultureInfo.DefaultThreadCurrentCulture = culture;
+CultureInfo.DefaultThreadCurrentUICulture = culture;
 
 await host.RunAsync();
+
+static async Task<CultureInfo> LoadCultureAsync(IServiceProvider services)
+{
+    const string storageKey = "tourGuideMarketplaceCulture";
+
+    var jsRuntime = services.GetRequiredService<IJSRuntime>();
+    var cultureName = await jsRuntime.InvokeAsync<string?>("localStorage.getItem", storageKey);
+
+    if (string.IsNullOrWhiteSpace(cultureName))
+    {
+        return CultureInfo.CurrentCulture;
+    }
+
+    try
+    {
+        return CultureInfo.GetCultureInfo(cultureName);
+    }
+    catch (CultureNotFoundException)
+    {
+        return CultureInfo.CurrentCulture;
+    }
+}

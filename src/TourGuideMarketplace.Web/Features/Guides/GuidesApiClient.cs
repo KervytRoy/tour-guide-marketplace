@@ -20,12 +20,16 @@ public sealed class GuidesApiClient
     {
         return _apiClient.GetAsync<PagedResult<GuideProfileResponse>>(
             $"api/guides{BuildQueryString(request)}",
+            authorized: false,
             cancellationToken: cancellationToken);
     }
 
     public Task<ApiResult<GuideProfileResponse>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return _apiClient.GetAsync<GuideProfileResponse>($"api/guides/{id}", cancellationToken: cancellationToken);
+        return _apiClient.GetAsync<GuideProfileResponse>(
+            $"api/guides/{id}",
+            authorized: false,
+            cancellationToken: cancellationToken);
     }
 
     public Task<ApiResult<GuideProfileResponse>> GetMyProfileAsync(CancellationToken cancellationToken = default)

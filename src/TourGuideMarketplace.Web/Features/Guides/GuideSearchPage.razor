@@ -61,16 +61,17 @@
             @foreach (var guide in _guides)
             {
                 <MudItem xs="12" md="6" xl="4">
-                    <MudPaper Class="guide-card" Elevation="0">
-                        <div class="guide-card-header">
-                            <MudAvatar Color="Color.Primary">@GetInitials(guide.GuideName)</MudAvatar>
-                            <div>
-                                <MudText Typo="Typo.h6">@guide.GuideName</MudText>
-                                <MudText Typo="Typo.body2" Color="Color.Secondary">@guide.City, @guide.Country</MudText>
+                    <a class="guide-card-link" href="@GetGuideProfileUrl(guide.Id)" aria-label="@L["ViewGuideProfileAria", guide.GuideName]">
+                        <MudPaper Class="guide-card" Elevation="0">
+                            <div class="guide-card-header">
+                                <MudAvatar Color="Color.Primary">@GetInitials(guide.GuideName)</MudAvatar>
+                                <div>
+                                    <MudText Typo="Typo.h6">@guide.GuideName</MudText>
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">@guide.City, @guide.Country</MudText>
+                                </div>
                             </div>
-                        </div>
 
-                        <MudText Typo="Typo.body2" Class="guide-bio">@guide.Bio</MudText>
+                            <MudText Typo="Typo.body2" Class="guide-bio">@guide.Bio</MudText>
 
                         <div class="guide-meta">
                             <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined">@L["HourlyRateDisplay", guide.Currency, guide.HourlyRate]</MudChip>
@@ -81,10 +82,11 @@
                             }
                         </div>
 
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">
-                            @string.Join(", ", guide.Specialties.Take(3))
-                        </MudText>
-                    </MudPaper>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                @string.Join(", ", guide.Specialties.Take(3))
+                            </MudText>
+                        </MudPaper>
+                    </a>
                 </MudItem>
             }
         </MudGrid>
@@ -135,5 +137,10 @@
     {
         var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         return string.Concat(parts.Take(2).Select(part => part[0])).ToUpperInvariant();
+    }
+
+    private static string GetGuideProfileUrl(Guid guideId)
+    {
+        return $"/guides/{guideId}";
     }
 }

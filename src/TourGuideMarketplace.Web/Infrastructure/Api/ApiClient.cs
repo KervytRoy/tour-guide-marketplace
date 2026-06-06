@@ -231,7 +231,7 @@ public sealed class ApiClient
         try
         {
             var error = await response.Content.ReadFromJsonAsync<ApiErrorResponse>(JsonOptions, cancellationToken);
-            return error?.Errors.Count > 0 ? error.Errors : [fallback];
+            return error?.Errors is { Count: > 0 } ? error.Errors : [fallback];
         }
         catch (JsonException)
         {

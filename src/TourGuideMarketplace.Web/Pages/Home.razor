@@ -1,12 +1,524 @@
 @page "/"
-@layout AuthLayout
-@inject AuthenticationStateProvider AuthenticationStateProvider
+@layout PublicHomeLayout
+@attribute [AllowAnonymous]
+@using System.Globalization
+@inject GuidesApiClient GuidesApi
+@inject IStringLocalizer<SharedResource> L
+@inject IJSRuntime JSRuntime
 @inject NavigationManager Navigation
 
+<div class="market-home">
+    <header class="market-home-header">
+        <a class="market-brand" href="/" aria-label="@L["HomeBrandAriaLabel"]">
+            <span class="market-brand-mark">
+                <MudIcon Icon="@Icons.Material.Filled.Explore" />
+            </span>
+            <span>@L["AppName"]</span>
+        </a>
+
+        <nav class="market-home-tabs" aria-label="@L["HomeMainSectionsAriaLabel"]">
+            @foreach (var tab in _tabs)
+            {
+                <button type="button" class="@GetTabClass(tab.Section)" @onclick="@(() => SelectSection(tab.Section))">
+                    <MudIcon Icon="@tab.Icon" />
+                    <span>@GetTabLabel(tab)</span>
+                </button>
+            }
+        </nav>
+
+        <div class="market-home-actions">
+            <MudButton Href="/register?role=Guide" Variant="Variant.Text" Color="Color.Inherit" Class="market-guide-link">
+                @L["BecomeGuide"]
+            </MudButton>
+
+            <div class="market-language-picker">
+                <MudMenu Icon="@Icons.Material.Filled.Language" Color="Color.Inherit" Dense="true" Class="market-round-menu" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+                    <MudMenuItem OnClick="SetLanguageEsAsync">@L["LanguageSpanish"]</MudMenuItem>
+                    <MudMenuItem OnClick="SetLanguageEnAsync">@L["LanguageEnglish"]</MudMenuItem>
+                </MudMenu>
+                <span>@CurrentLanguageLabel</span>
+            </div>
+
+            <MudMenu Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Dense="true" Class="market-round-menu" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+                <MudMenuItem Href="/help" Icon="@Icons.Material.Filled.HelpOutline">@L["HelpCenter"]</MudMenuItem>
+                <MudMenuItem Href="/register?role=Guide" Icon="@Icons.Material.Filled.Badge">@L["BecomeGuide"]</MudMenuItem>
+                <MudMenuItem Href="/login" Icon="@Icons.Material.Filled.Login">@L["LoginOrRegister"]</MudMenuItem>
+            </MudMenu>
+        </div>
+    </header>
+
+    <main>
+        <section class="market-search-band" aria-label="@L["HomeMainSearchAriaLabel"]">
+            <div class="market-search-card">
+                <label class="market-search-field">
+                    <span>@GetPrimaryLabel()</span>
+                    <input @bind="_primarySearch" placeholder="@GetPrimaryPlaceholder()" />
+                </label>
+
+                <label class="market-search-field">
+                    <span>@GetSecondaryLabel()</span>
+                    <input @bind="_secondarySearch" placeholder="@GetSecondaryPlaceholder()" />
+                </label>
+
+                <label class="market-search-field">
+                    <span>@GetTertiaryLabel()</span>
+                    <input @bind="_tertiarySearch" placeholder="@GetTertiaryPlaceholder()" />
+                </label>
+
+                <MudIconButton Icon="@Icons.Material.Filled.Search" Color="Color.Inherit" Class="market-search-button" OnClick="RunSearch" aria-label="@GetSearchLabel()" />
+            </div>
+        </section>
+
+        <section class="market-home-content">
+            @switch (_activeSection)
+            {
+                case HomeSection.Guides:
+                    @RenderGuidesSection()
+                    break;
+                case HomeSection.TravelFriends:
+                    @RenderTravelFriendsSection()
+                    break;
+                case HomeSection.Places:
+                    @RenderPlacesSection()
+                    break;
+            }
+        </section>
+    </main>
+</div>
+
 @code {
-    protected override async Task OnInitializedAsync()
+    private enum HomeSection
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        Navigation.NavigateTo(authState.User.Identity?.IsAuthenticated == true ? "/dashboard" : "/login");
+        Guides,
+        TravelFriends,
+        Places
     }
+
+    private const string CultureStorageKey = "tourGuideMarketplaceCulture";
+    private const string PlaceFilterAll = "HomePlaceFilterAll";
+    private const string PlaceFilterBeach = "HomePlaceFilterBeach";
+    private const string PlaceFilterCulture = "HomePlaceFilterCulture";
+    private const string PlaceFilterAdventure = "HomePlaceFilterAdventure";
+    private const string PlaceFilterFood = "HomePlaceFilterFood";
+    private const string PlaceFilterNature = "HomePlaceFilterNature";
+    private const string BudgetMedium = "HomeBudgetMedium";
+    private const string BudgetAccessible = "HomeBudgetAccessible";
+    private const string BudgetUpperMedium = "HomeBudgetUpperMedium";
+
+    private HomeSection _activeSection = HomeSection.Guides;
+    private string? _primarySearch;
+    private string? _secondarySearch;
+    private string? _tertiarySearch;
+    private string _activePlaceFilter = PlaceFilterAll;
+    private bool _isBusy;
+    private IReadOnlyCollection<GuideProfileResponse> _guides = [];
+    private IReadOnlyCollection<string> _errors = [];
+
+    private readonly IReadOnlyList<HomeTab> _tabs =
+    [
+        new(HomeSection.Guides, "HomeTabGuides", Icons.Material.Filled.TravelExplore),
+        new(HomeSection.TravelFriends, "HomeTabTravelFriends", Icons.Material.Filled.Groups),
+        new(HomeSection.Places, "HomeTabPlaces", Icons.Material.Filled.LocationOn)
+    ];
+
+    private readonly IReadOnlyList<TravelFriendPreview> _travelFriends =
+    [
+        new("Ana y Diego", "Cusco, Peru", "HomeTravelFriendAnaStyle", "HomeTravelFriendAnaWindow", ["HomeTagSpanish", "HomeTagFlexible"]),
+        new("Marco", "Cartagena, Colombia", "HomeTravelFriendMarcoStyle", "HomeTravelFriendMarcoWindow", ["HomeTagEnglish", "HomeTagSmallGroup"]),
+        new("Lucia", "Oaxaca, Mexico", "HomeTravelFriendLuciaStyle", "HomeTravelFriendLuciaWindow", ["HomeTagSpanish", "HomeTagMidBudget"])
+    ];
+
+    private readonly IReadOnlyList<string> _placeFilters =
+    [
+        PlaceFilterAll,
+        PlaceFilterBeach,
+        PlaceFilterCulture,
+        PlaceFilterAdventure,
+        PlaceFilterFood,
+        PlaceFilterNature
+    ];
+
+    private readonly IReadOnlyList<DestinationRecommendation> _destinations =
+    [
+        new("Cusco", "Peru", PlaceFilterCulture, BudgetMedium, "HomeSeasonCusco", "https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=900&q=80"),
+        new("Cartagena", "Colombia", PlaceFilterBeach, BudgetMedium, "HomeSeasonCartagena", "https://images.unsplash.com/photo-1666977461267-c0e924696510?auto=format&fit=crop&w=900&q=80"),
+        new("Oaxaca", "Mexico", PlaceFilterFood, BudgetAccessible, "HomeSeasonOaxaca", "https://images.unsplash.com/photo-1598057049437-d905bf389631?auto=format&fit=crop&w=900&q=80"),
+        new("Bariloche", "Argentina", PlaceFilterNature, BudgetUpperMedium, "HomeSeasonBariloche", "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Mountains_and_Lake_in_Bariloche_%28Unsplash%29.jpg/960px-Mountains_and_Lake_in_Bariloche_%28Unsplash%29.jpg"),
+        new("San Pedro de Atacama", "Chile", PlaceFilterAdventure, BudgetUpperMedium, "HomeSeasonAtacama", "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Abandoned_bus_in_San_Pedro_de_Atacama_%28Unsplash%29.jpg/960px-Abandoned_bus_in_San_Pedro_de_Atacama_%28Unsplash%29.jpg")
+    ];
+
+    private IEnumerable<DestinationRecommendation> FilteredDestinations =>
+        _activePlaceFilter == PlaceFilterAll
+            ? _destinations
+            : _destinations.Where(destination => destination.Category == _activePlaceFilter);
+
+    protected override Task OnInitializedAsync()
+    {
+        return LoadVerifiedGuidesAsync();
+    }
+
+    private RenderFragment RenderGuidesSection() => @<div>
+        <div class="market-section-heading">
+            <div>
+                <MudText Typo="Typo.h4">@L["HomeVerifiedGuidesTitle"]</MudText>
+                <MudText Typo="Typo.body1" Color="Color.Secondary">
+                    @L["HomeVerifiedGuidesSubtitle"]
+                </MudText>
+            </div>
+            <MudButton Href="/register?role=Guide" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Badge">
+                @L["BecomeGuide"]
+            </MudButton>
+        </div>
+
+        @if (_isBusy)
+        {
+            <div class="app-loading">
+                <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+            </div>
+        }
+        else if (_errors.Count > 0)
+        {
+            <MudPaper Class="state-panel" Elevation="0">
+                <MudIcon Icon="@Icons.Material.Filled.CloudOff" Color="Color.Secondary" Size="Size.Large" />
+                <MudText Typo="Typo.h6">@L["HomeGuidesLoadFailed"]</MudText>
+                <MudText Color="Color.Secondary">@GetGuideErrorText()</MudText>
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="LoadVerifiedGuidesAsync" StartIcon="@Icons.Material.Filled.Refresh">
+                    @L["Retry"]
+                </MudButton>
+            </MudPaper>
+        }
+        else if (_guides.Count == 0)
+        {
+            <MudPaper Class="state-panel" Elevation="0">
+                <MudIcon Icon="@Icons.Material.Filled.TravelExplore" Color="Color.Secondary" Size="Size.Large" />
+                <MudText Typo="Typo.h6">@L["HomeNoVerifiedGuidesTitle"]</MudText>
+                <MudText Color="Color.Secondary">@L["HomeNoVerifiedGuidesDescription"]</MudText>
+            </MudPaper>
+        }
+        else
+        {
+            <div class="home-guide-grid">
+                @foreach (var guide in _guides)
+                {
+                    <a class="home-guide-card-link" href="@GetGuideProfileUrl(guide.Id)" aria-label="@L["ViewGuideProfileAria", guide.GuideName]">
+                        <MudPaper Class="home-guide-card" Elevation="0">
+                            <div class="home-guide-photo">
+                                @if (!string.IsNullOrWhiteSpace(guide.PhotoUrl))
+                                {
+                                    <img src="@guide.PhotoUrl" alt="@L["GuidePhotoAlt", guide.GuideName]" class="home-guide-image" />
+                                }
+                                else
+                                {
+                                    <MudAvatar Size="Size.Large" Color="Color.Primary">@GetInitials(guide.GuideName)</MudAvatar>
+                                }
+                            </div>
+
+                            <div class="home-guide-content">
+                                <MudText Typo="Typo.subtitle1" Class="home-guide-name">@guide.GuideName</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">@guide.City, @guide.Country</MudText>
+
+                                <div class="home-guide-tags">
+                                    @foreach (var specialty in guide.Specialties.Take(2))
+                                    {
+                                        <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary">@specialty</MudChip>
+                                    }
+                                </div>
+                            </div>
+                        </MudPaper>
+                    </a>
+                }
+            </div>
+        }
+    </div>;
+
+    private RenderFragment RenderTravelFriendsSection() => @<div>
+        <div class="market-section-heading">
+            <div>
+                <MudText Typo="Typo.h4">@L["HomeTravelFriendsTitle"]</MudText>
+                <MudText Typo="Typo.body1" Color="Color.Secondary">
+                    @L["HomeTravelFriendsSubtitle"]
+                </MudText>
+            </div>
+            <MudChip T="string" Color="Color.Secondary" Variant="Variant.Filled">@L["HomeFutureRelease"]</MudChip>
+        </div>
+
+        <div class="travel-friend-grid">
+            @foreach (var friend in _travelFriends)
+            {
+                <MudPaper Class="travel-friend-card" Elevation="0">
+                    <div class="travel-friend-top">
+                        <MudAvatar Color="Color.Secondary" Size="Size.Large">@GetInitials(friend.Name)</MudAvatar>
+                        <div>
+                            <MudText Typo="Typo.h6">@friend.Name</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">@friend.Destination</MudText>
+                        </div>
+                    </div>
+                    <MudText Typo="Typo.body2" Class="travel-friend-style">@GetTravelFriendStyle(friend)</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">@GetTravelFriendWindow(friend)</MudText>
+                    <div class="home-guide-tags">
+                        @foreach (var tag in GetTravelFriendTags(friend))
+                        {
+                            <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary">@tag</MudChip>
+                        }
+                    </div>
+                </MudPaper>
+            }
+        </div>
+    </div>;
+
+    private RenderFragment RenderPlacesSection() => @<div>
+        <div class="market-section-heading">
+            <div>
+                <MudText Typo="Typo.h4">@L["HomeRecommendedPlacesTitle"]</MudText>
+                <MudText Typo="Typo.body1" Color="Color.Secondary">
+                    @L["HomeRecommendedPlacesSubtitle"]
+                </MudText>
+            </div>
+        </div>
+
+        <div class="place-filter-row" aria-label="@L["HomePlaceFiltersAriaLabel"]">
+            @foreach (var filter in _placeFilters)
+            {
+                <button type="button" class="@GetPlaceFilterClass(filter)" @onclick="@(() => _activePlaceFilter = filter)">
+                    @GetPlaceFilterLabel(filter)
+                </button>
+            }
+        </div>
+
+        <div class="destination-grid">
+            @foreach (var destination in FilteredDestinations)
+            {
+                <MudPaper Class="destination-card" Elevation="0">
+                    <div class="destination-image-shell">
+                        <img src="@destination.ImageUrl" alt="@destination.Name" class="destination-image" onerror="this.parentElement.classList.add('is-missing')" />
+                    </div>
+                    <div class="destination-card-content">
+                        <MudText Typo="Typo.h6">@destination.Name</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">@destination.Country</MudText>
+                        <div class="destination-meta">
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined">@GetCategoryLabel(destination.Category)</MudChip>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Secondary" Variant="Variant.Outlined">@GetBudgetLabel(destination.Budget)</MudChip>
+                        </div>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">@GetSeasonLabel(destination)</MudText>
+                    </div>
+                </MudPaper>
+            }
+        </div>
+    </div>;
+
+    private async Task LoadVerifiedGuidesAsync()
+    {
+        _isBusy = true;
+        _errors = [];
+        var result = await GuidesApi.SearchAsync(new GuideSearchRequest(
+            City: null,
+            Country: null,
+            Specialty: null,
+            Language: null,
+            MaxHourlyRate: null,
+            MinRating: null,
+            AvailableNow: null,
+            PageNumber: 1,
+            PageSize: 24));
+        _isBusy = false;
+
+        if (!result.Succeeded)
+        {
+            _errors = result.Errors;
+            return;
+        }
+
+        _guides = result.Value?.Items ?? [];
+    }
+
+    private void SelectSection(HomeSection section)
+    {
+        _activeSection = section;
+        _primarySearch = null;
+        _secondarySearch = null;
+        _tertiarySearch = null;
+    }
+
+    private void RunSearch()
+    {
+        if (_activeSection == HomeSection.Guides)
+        {
+            Navigation.NavigateTo("/guides");
+        }
+    }
+
+    private string CurrentLanguageLabel =>
+        CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("en", StringComparison.OrdinalIgnoreCase)
+            ? "EN"
+            : "ES";
+
+    private Task SetLanguageEsAsync() => SetCultureAsync("es");
+
+    private Task SetLanguageEnAsync() => SetCultureAsync("en");
+
+    private async Task SetCultureAsync(string cultureName)
+    {
+        var culture = CultureInfo.GetCultureInfo(cultureName);
+        CultureInfo.CurrentCulture = culture;
+        CultureInfo.CurrentUICulture = culture;
+        CultureInfo.DefaultThreadCurrentCulture = culture;
+        CultureInfo.DefaultThreadCurrentUICulture = culture;
+
+        await JSRuntime.InvokeVoidAsync("localStorage.setItem", CultureStorageKey, culture.Name);
+    }
+
+    private string GetTabLabel(HomeTab tab)
+    {
+        return L[tab.LabelKey].Value;
+    }
+
+    private string GetTabClass(HomeSection section)
+    {
+        return section == _activeSection ? "market-home-tab is-active" : "market-home-tab";
+    }
+
+    private string GetPlaceFilterClass(string filter)
+    {
+        return filter == _activePlaceFilter ? "place-filter is-active" : "place-filter";
+    }
+
+    private string GetPrimaryLabel()
+    {
+        return _activeSection switch
+        {
+            HomeSection.Guides => L["HomePrimaryGuidesLabel"].Value,
+            HomeSection.TravelFriends => L["HomePrimaryTravelFriendsLabel"].Value,
+            _ => L["HomePrimaryPlacesLabel"].Value
+        };
+    }
+
+    private string GetPrimaryPlaceholder()
+    {
+        return _activeSection switch
+        {
+            HomeSection.Guides => L["HomePrimaryGuidesPlaceholder"].Value,
+            HomeSection.TravelFriends => L["HomePrimaryTravelFriendsPlaceholder"].Value,
+            _ => L["HomePrimaryPlacesPlaceholder"].Value
+        };
+    }
+
+    private string GetSecondaryLabel()
+    {
+        return _activeSection switch
+        {
+            HomeSection.Guides => L["HomeSecondaryGuidesLabel"].Value,
+            HomeSection.TravelFriends => L["HomeSecondaryTravelFriendsLabel"].Value,
+            _ => L["HomeSecondaryPlacesLabel"].Value
+        };
+    }
+
+    private string GetSecondaryPlaceholder()
+    {
+        return _activeSection switch
+        {
+            HomeSection.Guides => L["HomeSecondaryGuidesPlaceholder"].Value,
+            HomeSection.TravelFriends => L["HomeSecondaryTravelFriendsPlaceholder"].Value,
+            _ => L["HomeSecondaryPlacesPlaceholder"].Value
+        };
+    }
+
+    private string GetTertiaryLabel()
+    {
+        return _activeSection switch
+        {
+            HomeSection.Guides => L["HomeTertiaryGuidesLabel"].Value,
+            HomeSection.TravelFriends => L["HomeTertiaryTravelFriendsLabel"].Value,
+            _ => L["HomeTertiaryPlacesLabel"].Value
+        };
+    }
+
+    private string GetTertiaryPlaceholder()
+    {
+        return _activeSection switch
+        {
+            HomeSection.Guides => L["HomeTertiaryGuidesPlaceholder"].Value,
+            HomeSection.TravelFriends => L["HomeTertiaryTravelFriendsPlaceholder"].Value,
+            _ => L["HomeTertiaryPlacesPlaceholder"].Value
+        };
+    }
+
+    private string GetSearchLabel()
+    {
+        return _activeSection switch
+        {
+            HomeSection.Guides => L["SearchGuides"].Value,
+            HomeSection.TravelFriends => L["HomeSearchTravelFriendsLabel"].Value,
+            _ => L["HomeSearchPlacesLabel"].Value
+        };
+    }
+
+    private string GetTravelFriendStyle(TravelFriendPreview friend)
+    {
+        return L[friend.StyleKey].Value;
+    }
+
+    private string GetGuideErrorText()
+    {
+        return string.Join(" ", _errors);
+    }
+
+    private static string GetGuideProfileUrl(Guid guideId)
+    {
+        return $"/guides/{guideId}";
+    }
+
+    private string GetTravelFriendWindow(TravelFriendPreview friend)
+    {
+        return L[friend.TravelWindowKey].Value;
+    }
+
+    private IEnumerable<string> GetTravelFriendTags(TravelFriendPreview friend)
+    {
+        return friend.TagKeys.Select(key => L[key].Value);
+    }
+
+    private string GetPlaceFilterLabel(string filter)
+    {
+        return L[filter].Value;
+    }
+
+    private string GetCategoryLabel(string category)
+    {
+        return L[category].Value;
+    }
+
+    private string GetBudgetLabel(string budget)
+    {
+        return L[budget].Value;
+    }
+
+    private string GetSeasonLabel(DestinationRecommendation destination)
+    {
+        return L[destination.SeasonKey].Value;
+    }
+
+    private static string GetInitials(string value)
+    {
+        var parts = value.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return parts.Length == 0
+            ? "GM"
+            : string.Concat(parts.Take(2).Select(part => part[0])).ToUpperInvariant();
+    }
+
+    private sealed record HomeTab(HomeSection Section, string LabelKey, string Icon);
+
+    private sealed record TravelFriendPreview(
+        string Name,
+        string Destination,
+        string StyleKey,
+        string TravelWindowKey,
+        IReadOnlyList<string> TagKeys);
+
+    private sealed record DestinationRecommendation(
+        string Name,
+        string Country,
+        string Category,
+        string Budget,
+        string SeasonKey,
+        string ImageUrl);
 }
