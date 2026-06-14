@@ -22,7 +22,7 @@
   <data name="ApiConnectionError" xml:space="preserve"><value>No se pudo conectar con la API.</value></data>
   <data name="ApiEmptyResponse" xml:space="preserve"><value>La API devolvio una respuesta vacia.</value></data>
   <data name="ApiStatusFailure" xml:space="preserve"><value>La solicitud fallo con estado {0}.</value></data>
-  <data name="AppName" xml:space="preserve"><value>Trust Admin</value></data>
+  <data name="AppName" xml:space="preserve"><value>KUIVE Admin</value></data>
   <data name="ApplyFilters" xml:space="preserve"><value>Aplicar filtros</value></data>
   <data name="ApproveProfile" xml:space="preserve"><value>Aprobar perfil</value></data>
   <data name="Approved" xml:space="preserve"><value>Aprobado</value></data>

@@ -1,121 +1,177 @@
 @page "/guides/{GuideId:guid}"
+@layout PublicHomeLayout
 @attribute [AllowAnonymous]
+@using System.Globalization
 @inject GuidesApiClient GuidesApi
 @inject IStringLocalizer<SharedResource> L
+@inject NavigationManager Navigation
 
-<MudStack Spacing="3">
-    @if (_isBusy)
-    {
-        <div class="app-loading">
-            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
-        </div>
-    }
-    else if (_errors.Count > 0)
-    {
-        <MudPaper Class="state-panel" Elevation="0">
-            <MudIcon Icon="@Icons.Material.Filled.CloudOff" Color="Color.Secondary" Size="Size.Large" />
-            <MudText Typo="Typo.h6">@L["PublicGuideLoadFailed"]</MudText>
-            <MudText Color="Color.Secondary">@string.Join(" ", _errors)</MudText>
-            <MudButton Href="/" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack">
-                @L["BackToHome"]
-            </MudButton>
-        </MudPaper>
-    }
-    else if (_guide is not null)
-    {
-        <MudButton Href="/" Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack" Class="guide-profile-back">
-            @L["BackToHome"]
-        </MudButton>
+<div class="market-home">
+    <PublicMarketHeader />
 
-        <MudPaper Class="public-guide-profile" Elevation="0">
-            <div class="public-guide-photo">
-                @if (!string.IsNullOrWhiteSpace(_guide.PhotoUrl))
-                {
-                    <img src="@_guide.PhotoUrl" alt="@L["GuidePhotoAlt", _guide.GuideName]" />
-                }
-                else
-                {
-                    <MudAvatar Color="Color.Primary">@GetInitials(_guide.GuideName)</MudAvatar>
-                }
-            </div>
-
-            <div class="public-guide-main">
-                <div class="public-guide-heading">
-                    <div>
-                        <MudText Typo="Typo.h3">@_guide.GuideName</MudText>
-                        <MudText Typo="Typo.subtitle1" Color="Color.Secondary">@_guide.City, @_guide.Country</MudText>
-                    </div>
-
-                    @if (_guide.IsVerified)
-                    {
-                        <MudChip T="string" Color="Color.Success" Variant="Variant.Filled" Icon="@Icons.Material.Filled.Verified">
-                            @L["VerifiedGuide"]
-                        </MudChip>
-                    }
+    <main class="market-home-content public-guide-page">
+        <MudStack Spacing="3">
+            @if (_isBusy)
+            {
+                <div class="app-loading">
+                    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
                 </div>
+            }
+            else if (_errors.Count > 0)
+            {
+                <MudPaper Class="state-panel" Elevation="0">
+                    <MudIcon Icon="@Icons.Material.Filled.CloudOff" Color="Color.Secondary" Size="Size.Large" />
+                    <MudText Typo="Typo.h6">@L["PublicGuideLoadFailed"]</MudText>
+                    <MudText Color="Color.Secondary">@string.Join(" ", _errors)</MudText>
+                    <MudButton Href="/" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack">
+                        @L["BackToHome"]
+                    </MudButton>
+                </MudPaper>
+            }
+            else if (_guide is not null)
+            {
+                <MudButton Href="/" Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack" Class="guide-profile-back">
+                    @L["BackToHome"]
+                </MudButton>
 
-                <div class="public-guide-stats">
-                    <div>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">@L["HourlyRate"]</MudText>
-                        <MudText Typo="Typo.subtitle1">@L["HourlyRateDisplay", _guide.Currency, _guide.HourlyRate]</MudText>
-                    </div>
-                    <div>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">@L["Rating"]</MudText>
-                        <MudText Typo="Typo.subtitle1">@L["PublicGuideRatingDisplay", _guide.AverageRating, _guide.ReviewsCount]</MudText>
-                    </div>
-                    <div>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">@L["Availability"]</MudText>
-                        <MudText Typo="Typo.subtitle1">@(_guide.AvailableNow ? L["AvailableNow"] : L["AskAvailability"])</MudText>
-                    </div>
-                </div>
-
-                <MudDivider />
-
-                <div>
-                    <MudText Typo="Typo.h6">@L["AboutGuide"]</MudText>
-                    <MudText Typo="Typo.body1" Class="public-guide-bio">@_guide.Bio</MudText>
-                </div>
-
-                <div class="public-guide-list">
-                    <MudText Typo="Typo.subtitle2">@L["Specialties"]</MudText>
-                    <div class="guide-meta">
-                        @foreach (var specialty in _guide.Specialties)
+                <MudPaper Class="public-guide-profile" Elevation="0">
+                    <div class="public-guide-photo">
+                        @if (!string.IsNullOrWhiteSpace(_guide.PhotoUrl))
                         {
-                            <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined">@specialty</MudChip>
+                            <img src="@_guide.PhotoUrl" alt="@L["GuidePhotoAlt", _guide.GuideName]" />
+                        }
+                        else
+                        {
+                            <MudAvatar Color="Color.Primary">@GetInitials(_guide.GuideName)</MudAvatar>
                         }
                     </div>
-                </div>
 
-                <div class="public-guide-list">
-                    <MudText Typo="Typo.subtitle2">@L["Languages"]</MudText>
-                    <div class="guide-meta">
-                        @foreach (var language in _guide.Languages)
+                    <div class="public-guide-main">
+                        <div class="public-guide-heading">
+                            <div>
+                                <MudText Typo="Typo.h3">@_guide.GuideName</MudText>
+                                <MudText Typo="Typo.subtitle1" Color="Color.Secondary">@_guide.City, @_guide.Country</MudText>
+                            </div>
+
+                            @if (_guide.IsVerified)
+                            {
+                                <MudChip T="string" Color="Color.Success" Variant="Variant.Filled" Icon="@Icons.Material.Filled.Verified">
+                                    @L["VerifiedGuide"]
+                                </MudChip>
+                            }
+                        </div>
+
+                        <div class="public-guide-stats">
+                            <div>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">@L["HourlyRate"]</MudText>
+                                <MudText Typo="Typo.subtitle1">@L["HourlyRateDisplay", _guide.Currency, _guide.HourlyRate]</MudText>
+                            </div>
+                            <div>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">@L["Rating"]</MudText>
+                                <MudText Typo="Typo.subtitle1">@L["PublicGuideRatingDisplay", _guide.AverageRating, _guide.ReviewsCount]</MudText>
+                            </div>
+                            <div>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">@L["Availability"]</MudText>
+                                <MudText Typo="Typo.subtitle1">@(_guide.AvailableNow ? L["AvailableNow"] : L["AskAvailability"])</MudText>
+                            </div>
+                        </div>
+
+                        <MudDivider />
+
+                        <div>
+                            <MudText Typo="Typo.h6">@L["AboutGuide"]</MudText>
+                            <MudText Typo="Typo.body1" Class="public-guide-bio">@_guide.Bio</MudText>
+                        </div>
+
+                        <div class="public-guide-list">
+                            <MudText Typo="Typo.subtitle2">@L["Specialties"]</MudText>
+                            <div class="guide-meta">
+                                @foreach (var specialty in _guide.Specialties)
+                                {
+                                    <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined">@specialty</MudChip>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="public-guide-list">
+                            <MudText Typo="Typo.subtitle2">@L["Languages"]</MudText>
+                            <div class="guide-meta">
+                                @foreach (var language in _guide.Languages)
+                                {
+                                    <MudChip T="string" Color="Color.Secondary" Variant="Variant.Outlined">@language</MudChip>
+                                }
+                            </div>
+                        </div>
+
+                        @if (HasTripContext)
                         {
-                            <MudChip T="string" Color="Color.Secondary" Variant="Variant.Outlined">@language</MudChip>
+                            <MudPaper Class="guide-trip-context" Elevation="0">
+                                <MudText Typo="Typo.subtitle2">@L["GuideSearchTripContextTitle"]</MudText>
+                                <div class="guide-search-context">
+                                    @if (!string.IsNullOrWhiteSpace(Destination))
+                                    {
+                                        <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined" Icon="@Icons.Material.Filled.LocationOn">
+                                            @Destination
+                                        </MudChip>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(GetDateRangeText()))
+                                    {
+                                        <MudChip T="string" Color="Color.Secondary" Variant="Variant.Outlined" Icon="@Icons.Material.Filled.DateRange">
+                                            @GetDateRangeText()
+                                        </MudChip>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(GetTravelersText()))
+                                    {
+                                        <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Groups">
+                                            @GetTravelersText()
+                                        </MudChip>
+                                    }
+                                </div>
+                            </MudPaper>
                         }
-                    </div>
-                </div>
 
-                <div class="public-guide-actions">
-                    <MudButton Href="/login" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.EventAvailable">
-                        @L["LoginToBook"]
-                    </MudButton>
-                    <MudButton Href="/guides" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.TravelExplore">
-                        @L["ViewMoreGuides"]
-                    </MudButton>
-                </div>
-            </div>
-        </MudPaper>
-    }
-</MudStack>
+                        <div class="public-guide-actions">
+                            <MudButton Href="@GetLoginToBookUrl()" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.EventAvailable">
+                                @L["LoginToBook"]
+                            </MudButton>
+                        </div>
+                    </div>
+                </MudPaper>
+            }
+        </MudStack>
+    </main>
+</div>
 
 @code {
     [Parameter]
     public Guid GuideId { get; set; }
 
+    [Parameter, SupplyParameterFromQuery(Name = "destination")]
+    public string? Destination { get; set; }
+
+    [Parameter, SupplyParameterFromQuery(Name = "startDate")]
+    public string? StartDate { get; set; }
+
+    [Parameter, SupplyParameterFromQuery(Name = "endDate")]
+    public string? EndDate { get; set; }
+
+    [Parameter, SupplyParameterFromQuery(Name = "adults")]
+    public int? Adults { get; set; }
+
+    [Parameter, SupplyParameterFromQuery(Name = "children")]
+    public int? Children { get; set; }
+
+    [Parameter, SupplyParameterFromQuery(Name = "infants")]
+    public int? Infants { get; set; }
+
     private bool _isBusy;
     private GuideProfileResponse? _guide;
     private IReadOnlyCollection<string> _errors = [];
+
+    private bool HasTripContext =>
+        !string.IsNullOrWhiteSpace(Destination)
+        || !string.IsNullOrWhiteSpace(GetDateRangeText())
+        || !string.IsNullOrWhiteSpace(GetTravelersText());
 
     protected override Task OnParametersSetAsync()
     {
@@ -146,5 +202,68 @@
         return parts.Length == 0
             ? "GM"
             : string.Concat(parts.Take(2).Select(part => part[0])).ToUpperInvariant();
+    }
+
+    private string GetLoginToBookUrl()
+    {
+        var returnUrl = Uri.EscapeDataString(Navigation.ToBaseRelativePath(Navigation.Uri));
+        return $"/login?returnUrl={returnUrl}";
+    }
+
+    private string GetDateRangeText()
+    {
+        var startDate = FormatDate(StartDate);
+        var endDate = FormatDate(EndDate);
+
+        if (startDate is null && endDate is null)
+        {
+            return string.Empty;
+        }
+
+        if (startDate is null)
+        {
+            return endDate!;
+        }
+
+        if (endDate is null)
+        {
+            return startDate;
+        }
+
+        return L["GuideSearchDateRangeDisplay", startDate, endDate].Value;
+    }
+
+    private string GetTravelersText()
+    {
+        var travelers = Math.Max(Adults ?? 0, 0) + Math.Max(Children ?? 0, 0);
+        var infants = Math.Max(Infants ?? 0, 0);
+        var parts = new List<string>();
+
+        if (travelers == 1)
+        {
+            parts.Add(L["GuideSearchOneTraveler"].Value);
+        }
+        else if (travelers > 1)
+        {
+            parts.Add(L["GuideSearchManyTravelers", travelers].Value);
+        }
+
+        if (infants == 1)
+        {
+            parts.Add(L["GuideSearchOneInfant"].Value);
+        }
+        else if (infants > 1)
+        {
+            parts.Add(L["GuideSearchManyInfants", infants].Value);
+        }
+
+        return string.Join(" - ", parts);
+    }
+
+    private static string? FormatDate(string? value)
+    {
+        return DateTime.TryParse(value, out var date)
+            ? date.ToString("dd MMM yyyy", CultureInfo.CurrentUICulture)
+            : null;
     }
 }

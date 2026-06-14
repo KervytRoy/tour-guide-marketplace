@@ -50,7 +50,7 @@
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         if (authState.User.Identity?.IsAuthenticated == true)
         {
-            Navigation.NavigateTo("/dashboard");
+            Navigation.NavigateTo(GetReturnUrl());
         }
     }
 

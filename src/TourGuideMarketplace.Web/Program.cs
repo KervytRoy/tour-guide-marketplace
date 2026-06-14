@@ -6,6 +6,7 @@ using Microsoft.JSInterop;
 using MudBlazor.Services;
 using TourGuideMarketplace.Web;
 using TourGuideMarketplace.Web.Features.Guides;
+using TourGuideMarketplace.Web.Features.Locations;
 using TourGuideMarketplace.Web.Features.Tourists;
 using TourGuideMarketplace.Web.Features.Trust;
 using TourGuideMarketplace.Web.Infrastructure.Api;
@@ -31,6 +32,7 @@ builder.Services.AddScoped<ApiClient>();
 builder.Services.AddScoped<AuthSessionService>();
 builder.Services.AddScoped<CurrentUserState>();
 builder.Services.AddScoped<GuidesApiClient>();
+builder.Services.AddScoped<LocationsApiClient>();
 builder.Services.AddScoped<TouristsApiClient>();
 builder.Services.AddScoped<TrustApiClient>();
 

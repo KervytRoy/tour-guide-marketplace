@@ -1,72 +1,27 @@
 @page "/"
 @layout PublicHomeLayout
 @attribute [AllowAnonymous]
-@using System.Globalization
 @inject GuidesApiClient GuidesApi
 @inject IStringLocalizer<SharedResource> L
-@inject IJSRuntime JSRuntime
-@inject NavigationManager Navigation
 
 <div class="market-home">
-    <header class="market-home-header">
-        <a class="market-brand" href="/" aria-label="@L["HomeBrandAriaLabel"]">
-            <span class="market-brand-mark">
-                <MudIcon Icon="@Icons.Material.Filled.Explore" />
-            </span>
-            <span>@L["AppName"]</span>
-        </a>
-
-        <nav class="market-home-tabs" aria-label="@L["HomeMainSectionsAriaLabel"]">
-            @foreach (var tab in _tabs)
-            {
-                <button type="button" class="@GetTabClass(tab.Section)" @onclick="@(() => SelectSection(tab.Section))">
-                    <MudIcon Icon="@tab.Icon" />
-                    <span>@GetTabLabel(tab)</span>
-                </button>
-            }
-        </nav>
-
-        <div class="market-home-actions">
-            <MudButton Href="/register?role=Guide" Variant="Variant.Text" Color="Color.Inherit" Class="market-guide-link">
-                @L["BecomeGuide"]
-            </MudButton>
-
-            <div class="market-language-picker">
-                <MudMenu Icon="@Icons.Material.Filled.Language" Color="Color.Inherit" Dense="true" Class="market-round-menu" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
-                    <MudMenuItem OnClick="SetLanguageEsAsync">@L["LanguageSpanish"]</MudMenuItem>
-                    <MudMenuItem OnClick="SetLanguageEnAsync">@L["LanguageEnglish"]</MudMenuItem>
-                </MudMenu>
-                <span>@CurrentLanguageLabel</span>
-            </div>
-
-            <MudMenu Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Dense="true" Class="market-round-menu" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
-                <MudMenuItem Href="/help" Icon="@Icons.Material.Filled.HelpOutline">@L["HelpCenter"]</MudMenuItem>
-                <MudMenuItem Href="/register?role=Guide" Icon="@Icons.Material.Filled.Badge">@L["BecomeGuide"]</MudMenuItem>
-                <MudMenuItem Href="/login" Icon="@Icons.Material.Filled.Login">@L["LoginOrRegister"]</MudMenuItem>
-            </MudMenu>
-        </div>
-    </header>
+    <PublicMarketHeader>
+        <CenterContent>
+            <nav class="market-home-tabs" aria-label="@L["HomeMainSectionsAriaLabel"]">
+                @foreach (var tab in _tabs)
+                {
+                    <button type="button" class="@GetTabClass(tab.Section)" @onclick="@(() => SelectSection(tab.Section))">
+                        <MudIcon Icon="@tab.Icon" />
+                        <span>@GetTabLabel(tab)</span>
+                    </button>
+                }
+            </nav>
+        </CenterContent>
+    </PublicMarketHeader>
 
     <main>
         <section class="market-search-band" aria-label="@L["HomeMainSearchAriaLabel"]">
-            <div class="market-search-card">
-                <label class="market-search-field">
-                    <span>@GetPrimaryLabel()</span>
-                    <input @bind="_primarySearch" placeholder="@GetPrimaryPlaceholder()" />
-                </label>
-
-                <label class="market-search-field">
-                    <span>@GetSecondaryLabel()</span>
-                    <input @bind="_secondarySearch" placeholder="@GetSecondaryPlaceholder()" />
-                </label>
-
-                <label class="market-search-field">
-                    <span>@GetTertiaryLabel()</span>
-                    <input @bind="_tertiarySearch" placeholder="@GetTertiaryPlaceholder()" />
-                </label>
-
-                <MudIconButton Icon="@Icons.Material.Filled.Search" Color="Color.Inherit" Class="market-search-button" OnClick="RunSearch" aria-label="@GetSearchLabel()" />
-            </div>
+            <PublicGuideSearchBar />
         </section>
 
         <section class="market-home-content">
@@ -94,7 +49,6 @@
         Places
     }
 
-    private const string CultureStorageKey = "tourGuideMarketplaceCulture";
     private const string PlaceFilterAll = "HomePlaceFilterAll";
     private const string PlaceFilterBeach = "HomePlaceFilterBeach";
     private const string PlaceFilterCulture = "HomePlaceFilterCulture";
@@ -106,9 +60,6 @@
     private const string BudgetUpperMedium = "HomeBudgetUpperMedium";
 
     private HomeSection _activeSection = HomeSection.Guides;
-    private string? _primarySearch;
-    private string? _secondarySearch;
-    private string? _tertiarySearch;
     private string _activePlaceFilter = PlaceFilterAll;
     private bool _isBusy;
     private IReadOnlyCollection<GuideProfileResponse> _guides = [];
@@ -334,37 +285,6 @@
     private void SelectSection(HomeSection section)
     {
         _activeSection = section;
-        _primarySearch = null;
-        _secondarySearch = null;
-        _tertiarySearch = null;
-    }
-
-    private void RunSearch()
-    {
-        if (_activeSection == HomeSection.Guides)
-        {
-            Navigation.NavigateTo("/guides");
-        }
-    }
-
-    private string CurrentLanguageLabel =>
-        CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("en", StringComparison.OrdinalIgnoreCase)
-            ? "EN"
-            : "ES";
-
-    private Task SetLanguageEsAsync() => SetCultureAsync("es");
-
-    private Task SetLanguageEnAsync() => SetCultureAsync("en");
-
-    private async Task SetCultureAsync(string cultureName)
-    {
-        var culture = CultureInfo.GetCultureInfo(cultureName);
-        CultureInfo.CurrentCulture = culture;
-        CultureInfo.CurrentUICulture = culture;
-        CultureInfo.DefaultThreadCurrentCulture = culture;
-        CultureInfo.DefaultThreadCurrentUICulture = culture;
-
-        await JSRuntime.InvokeVoidAsync("localStorage.setItem", CultureStorageKey, culture.Name);
     }
 
     private string GetTabLabel(HomeTab tab)
@@ -380,76 +300,6 @@
     private string GetPlaceFilterClass(string filter)
     {
         return filter == _activePlaceFilter ? "place-filter is-active" : "place-filter";
-    }
-
-    private string GetPrimaryLabel()
-    {
-        return _activeSection switch
-        {
-            HomeSection.Guides => L["HomePrimaryGuidesLabel"].Value,
-            HomeSection.TravelFriends => L["HomePrimaryTravelFriendsLabel"].Value,
-            _ => L["HomePrimaryPlacesLabel"].Value
-        };
-    }
-
-    private string GetPrimaryPlaceholder()
-    {
-        return _activeSection switch
-        {
-            HomeSection.Guides => L["HomePrimaryGuidesPlaceholder"].Value,
-            HomeSection.TravelFriends => L["HomePrimaryTravelFriendsPlaceholder"].Value,
-            _ => L["HomePrimaryPlacesPlaceholder"].Value
-        };
-    }
-
-    private string GetSecondaryLabel()
-    {
-        return _activeSection switch
-        {
-            HomeSection.Guides => L["HomeSecondaryGuidesLabel"].Value,
-            HomeSection.TravelFriends => L["HomeSecondaryTravelFriendsLabel"].Value,
-            _ => L["HomeSecondaryPlacesLabel"].Value
-        };
-    }
-
-    private string GetSecondaryPlaceholder()
-    {
-        return _activeSection switch
-        {
-            HomeSection.Guides => L["HomeSecondaryGuidesPlaceholder"].Value,
-            HomeSection.TravelFriends => L["HomeSecondaryTravelFriendsPlaceholder"].Value,
-            _ => L["HomeSecondaryPlacesPlaceholder"].Value
-        };
-    }
-
-    private string GetTertiaryLabel()
-    {
-        return _activeSection switch
-        {
-            HomeSection.Guides => L["HomeTertiaryGuidesLabel"].Value,
-            HomeSection.TravelFriends => L["HomeTertiaryTravelFriendsLabel"].Value,
-            _ => L["HomeTertiaryPlacesLabel"].Value
-        };
-    }
-
-    private string GetTertiaryPlaceholder()
-    {
-        return _activeSection switch
-        {
-            HomeSection.Guides => L["HomeTertiaryGuidesPlaceholder"].Value,
-            HomeSection.TravelFriends => L["HomeTertiaryTravelFriendsPlaceholder"].Value,
-            _ => L["HomeTertiaryPlacesPlaceholder"].Value
-        };
-    }
-
-    private string GetSearchLabel()
-    {
-        return _activeSection switch
-        {
-            HomeSection.Guides => L["SearchGuides"].Value,
-            HomeSection.TravelFriends => L["HomeSearchTravelFriendsLabel"].Value,
-            _ => L["HomeSearchPlacesLabel"].Value
-        };
     }
 
     private string GetTravelFriendStyle(TravelFriendPreview friend)

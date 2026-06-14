@@ -1,0 +1,906 @@
+@using System.Globalization
+@using System.Text.Json
+@inject IStringLocalizer<SharedResource> L
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+@inject LocationsApiClient LocationsApi
+
+<div class="market-search-card guide-search-card">
+    @if (_isTravelersPanelOpen || _isDestinationSuggestionsOpen || _isDatePanelOpen)
+    {
+        <button type="button" class="guide-search-dismiss-layer" @onclick="ClosePanels" aria-label="@L["GuideSearchClosePanelLabel"]"></button>
+    }
+
+    <div class="market-search-field guide-search-destination">
+        <span>@L["GuideSearchWhereLabel"]</span>
+        <div class="guide-location-input-shell">
+            <input value="@_destination"
+                   @oninput="HandleDestinationInput"
+                   @onfocus="OpenDestinationSuggestions"
+                   @onkeydown="HandleDestinationKeyDown"
+                   placeholder="@L["GuideSearchWherePlaceholder"]"
+                   autocomplete="off"
+                   role="combobox"
+                   aria-controls="guide-location-suggestions"
+                   aria-expanded="@_isDestinationSuggestionsOpen" />
+
+            @if (!string.IsNullOrWhiteSpace(_destination))
+            {
+                <button type="button" class="guide-location-clear" @onclick="ClearDestination" aria-label="@L["GuideSearchClearLocationLabel"]">
+                    <MudIcon Icon="@Icons.Material.Filled.Close" />
+                </button>
+            }
+        </div>
+
+        @if (_isDestinationSuggestionsOpen)
+        {
+            <MudPaper Class="guide-location-popover" Elevation="8" id="guide-location-suggestions">
+                @if (_isLoadingLocationSuggestions)
+                {
+                    <div class="guide-location-empty">@L["GuideSearchLoadingLocations"]</div>
+                }
+                else if (_recentDestinations.Count > 0 || _locationSuggestions.Count > 0)
+                {
+                    @if (_recentDestinations.Count > 0)
+                    {
+                        <section class="guide-location-section">
+                            <div class="guide-location-section-title">@L["GuideSearchRecentLocationsTitle"]</div>
+                            @foreach (var recent in _recentDestinations)
+                            {
+                                <button type="button" class="guide-location-option is-recent" @onclick="@(() => SelectRecentDestination(recent))">
+                                    <span class="guide-location-icon">
+                                        <MudIcon Icon="@Icons.Material.Filled.History" />
+                                    </span>
+                                    <span class="guide-location-main">
+                                        <strong>@recent.Destination</strong>
+                                        <span>@GetRecentDestinationSubtitle(recent)</span>
+                                    </span>
+                                </button>
+                            }
+                        </section>
+                    }
+
+                    @if (_locationSuggestions.Count > 0)
+                    {
+                        <section class="guide-location-section">
+                            <div class="guide-location-section-title">@L["GuideSearchSuggestedLocationsTitle"]</div>
+                            @foreach (var suggestion in _locationSuggestions)
+                            {
+                                <button type="button" class="guide-location-option is-suggested" @onclick="@(() => SelectDestination(suggestion))">
+                                    <span class="guide-location-icon">
+                                        <MudIcon Icon="@Icons.Material.Filled.LocationOn" />
+                                    </span>
+                                    <span class="guide-location-main">
+                                        <strong>@suggestion.City</strong>
+                                        <span>@GetLocationSecondaryText(suggestion)</span>
+                                    </span>
+                                </button>
+                            }
+                        </section>
+                    }
+                }
+                else
+                {
+                    <div class="guide-location-empty">@L["GuideSearchNoLocationSuggestions"]</div>
+                }
+            </MudPaper>
+        }
+    </div>
+
+    <div class="guide-search-dates-shell">
+        <button type="button" class="@GetDateButtonClass()" @onclick="ToggleDatePanel" aria-expanded="@_isDatePanelOpen">
+            <span>@L["GuideSearchDatesLabel"]</span>
+            <strong>@GetDateSummary()</strong>
+        </button>
+
+        @if (_isDatePanelOpen)
+        {
+            <MudPaper Class="guide-date-popover" Elevation="8">
+                <div class="guide-date-mode-toggle" role="tablist" aria-label="@L["GuideSearchDatesLabel"]">
+                    <button type="button" class="@GetDateModeClass(false)" @onclick="@(() => SetFlexibleDateMode(false))">
+                        @L["GuideSearchDateModeExact"]
+                    </button>
+                    <button type="button" class="@GetDateModeClass(true)" @onclick="@(() => SetFlexibleDateMode(true))">
+                        @L["GuideSearchDateModeFlexible"]
+                    </button>
+                </div>
+
+                @if (_isFlexibleDateMode)
+                {
+                    <section class="guide-flexible-date-panel">
+                        <h3>@L["GuideSearchFlexibleWhenTitle"]</h3>
+
+                        <div class="guide-flexible-month-shell">
+                            <button type="button" class="guide-date-nav guide-flexible-month-nav" @onclick="PreviousFlexibleMonthPage" disabled="@IsPreviousFlexibleMonthPageDisabled()" aria-label="@L["GuideSearchPreviousMonthsLabel"]">
+                                <MudIcon Icon="@Icons.Material.Filled.ChevronLeft" />
+                            </button>
+
+                            <div class="guide-flexible-month-grid">
+                                @foreach (var month in GetFlexibleMonths())
+                                {
+                                    <button type="button" class="@GetFlexibleMonthClass(month)" @onclick="@(() => SelectFlexibleMonth(month))">
+                                        <span class="guide-flexible-month-icon">
+                                            <MudIcon Icon="@Icons.Material.Filled.CalendarToday" />
+                                        </span>
+                                        <strong>@FormatMonthName(month)</strong>
+                                        <span>@month.Year</span>
+                                    </button>
+                                }
+                            </div>
+
+                            <button type="button" class="guide-date-nav guide-flexible-month-nav" @onclick="NextFlexibleMonthPage" aria-label="@L["GuideSearchNextMonthsLabel"]">
+                                <MudIcon Icon="@Icons.Material.Filled.ChevronRight" />
+                            </button>
+                        </div>
+                    </section>
+                }
+                else
+                {
+                    <div class="guide-date-calendar-shell">
+                        <button type="button" class="guide-date-nav" @onclick="PreviousCalendarMonth" disabled="@IsPreviousMonthDisabled()" aria-label="@L["GuideSearchPreviousMonthLabel"]">
+                            <MudIcon Icon="@Icons.Material.Filled.ChevronLeft" />
+                        </button>
+
+                        <div class="guide-date-months">
+                            @RenderCalendarMonth(_calendarMonth)
+                            @RenderCalendarMonth(_calendarMonth.AddMonths(1))
+                        </div>
+
+                        <button type="button" class="guide-date-nav" @onclick="NextCalendarMonth" aria-label="@L["GuideSearchNextMonthLabel"]">
+                            <MudIcon Icon="@Icons.Material.Filled.ChevronRight" />
+                        </button>
+                    </div>
+
+                    <div class="guide-date-flex-options">
+                        @foreach (var days in FlexibleDateOptions)
+                        {
+                            <button type="button" class="@GetFlexibleDateOptionClass(days)" @onclick="@(() => SelectFlexibleDateOption(days))">
+                                @GetFlexibleDateOptionLabel(days)
+                            </button>
+                        }
+                    </div>
+                }
+            </MudPaper>
+        }
+    </div>
+
+    <div class="guide-search-who-shell">
+        <button type="button" class="market-search-field guide-search-who" @onclick="ToggleTravelersPanel" aria-expanded="@_isTravelersPanelOpen">
+            <span>@L["GuideSearchWhoLabel"]</span>
+            <strong>@GetTravelersSummary()</strong>
+        </button>
+
+        @if (_isTravelersPanelOpen)
+        {
+            <MudPaper Class="guide-travelers-popover" Elevation="8">
+                @RenderTravelerRow(L["GuideSearchAdultsLabel"].Value, L["GuideSearchAdultsHelp"].Value, _adults, () => AdjustAdults(-1), () => AdjustAdults(1), _adults == 0)
+                @RenderTravelerRow(L["GuideSearchChildrenLabel"].Value, L["GuideSearchChildrenHelp"].Value, _children, () => AdjustChildren(-1), () => AdjustChildren(1), _children == 0)
+                @RenderTravelerRow(L["GuideSearchInfantsLabel"].Value, L["GuideSearchInfantsHelp"].Value, _infants, () => AdjustInfants(-1), () => AdjustInfants(1), _infants == 0)
+            </MudPaper>
+        }
+    </div>
+
+    <button type="button" class="market-search-submit" @onclick="NavigateToSearch" aria-label="@L["SearchGuides"]">
+        <MudIcon Icon="@Icons.Material.Filled.Search" />
+        <span>@L["Search"]</span>
+    </button>
+</div>
+
+@code {
+    private const string RecentDestinationsStorageKey = "kuiveRecentDestinations";
+    private const int MaxTravelers = 20;
+    private const int MaxInfants = 10;
+    private static readonly int[] FlexibleDateOptions = [0, 1, 2, 3, 7, 14];
+
+    private bool _hasInitialized;
+    private bool _isDatePanelOpen;
+    private bool _isDestinationSuggestionsOpen;
+    private bool _isLoadingLocationSuggestions;
+    private bool _isFlexibleDateMode;
+    private bool _isTravelersPanelOpen;
+    private int _flexibleDays;
+    private DateTime _calendarMonth = FirstDayOfMonth(DateTime.Today);
+    private DateTime _flexibleMonthStart = FirstDayOfMonth(DateTime.Today);
+    private DateTime? _selectedFlexibleMonth;
+    private string? _destination;
+    private string? _startDate;
+    private string? _endDate;
+    private int _adults;
+    private int _children;
+    private int _infants;
+    private IReadOnlyList<LocationSuggestionResponse> _locationSuggestions = [];
+    private IReadOnlyList<RecentDestination> _recentDestinations = [];
+
+    [Parameter]
+    public string? Destination { get; set; }
+
+    [Parameter]
+    public string? StartDate { get; set; }
+
+    [Parameter]
+    public string? EndDate { get; set; }
+
+    [Parameter]
+    public int? Adults { get; set; }
+
+    [Parameter]
+    public int? Children { get; set; }
+
+    [Parameter]
+    public int? Infants { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (_hasInitialized)
+        {
+            return;
+        }
+
+        _destination = Destination;
+        _startDate = NormalizeDate(StartDate);
+        _endDate = NormalizeDate(EndDate);
+        _adults = NormalizeCount(Adults, MaxTravelers);
+        _children = NormalizeCount(Children, MaxTravelers);
+        _infants = NormalizeCount(Infants, MaxInfants);
+        _hasInitialized = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await LoadRecentDestinationsAsync();
+        StateHasChanged();
+    }
+
+    private RenderFragment RenderTravelerRow(
+        string title,
+        string description,
+        int value,
+        Action decrement,
+        Action increment,
+        bool decrementDisabled) => @<div class="guide-traveler-row">
+            <div>
+                <MudText Typo="Typo.subtitle1">@title</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">@description</MudText>
+            </div>
+            <div class="guide-traveler-stepper">
+                <button type="button" @onclick="decrement" disabled="@decrementDisabled" aria-label="@L["GuideSearchDecreaseLabel", title]">
+                    <MudIcon Icon="@Icons.Material.Filled.Remove" />
+                </button>
+                <span>@value</span>
+                <button type="button" @onclick="increment" aria-label="@L["GuideSearchIncreaseLabel", title]">
+                    <MudIcon Icon="@Icons.Material.Filled.Add" />
+                </button>
+            </div>
+        </div>;
+
+    private RenderFragment RenderCalendarMonth(DateTime month) => @<section class="guide-date-month" aria-label="@FormatMonthTitle(month)">
+            <h3>@FormatMonthTitle(month)</h3>
+
+            <div class="guide-date-weekdays" aria-hidden="true">
+                @foreach (var weekday in GetWeekdayLabels())
+                {
+                    <span>@weekday</span>
+                }
+            </div>
+
+            <div class="guide-date-grid">
+                @foreach (var day in GetCalendarDays(month))
+                {
+                    @if (day is null)
+                    {
+                        <span class="guide-date-day-spacer"></span>
+                    }
+                    else
+                    {
+                        var currentDay = day.Value;
+                        <button type="button"
+                                class="@GetCalendarDayClass(currentDay)"
+                                disabled="@IsCalendarDateDisabled(currentDay)"
+                                @onclick="@(() => SelectCalendarDate(currentDay))"
+                                aria-label="@L["GuideSearchSelectDateLabel", currentDay.ToString("D", CultureInfo.CurrentUICulture)]">
+                            <span>@currentDay.Day</span>
+                        </button>
+                    }
+                }
+            </div>
+        </section>;
+
+    private void ToggleTravelersPanel()
+    {
+        _isDatePanelOpen = false;
+        _isDestinationSuggestionsOpen = false;
+        _isTravelersPanelOpen = !_isTravelersPanelOpen;
+    }
+
+    private void ToggleDatePanel()
+    {
+        _isDestinationSuggestionsOpen = false;
+        _isTravelersPanelOpen = false;
+        _isDatePanelOpen = !_isDatePanelOpen;
+
+        if (_isDatePanelOpen)
+        {
+            SyncCalendarMonthToSelection();
+            SyncFlexibleMonthStartToSelection();
+        }
+    }
+
+    private void ClosePanels()
+    {
+        _isDatePanelOpen = false;
+        _isDestinationSuggestionsOpen = false;
+        _isTravelersPanelOpen = false;
+    }
+
+    private async Task OpenDestinationSuggestions()
+    {
+        _isDatePanelOpen = false;
+        _isDestinationSuggestionsOpen = true;
+        _isTravelersPanelOpen = false;
+        await LoadLocationSuggestionsAsync();
+    }
+
+    private void SelectDestination(LocationSuggestionResponse suggestion)
+    {
+        _destination = GetLocationDisplayName(suggestion);
+        _isDestinationSuggestionsOpen = false;
+    }
+
+    private void SelectRecentDestination(RecentDestination recent)
+    {
+        _destination = recent.Destination;
+        _selectedFlexibleMonth = null;
+        _startDate = NormalizeDate(recent.StartDate);
+        _endDate = NormalizeDate(recent.EndDate);
+        _adults = NormalizeCount(recent.Adults, MaxTravelers);
+        _children = NormalizeCount(recent.Children, MaxTravelers);
+        _infants = NormalizeCount(recent.Infants, MaxInfants);
+        _isDestinationSuggestionsOpen = false;
+    }
+
+    private async Task ClearDestination()
+    {
+        _destination = null;
+        _locationSuggestions = [];
+        _isDestinationSuggestionsOpen = true;
+        await LoadLocationSuggestionsAsync();
+    }
+
+    private void AdjustAdults(int delta)
+    {
+        _adults = Math.Clamp(_adults + delta, 0, MaxTravelers);
+    }
+
+    private void AdjustChildren(int delta)
+    {
+        _children = Math.Clamp(_children + delta, 0, MaxTravelers);
+    }
+
+    private void AdjustInfants(int delta)
+    {
+        _infants = Math.Clamp(_infants + delta, 0, MaxInfants);
+    }
+
+    private async Task HandleDestinationKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            await NavigateToSearch();
+        }
+    }
+
+    private async Task HandleDestinationInput(ChangeEventArgs args)
+    {
+        _destination = args.Value?.ToString();
+        await OpenDestinationSuggestions();
+    }
+
+    private async Task NavigateToSearch()
+    {
+        ClosePanels();
+        await SaveRecentDestinationAsync();
+
+        var parameters = new List<string>();
+        Add(parameters, "destination", _destination);
+        Add(parameters, "startDate", NormalizeDate(_startDate));
+        Add(parameters, "endDate", NormalizeDate(_endDate));
+        Add(parameters, "adults", _adults > 0 ? _adults.ToString() : null);
+        Add(parameters, "children", _children > 0 ? _children.ToString() : null);
+        Add(parameters, "infants", _infants > 0 ? _infants.ToString() : null);
+
+        Navigation.NavigateTo(parameters.Count == 0
+            ? "/guides/search"
+            : $"/guides/search?{string.Join("&", parameters)}");
+    }
+
+    private void SelectCalendarDate(DateTime date)
+    {
+        if (IsCalendarDateDisabled(date))
+        {
+            return;
+        }
+
+        var startDate = ParseDate(_startDate);
+        var endDate = ParseDate(_endDate);
+        var selectedDate = date.Date;
+
+        if (startDate is null || endDate is not null || selectedDate < startDate.Value.Date)
+        {
+            _selectedFlexibleMonth = null;
+            _startDate = FormatStorageDate(selectedDate);
+            _endDate = null;
+            return;
+        }
+
+        _selectedFlexibleMonth = null;
+        _endDate = FormatStorageDate(selectedDate);
+    }
+
+    private void PreviousCalendarMonth()
+    {
+        if (!IsPreviousMonthDisabled())
+        {
+            _calendarMonth = _calendarMonth.AddMonths(-1);
+        }
+    }
+
+    private void NextCalendarMonth()
+    {
+        _calendarMonth = _calendarMonth.AddMonths(1);
+    }
+
+    private void SetFlexibleDateMode(bool isFlexible)
+    {
+        _isFlexibleDateMode = isFlexible;
+
+        if (isFlexible)
+        {
+            SyncFlexibleMonthStartToSelection();
+        }
+        else
+        {
+            SyncCalendarMonthToSelection();
+        }
+    }
+
+    private void SelectFlexibleDateOption(int days)
+    {
+        _flexibleDays = days;
+        _selectedFlexibleMonth = null;
+    }
+
+    private void SelectFlexibleMonth(DateTime month)
+    {
+        var firstDay = FirstDayOfMonth(month);
+        var today = DateTime.Today.Date;
+        var lastDay = firstDay.AddMonths(1).AddDays(-1);
+
+        if (lastDay < today)
+        {
+            return;
+        }
+
+        var startDate = firstDay < today ? today : firstDay;
+
+        _selectedFlexibleMonth = firstDay;
+        _startDate = FormatStorageDate(startDate);
+        _endDate = FormatStorageDate(lastDay);
+    }
+
+    private void PreviousFlexibleMonthPage()
+    {
+        if (!IsPreviousFlexibleMonthPageDisabled())
+        {
+            _flexibleMonthStart = _flexibleMonthStart.AddMonths(-6);
+        }
+    }
+
+    private void NextFlexibleMonthPage()
+    {
+        _flexibleMonthStart = _flexibleMonthStart.AddMonths(6);
+    }
+
+    private string GetTravelersSummary()
+    {
+        var travelers = _adults + _children;
+        if (travelers == 0 && _infants == 0)
+        {
+            return L["GuideSearchTravelersPlaceholder"];
+        }
+
+        var parts = new List<string>();
+        if (travelers == 1)
+        {
+            parts.Add(L["GuideSearchOneTraveler"]);
+        }
+        else if (travelers > 1)
+        {
+            parts.Add(L["GuideSearchManyTravelers", travelers]);
+        }
+
+        if (_infants == 1)
+        {
+            parts.Add(L["GuideSearchOneInfant"]);
+        }
+        else if (_infants > 1)
+        {
+            parts.Add(L["GuideSearchManyInfants", _infants]);
+        }
+
+        return string.Join(" - ", parts);
+    }
+
+    private string GetDateSummary()
+    {
+        var startDate = ParseDate(_startDate);
+        var endDate = ParseDate(_endDate);
+
+        if (startDate is null && endDate is null)
+        {
+            return L["GuideSearchDatesPlaceholder"];
+        }
+
+        if (_selectedFlexibleMonth is not null)
+        {
+            return FormatMonthTitle(_selectedFlexibleMonth.Value);
+        }
+
+        if (startDate is null)
+        {
+            return FormatShortDate(endDate!.Value);
+        }
+
+        if (endDate is null)
+        {
+            return FormatShortDate(startDate.Value);
+        }
+
+        return L["GuideSearchDateRangeDisplay", FormatShortDate(startDate.Value), FormatShortDate(endDate.Value)];
+    }
+
+    private async Task LoadRecentDestinationsAsync()
+    {
+        try
+        {
+            var stored = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", RecentDestinationsStorageKey);
+            _recentDestinations = string.IsNullOrWhiteSpace(stored)
+                ? []
+                : JsonSerializer.Deserialize<IReadOnlyList<RecentDestination>>(stored) ?? [];
+        }
+        catch (JSException)
+        {
+            _recentDestinations = [];
+        }
+    }
+
+    private async Task SaveRecentDestinationAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_destination))
+        {
+            return;
+        }
+
+        var recent = new RecentDestination(
+            _destination.Trim(),
+            NormalizeDate(_startDate),
+            NormalizeDate(_endDate),
+            _adults,
+            _children,
+            _infants);
+
+        _recentDestinations = _recentDestinations
+            .Where(item => !string.Equals(item.Destination, recent.Destination, StringComparison.CurrentCultureIgnoreCase))
+            .Prepend(recent)
+            .Take(4)
+            .ToList();
+
+        try
+        {
+            var serialized = JsonSerializer.Serialize(_recentDestinations);
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", RecentDestinationsStorageKey, serialized);
+        }
+        catch (JSException)
+        {
+            // Local storage can be unavailable in private modes; search should still work.
+        }
+    }
+
+    private async Task LoadLocationSuggestionsAsync()
+    {
+        _isLoadingLocationSuggestions = true;
+
+        var result = await LocationsApi.SuggestAsync(_destination, limit: 8);
+
+        _isLoadingLocationSuggestions = false;
+
+        if (!result.Succeeded)
+        {
+            return;
+        }
+
+        _locationSuggestions = result.Value?.ToList() ?? [];
+    }
+
+    private static string GetLocationDisplayName(LocationSuggestionResponse suggestion)
+    {
+        return $"{suggestion.City}, {suggestion.Country}";
+    }
+
+    private static string GetLocationSecondaryText(LocationSuggestionResponse suggestion)
+    {
+        return string.IsNullOrWhiteSpace(suggestion.Region)
+            ? suggestion.Country
+            : $"{suggestion.Region}, {suggestion.Country}";
+    }
+
+    private string GetRecentDestinationSubtitle(RecentDestination recent)
+    {
+        var parts = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(recent.StartDate) || !string.IsNullOrWhiteSpace(recent.EndDate))
+        {
+            parts.Add(GetRecentDateRangeText(recent));
+        }
+
+        var travelers = Math.Max(recent.Adults, 0) + Math.Max(recent.Children, 0);
+        if (travelers == 1)
+        {
+            parts.Add(L["GuideSearchOneTraveler"].Value);
+        }
+        else if (travelers > 1)
+        {
+            parts.Add(L["GuideSearchManyTravelers", travelers].Value);
+        }
+
+        if (recent.Infants == 1)
+        {
+            parts.Add(L["GuideSearchOneInfant"].Value);
+        }
+        else if (recent.Infants > 1)
+        {
+            parts.Add(L["GuideSearchManyInfants", recent.Infants].Value);
+        }
+
+        return parts.Count == 0
+            ? L["GuideSearchRecentLocationFallback"].Value
+            : string.Join(" - ", parts);
+    }
+
+    private string GetRecentDateRangeText(RecentDestination recent)
+    {
+        if (string.IsNullOrWhiteSpace(recent.StartDate))
+        {
+            return recent.EndDate ?? string.Empty;
+        }
+
+        if (string.IsNullOrWhiteSpace(recent.EndDate))
+        {
+            return recent.StartDate;
+        }
+
+        return L["GuideSearchDateRangeDisplay", recent.StartDate, recent.EndDate].Value;
+    }
+
+    private string GetDateButtonClass()
+    {
+        return _isDatePanelOpen
+            ? "market-search-field guide-search-dates-button is-open"
+            : "market-search-field guide-search-dates-button";
+    }
+
+    private string GetDateModeClass(bool isFlexible)
+    {
+        return _isFlexibleDateMode == isFlexible
+            ? "guide-date-mode is-active"
+            : "guide-date-mode";
+    }
+
+    private string GetFlexibleDateOptionClass(int days)
+    {
+        return _flexibleDays == days
+            ? "guide-date-flex-option is-active"
+            : "guide-date-flex-option";
+    }
+
+    private string GetFlexibleDateOptionLabel(int days)
+    {
+        if (days == 0)
+        {
+            return L["GuideSearchFlexibleExact"].Value;
+        }
+
+        return days == 1
+            ? L["GuideSearchFlexibleOneDay"].Value
+            : L["GuideSearchFlexibleManyDays", days].Value;
+    }
+
+    private string GetCalendarDayClass(DateTime date)
+    {
+        var classes = new List<string> { "guide-date-day" };
+        var selectedStartDate = ParseDate(_startDate);
+        var selectedEndDate = ParseDate(_endDate);
+
+        if (date.Date == DateTime.Today.Date)
+        {
+            classes.Add("is-today");
+        }
+
+        if (selectedStartDate?.Date == date.Date)
+        {
+            classes.Add("is-selected");
+            classes.Add("is-range-start");
+        }
+
+        if (selectedEndDate?.Date == date.Date)
+        {
+            classes.Add("is-selected");
+            classes.Add("is-range-end");
+        }
+
+        if (selectedStartDate is not null
+            && selectedEndDate is not null
+            && date.Date > selectedStartDate.Value.Date
+            && date.Date < selectedEndDate.Value.Date)
+        {
+            classes.Add("is-in-range");
+        }
+
+        return string.Join(" ", classes);
+    }
+
+    private bool IsCalendarDateDisabled(DateTime date)
+    {
+        return date.Date < DateTime.Today.Date;
+    }
+
+    private bool IsPreviousMonthDisabled()
+    {
+        return _calendarMonth <= FirstDayOfMonth(DateTime.Today);
+    }
+
+    private bool IsPreviousFlexibleMonthPageDisabled()
+    {
+        return _flexibleMonthStart <= FirstDayOfMonth(DateTime.Today);
+    }
+
+    private IEnumerable<DateTime> GetFlexibleMonths()
+    {
+        for (var index = 0; index < 6; index++)
+        {
+            yield return _flexibleMonthStart.AddMonths(index);
+        }
+    }
+
+    private string GetFlexibleMonthClass(DateTime month)
+    {
+        return _selectedFlexibleMonth?.Date == FirstDayOfMonth(month).Date
+            ? "guide-flexible-month-card is-selected"
+            : "guide-flexible-month-card";
+    }
+
+    private void SyncCalendarMonthToSelection()
+    {
+        var selectedStartDate = ParseDate(_startDate);
+        var month = FirstDayOfMonth(selectedStartDate ?? DateTime.Today);
+        var currentMonth = FirstDayOfMonth(DateTime.Today);
+
+        _calendarMonth = month < currentMonth
+            ? currentMonth
+            : month;
+    }
+
+    private void SyncFlexibleMonthStartToSelection()
+    {
+        var month = FirstDayOfMonth(_selectedFlexibleMonth ?? ParseDate(_startDate) ?? DateTime.Today);
+        var currentMonth = FirstDayOfMonth(DateTime.Today);
+
+        _flexibleMonthStart = month < currentMonth
+            ? currentMonth
+            : month;
+    }
+
+    private static IReadOnlyList<string> GetWeekdayLabels()
+    {
+        return CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("es", StringComparison.OrdinalIgnoreCase)
+            ? ["L", "Ma", "Mi", "J", "V", "S", "D"]
+            : ["M", "Tu", "W", "Th", "F", "S", "S"];
+    }
+
+    private static IEnumerable<DateTime?> GetCalendarDays(DateTime month)
+    {
+        var firstDay = FirstDayOfMonth(month);
+        var leadingEmptyDays = ((int)firstDay.DayOfWeek + 6) % 7;
+
+        for (var index = 0; index < leadingEmptyDays; index++)
+        {
+            yield return null;
+        }
+
+        for (var day = 1; day <= DateTime.DaysInMonth(firstDay.Year, firstDay.Month); day++)
+        {
+            yield return new DateTime(firstDay.Year, firstDay.Month, day);
+        }
+    }
+
+    private static DateTime FirstDayOfMonth(DateTime date)
+    {
+        return new DateTime(date.Year, date.Month, 1);
+    }
+
+    private static string FormatMonthTitle(DateTime month)
+    {
+        var value = month.ToString("MMMM yyyy", CultureInfo.CurrentUICulture);
+        return string.IsNullOrWhiteSpace(value)
+            ? string.Empty
+            : char.ToUpper(value[0], CultureInfo.CurrentUICulture) + value[1..];
+    }
+
+    private static string FormatMonthName(DateTime month)
+    {
+        var value = month.ToString("MMMM", CultureInfo.CurrentUICulture);
+        return string.IsNullOrWhiteSpace(value)
+            ? string.Empty
+            : char.ToUpper(value[0], CultureInfo.CurrentUICulture) + value[1..];
+    }
+
+    private static string FormatShortDate(DateTime date)
+    {
+        return date.ToString("d MMM", CultureInfo.CurrentUICulture);
+    }
+
+    private static string FormatStorageDate(DateTime date)
+    {
+        return date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+    }
+
+    private static DateTime? ParseDate(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var invariantDate))
+        {
+            return invariantDate.Date;
+        }
+
+        return DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out var currentDate)
+            ? currentDate.Date
+            : null;
+    }
+
+    private static int NormalizeCount(int? value, int max)
+    {
+        return Math.Clamp(value ?? 0, 0, max);
+    }
+
+    private static string? NormalizeDate(string? value)
+    {
+        var date = ParseDate(value);
+        return date is null
+            ? null
+            : FormatStorageDate(date.Value);
+    }
+
+    private static void Add(List<string> parameters, string name, string? value)
+    {
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            parameters.Add($"{Uri.EscapeDataString(name)}={Uri.EscapeDataString(value.Trim())}");
+        }
+    }
+
+    private sealed record RecentDestination(
+        string Destination,
+        string? StartDate,
+        string? EndDate,
+        int Adults,
+        int Children,
+        int Infants);
+}

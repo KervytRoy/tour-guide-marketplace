@@ -1,0 +1,67 @@
+@using System.Globalization
+@inject IStringLocalizer<SharedResource> L
+@inject IJSRuntime JSRuntime
+
+<header class="market-home-header">
+    <a class="market-brand" href="/" aria-label="@L["HomeBrandAriaLabel"]">
+        <span class="market-brand-mark">
+            <MudIcon Icon="@Icons.Material.Filled.Explore" />
+        </span>
+        <span>@L["AppName"]</span>
+    </a>
+
+    <div class="@CenterClass">
+        @CenterContent
+    </div>
+
+    <div class="market-home-actions">
+        <MudButton Href="/register?role=Guide" Variant="Variant.Text" Color="Color.Inherit" Class="market-guide-link">
+            @L["BecomeGuide"]
+        </MudButton>
+
+        <div class="market-language-picker">
+            <MudMenu Icon="@Icons.Material.Filled.Language" Color="Color.Inherit" Dense="true" Class="market-round-menu" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+                <MudMenuItem OnClick="SetLanguageEsAsync">@L["LanguageSpanish"]</MudMenuItem>
+                <MudMenuItem OnClick="SetLanguageEnAsync">@L["LanguageEnglish"]</MudMenuItem>
+            </MudMenu>
+            <span>@CurrentLanguageLabel</span>
+        </div>
+
+        <MudMenu Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Dense="true" Class="market-round-menu" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+            <MudMenuItem Href="/help" Icon="@Icons.Material.Filled.HelpOutline">@L["HelpCenter"]</MudMenuItem>
+            <MudMenuItem Href="/register?role=Guide" Icon="@Icons.Material.Filled.Badge">@L["BecomeGuide"]</MudMenuItem>
+            <MudMenuItem Href="/login" Icon="@Icons.Material.Filled.Login">@L["LoginOrRegister"]</MudMenuItem>
+        </MudMenu>
+    </div>
+</header>
+
+@code {
+    private const string CultureStorageKey = "tourGuideMarketplaceCulture";
+
+    [Parameter]
+    public RenderFragment? CenterContent { get; set; }
+
+    private string CenterClass => CenterContent is null
+        ? "market-header-center is-empty"
+        : "market-header-center";
+
+    private string CurrentLanguageLabel =>
+        CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("en", StringComparison.OrdinalIgnoreCase)
+            ? "EN"
+            : "ES";
+
+    private Task SetLanguageEsAsync() => SetCultureAsync("es");
+
+    private Task SetLanguageEnAsync() => SetCultureAsync("en");
+
+    private async Task SetCultureAsync(string cultureName)
+    {
+        var culture = CultureInfo.GetCultureInfo(cultureName);
+        CultureInfo.CurrentCulture = culture;
+        CultureInfo.CurrentUICulture = culture;
+        CultureInfo.DefaultThreadCurrentCulture = culture;
+        CultureInfo.DefaultThreadCurrentUICulture = culture;
+
+        await JSRuntime.InvokeVoidAsync("localStorage.setItem", CultureStorageKey, culture.Name);
+    }
+}
