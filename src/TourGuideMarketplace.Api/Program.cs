@@ -22,7 +22,7 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "Tour Guide Marketplace API",
+        Title = "KUIVE API",
         Version = "v1"
     });
 
@@ -97,7 +97,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Tour Guide Marketplace API v1");
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "KUIVE API v1");
         options.RoutePrefix = "swagger";
     });
 }
@@ -108,6 +108,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapGet("/api/health", () => Results.Ok(new { status = "Healthy", service = "TourGuideMarketplace.Api" }));
+app.MapGet("/api/health", () => Results.Ok(new { status = "Healthy", service = "KUIVE.Api" }));
 
 app.Run();

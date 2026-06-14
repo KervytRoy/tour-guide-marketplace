@@ -21,7 +21,7 @@
   <data name="ApiConnectionError" xml:space="preserve"><value>Could not connect to the API.</value></data>
   <data name="ApiEmptyResponse" xml:space="preserve"><value>The API returned an empty response.</value></data>
   <data name="ApiStatusFailure" xml:space="preserve"><value>Request failed with status {0}.</value></data>
-  <data name="AppName" xml:space="preserve"><value>Tour Guide Marketplace</value></data>
+  <data name="AppName" xml:space="preserve"><value>KUIVE</value></data>
   <data name="Approved" xml:space="preserve"><value>Approved</value></data>
   <data name="AuthLayoutSubtitle" xml:space="preserve"><value>Manage local experiences, profiles, and bookings from one clear workspace.</value></data>
   <data name="Available" xml:space="preserve"><value>Available</value></data>
@@ -80,7 +80,7 @@
   <data name="LogoutSuccess" xml:space="preserve"><value>Session closed.</value></data>
   <data name="Longitude" xml:space="preserve"><value>Longitude</value></data>
   <data name="ManualReview" xml:space="preserve"><value>Manual review</value></data>
-  <data name="Marketplace" xml:space="preserve"><value>Marketplace</value></data>
+  <data name="Marketplace" xml:space="preserve"><value>KUIVE</value></data>
   <data name="MaxHourlyRate" xml:space="preserve"><value>Maximum rate</value></data>
   <data name="MinRating" xml:space="preserve"><value>Minimum rating</value></data>
   <data name="MockCodeLabel" xml:space="preserve"><value>Mock code:</value></data>
@@ -153,8 +153,56 @@
   <data name="BackToHome" xml:space="preserve"><value>Back home</value></data>
   <data name="BecomeGuide" xml:space="preserve"><value>Become a Guide</value></data>
   <data name="GuidePhotoAlt" xml:space="preserve"><value>Photo of {0}</value></data>
+  <data name="GuideSearchAdultsHelp" xml:space="preserve"><value>Age: 13 or older</value></data>
+  <data name="GuideSearchAdultsLabel" xml:space="preserve"><value>Adults</value></data>
+  <data name="GuideSearchChildrenHelp" xml:space="preserve"><value>Ages 2 - 12</value></data>
+  <data name="GuideSearchChildrenLabel" xml:space="preserve"><value>Children</value></data>
+  <data name="GuideSearchClearGuideLocationLabel" xml:space="preserve"><value>Clear guide location</value></data>
+  <data name="GuideSearchClearLocationLabel" xml:space="preserve"><value>Clear destination</value></data>
+  <data name="GuideSearchClosePanelLabel" xml:space="preserve"><value>Close search selector</value></data>
+  <data name="GuideSearchDateRangeDisplay" xml:space="preserve"><value>{0} - {1}</value></data>
+  <data name="GuideSearchDatesLabel" xml:space="preserve"><value>Dates</value></data>
+  <data name="GuideSearchDatesPlaceholder" xml:space="preserve"><value>Add dates</value></data>
+  <data name="GuideSearchDateModeExact" xml:space="preserve"><value>Dates</value></data>
+  <data name="GuideSearchDateModeFlexible" xml:space="preserve"><value>Flexible</value></data>
+  <data name="GuideSearchDecreaseLabel" xml:space="preserve"><value>Decrease {0}</value></data>
+  <data name="GuideSearchEndDateLabel" xml:space="preserve"><value>End date</value></data>
+  <data name="GuideSearchFlexibleExact" xml:space="preserve"><value>Exact dates</value></data>
+  <data name="GuideSearchFlexibleManyDays" xml:space="preserve"><value>+/- {0} days</value></data>
+  <data name="GuideSearchFlexibleWhenTitle" xml:space="preserve"><value>When do you want to go?</value></data>
+  <data name="GuideSearchFlexibleOneDay" xml:space="preserve"><value>+/- 1 day</value></data>
+  <data name="GuideSearchIncreaseLabel" xml:space="preserve"><value>Increase {0}</value></data>
+  <data name="GuideSearchInfantsHelp" xml:space="preserve"><value>Under 2 years old</value></data>
+  <data name="GuideSearchInfantsLabel" xml:space="preserve"><value>Infants</value></data>
+  <data name="GuideSearchLoadFailed" xml:space="preserve"><value>We could not load the results</value></data>
+  <data name="GuideSearchLoadingLocations" xml:space="preserve"><value>Loading destinations</value></data>
+  <data name="GuideSearchManyInfants" xml:space="preserve"><value>{0} infants</value></data>
+  <data name="GuideSearchManyTravelers" xml:space="preserve"><value>{0} travelers</value></data>
+  <data name="GuideSearchRecentLocationFallback" xml:space="preserve"><value>Recent search</value></data>
+  <data name="GuideSearchRecentLocationsTitle" xml:space="preserve"><value>Recent searches</value></data>
+  <data name="GuideSearchNoResultsDescription" xml:space="preserve"><value>Try another destination or go back home to explore available guides.</value></data>
+  <data name="GuideSearchNoResultsTitle" xml:space="preserve"><value>We do not have guides in {0} yet</value></data>
+  <data name="GuideSearchNoResultsTitleGeneric" xml:space="preserve"><value>We could not find guides for that search yet</value></data>
+  <data name="GuideSearchNoLocationSuggestions" xml:space="preserve"><value>We could not find available destinations for that text</value></data>
+  <data name="GuideSearchOneInfant" xml:space="preserve"><value>1 infant</value></data>
+  <data name="GuideSearchOneTraveler" xml:space="preserve"><value>1 traveler</value></data>
+  <data name="GuideSearchNextMonthLabel" xml:space="preserve"><value>Show next month</value></data>
+  <data name="GuideSearchNextMonthsLabel" xml:space="preserve"><value>Show next months</value></data>
+  <data name="GuideSearchPreviousMonthLabel" xml:space="preserve"><value>Show previous month</value></data>
+  <data name="GuideSearchPreviousMonthsLabel" xml:space="preserve"><value>Show previous months</value></data>
+  <data name="GuideSearchResultsForDestination" xml:space="preserve"><value>Guides in {0}</value></data>
+  <data name="GuideSearchSelectDateLabel" xml:space="preserve"><value>Select {0}</value></data>
+  <data name="GuideSearchResultsSubtitle" xml:space="preserve"><value>Explore public profiles and keep dates and travelers ready for your request.</value></data>
+  <data name="GuideSearchResultsTitle" xml:space="preserve"><value>Available guides</value></data>
+  <data name="GuideSearchStartDateLabel" xml:space="preserve"><value>Start date</value></data>
+  <data name="GuideSearchSuggestedLocationsTitle" xml:space="preserve"><value>Suggested destinations</value></data>
+  <data name="GuideSearchTravelersPlaceholder" xml:space="preserve"><value>How many?</value></data>
+  <data name="GuideSearchTripContextTitle" xml:space="preserve"><value>Your search</value></data>
+  <data name="GuideSearchWhereLabel" xml:space="preserve"><value>Where</value></data>
+  <data name="GuideSearchWherePlaceholder" xml:space="preserve"><value>City or country</value></data>
+  <data name="GuideSearchWhoLabel" xml:space="preserve"><value>Who</value></data>
   <data name="HelpCenter" xml:space="preserve"><value>Help center</value></data>
-  <data name="HomeBrandAriaLabel" xml:space="preserve"><value>Tour Guide Marketplace home</value></data>
+  <data name="HomeBrandAriaLabel" xml:space="preserve"><value>KUIVE home</value></data>
   <data name="HomeBudgetAccessible" xml:space="preserve"><value>Accessible</value></data>
   <data name="HomeBudgetMedium" xml:space="preserve"><value>Medium</value></data>
   <data name="HomeBudgetUpperMedium" xml:space="preserve"><value>Upper medium</value></data>
@@ -225,7 +273,6 @@
   <data name="Rating" xml:space="preserve"><value>Rating</value></data>
   <data name="VerifiedGuide" xml:space="preserve"><value>Verified guide</value></data>
   <data name="ViewGuideProfileAria" xml:space="preserve"><value>View profile for {0}</value></data>
-  <data name="ViewMoreGuides" xml:space="preserve"><value>View more guides</value></data>
   <data name="Save" xml:space="preserve"><value>Save</value></data>
   <data name="SaveAcceptance" xml:space="preserve"><value>Save acceptance</value></data>
   <data name="Search" xml:space="preserve"><value>Search</value></data>

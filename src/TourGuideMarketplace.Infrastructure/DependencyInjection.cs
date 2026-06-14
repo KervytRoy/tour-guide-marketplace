@@ -44,6 +44,7 @@ public static class DependencyInjection
         // Application use cases.
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IGuideService, GuideService>();
+        services.AddScoped<ILocationCatalogService, LocationCatalogService>();
         services.AddScoped<ITouristService, TouristService>();
         services.AddScoped<ITrustService, TrustService>();
         services.AddScoped<IAdminTrustService, AdminTrustService>();

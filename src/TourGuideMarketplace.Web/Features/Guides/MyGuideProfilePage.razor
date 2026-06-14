@@ -1,6 +1,7 @@
 @page "/guide/profile"
 @attribute [Authorize(Roles = AppRoles.Guide)]
 @inject GuidesApiClient GuidesApi
+@inject LocationsApiClient LocationsApi
 @inject ISnackbar Snackbar
 @inject IStringLocalizer<SharedResource> L
 
@@ -33,10 +34,62 @@
                 <MudTextField T="string" @bind-Value="_bio" Label="@L["Biography"]" Lines="5" />
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudTextField T="string" @bind-Value="_city" Label="@L["City"]" />
+                <div class="profile-location-picker">
+                    <span class="profile-location-label">@L["City"]</span>
+                    <div class="profile-location-input-shell">
+                        <input class="profile-location-input"
+                               value="@_locationQuery"
+                               @oninput="HandleGuideLocationInput"
+                               @onfocus="OpenGuideLocationSuggestions"
+                               placeholder="@L["GuideSearchWherePlaceholder"]"
+                               autocomplete="off"
+                               role="combobox"
+                               aria-controls="guide-profile-location-suggestions"
+                               aria-expanded="@_isGuideLocationSuggestionsOpen" />
+
+                        @if (!string.IsNullOrWhiteSpace(_locationQuery))
+                        {
+                            <button type="button" class="guide-location-clear" @onclick="ClearGuideLocation" aria-label="@L["GuideSearchClearGuideLocationLabel"]">
+                                <MudIcon Icon="@Icons.Material.Filled.Close" />
+                            </button>
+                        }
+                    </div>
+
+                    @if (_isGuideLocationSuggestionsOpen)
+                    {
+                        <MudPaper Class="guide-location-popover profile-location-popover" Elevation="8" id="guide-profile-location-suggestions">
+                            @if (_isLoadingGuideLocationSuggestions)
+                            {
+                                <div class="guide-location-empty">@L["GuideSearchLoadingLocations"]</div>
+                            }
+                            else if (_guideLocationSuggestions.Count > 0)
+                            {
+                                <section class="guide-location-section">
+                                    <div class="guide-location-section-title">@L["GuideSearchSuggestedLocationsTitle"]</div>
+                                    @foreach (var suggestion in _guideLocationSuggestions)
+                                    {
+                                        <button type="button" class="guide-location-option is-suggested" @onclick="@(() => SelectGuideLocation(suggestion))">
+                                            <span class="guide-location-icon">
+                                                <MudIcon Icon="@Icons.Material.Filled.LocationOn" />
+                                            </span>
+                                            <span class="guide-location-main">
+                                                <strong>@suggestion.City</strong>
+                                                <span>@GetLocationSecondaryText(suggestion)</span>
+                                            </span>
+                                        </button>
+                                    }
+                                </section>
+                            }
+                            else
+                            {
+                                <div class="guide-location-empty">@L["GuideSearchNoLocationSuggestions"]</div>
+                            }
+                        </MudPaper>
+                    }
+                </div>
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudTextField T="string" @bind-Value="_country" Label="@L["Country"]" />
+                <MudTextField T="string" @bind-Value="_country" Label="@L["Country"]" ReadOnly="true" />
             </MudItem>
             <MudItem xs="12" md="4">
                 <MudNumericField T="decimal" @bind-Value="_hourlyRate" Label="@L["HourlyRate"]" />
@@ -67,6 +120,7 @@
     private string _bio = string.Empty;
     private string _city = string.Empty;
     private string _country = string.Empty;
+    private string _locationQuery = string.Empty;
     private decimal _hourlyRate;
     private string _currency = "USD";
     private bool _availableNow;
@@ -75,7 +129,10 @@
     private string _specialtiesCsv = string.Empty;
     private string _languagesCsv = string.Empty;
     private bool _isBusy;
+    private bool _isGuideLocationSuggestionsOpen;
+    private bool _isLoadingGuideLocationSuggestions;
     private IReadOnlyCollection<string> _loadErrors = [];
+    private IReadOnlyList<LocationSuggestionResponse> _guideLocationSuggestions = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -90,6 +147,7 @@
         _bio = profile.Bio;
         _city = profile.City;
         _country = profile.Country;
+        _locationQuery = FormatLocation(profile.City, profile.Country);
         _hourlyRate = profile.HourlyRate;
         _currency = profile.Currency;
         _availableNow = profile.AvailableNow;
@@ -101,6 +159,8 @@
 
     private async Task SaveAsync()
     {
+        ApplyTypedLocation();
+
         _isBusy = true;
         var result = await GuidesApi.UpsertMyProfileAsync(new GuideProfileRequest(
             _bio,
@@ -123,6 +183,95 @@
 
         _loadErrors = [];
         Snackbar.Add(L["GuideProfileSaved"], Severity.Success);
+    }
+
+    private async Task OpenGuideLocationSuggestions()
+    {
+        _isGuideLocationSuggestionsOpen = true;
+        await LoadGuideLocationSuggestionsAsync();
+    }
+
+    private async Task HandleGuideLocationInput(ChangeEventArgs args)
+    {
+        _locationQuery = args.Value?.ToString() ?? string.Empty;
+        ApplyTypedLocation();
+        await OpenGuideLocationSuggestions();
+    }
+
+    private void SelectGuideLocation(LocationSuggestionResponse suggestion)
+    {
+        _city = suggestion.City;
+        _country = suggestion.Country;
+        _latitude = suggestion.Latitude;
+        _longitude = suggestion.Longitude;
+        _locationQuery = FormatLocation(suggestion.City, suggestion.Country);
+        _isGuideLocationSuggestionsOpen = false;
+    }
+
+    private async Task ClearGuideLocation()
+    {
+        _city = string.Empty;
+        _country = string.Empty;
+        _latitude = null;
+        _longitude = null;
+        _locationQuery = string.Empty;
+        _guideLocationSuggestions = [];
+        _isGuideLocationSuggestionsOpen = true;
+        await LoadGuideLocationSuggestionsAsync();
+    }
+
+    private async Task LoadGuideLocationSuggestionsAsync()
+    {
+        _isLoadingGuideLocationSuggestions = true;
+
+        var result = await LocationsApi.SuggestAsync(_locationQuery, limit: 8);
+
+        _isLoadingGuideLocationSuggestions = false;
+
+        if (!result.Succeeded)
+        {
+            _guideLocationSuggestions = [];
+            return;
+        }
+
+        _guideLocationSuggestions = result.Value?.ToList() ?? [];
+    }
+
+    private void ApplyTypedLocation()
+    {
+        if (string.IsNullOrWhiteSpace(_locationQuery))
+        {
+            _city = string.Empty;
+            _country = string.Empty;
+            return;
+        }
+
+        var parts = _locationQuery
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(part => !string.IsNullOrWhiteSpace(part))
+            .ToArray();
+
+        _city = parts.Length > 0 ? parts[0] : _locationQuery.Trim();
+        _country = parts.Length > 1 ? parts[^1] : string.Empty;
+    }
+
+    private static string FormatLocation(string city, string country)
+    {
+        if (string.IsNullOrWhiteSpace(city))
+        {
+            return string.Empty;
+        }
+
+        return string.IsNullOrWhiteSpace(country)
+            ? city.Trim()
+            : $"{city.Trim()}, {country.Trim()}";
+    }
+
+    private static string GetLocationSecondaryText(LocationSuggestionResponse suggestion)
+    {
+        return string.IsNullOrWhiteSpace(suggestion.Region)
+            ? suggestion.Country
+            : $"{suggestion.Region}, {suggestion.Country}";
     }
 
     private static IReadOnlyCollection<string> ParseCsv(string value)
