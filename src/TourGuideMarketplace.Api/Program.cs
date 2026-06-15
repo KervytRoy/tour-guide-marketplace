@@ -46,7 +46,12 @@ builder.Services.AddCors(options =>
     var allowedOrigins = builder.Configuration
         .GetSection("Cors:AllowedOrigins")
         .Get<string[]>()
-        ?? ["http://localhost:5010", "https://localhost:7278"];
+        ?? [
+            "http://localhost:5010",
+            "https://localhost:7278",
+            "http://localhost:5221",
+            "https://localhost:7241"
+        ];
 
     options.AddPolicy(WebCorsPolicy, policy =>
     {
