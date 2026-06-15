@@ -740,8 +740,47 @@ namespace TourGuideMarketplace.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<string>("DeclaredCity")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("DeclaredCountry")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<bool>("DeclaredDataReviewed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("DeclaredDocumentNumberLast4")
+                        .HasMaxLength(4)
+                        .HasColumnType("nvarchar(4)");
+
+                    b.Property<string>("DeclaredDocumentType")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("DeclaredLegalName")
+                        .HasMaxLength(160)
+                        .HasColumnType("nvarchar(160)");
+
                     b.Property<DateTimeOffset?>("EmailVerifiedAt")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("EvidenceNotes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTimeOffset?>("EvidenceReceivedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("EvidenceReviewStatus")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("EvidenceReviewedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("EvidenceReviewedByUserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ExternalVerificationId")
                         .HasMaxLength(200)
@@ -764,14 +803,69 @@ namespace TourGuideMarketplace.Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTimeOffset?>("ManualDeclarationAcceptedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ManualInterviewChannel")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<DateTimeOffset?>("ManualInterviewCompletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ManualInterviewNotes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("ManualInterviewReference")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<int>("ManualInterviewResult")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("ManualInterviewReviewedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("ManualInterviewScheduledAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("ManualInterviewStatus")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("ManualReviewCompletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("ManualReviewCompletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("ManualReviewSubmittedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("PhoneContactedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("PhoneContactedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PhoneContactNotes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
                     b.Property<DateTimeOffset?>("PhoneVerifiedAt")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("ProfileCoherent")
+                        .HasColumnType("bit");
 
                     b.Property<DateTimeOffset?>("ProfileSubmittedAt")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<DateTimeOffset?>("ProfileValidatedAt")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("ReferencesReviewed")
+                        .HasColumnType("bit");
 
                     b.Property<DateTimeOffset?>("SafetyRulesAcceptedAt")
                         .HasColumnType("datetimeoffset");

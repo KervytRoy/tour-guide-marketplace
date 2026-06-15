@@ -199,6 +199,7 @@ public sealed class TrustService : ITrustService
 
     public async Task<Result<TrustStatusResponse>> SubmitGuideProfileReviewAsync(
         Guid userId,
+        SubmitManualGuideReviewRequest request,
         CancellationToken cancellationToken)
     {
         var user = await _userAccountService.FindByIdAsync(userId, cancellationToken);
@@ -215,9 +216,9 @@ public sealed class TrustService : ITrustService
         var verification = await EnsureVerificationAsync(user, cancellationToken);
         SyncContactFlags(user, verification);
 
-        if (!verification.IdentityVerifiedAt.HasValue)
+        if (!ManualReviewMapper.IsEmailConfirmed(user, verification))
         {
-            return Result<TrustStatusResponse>.Failure("Identity must be verified before submitting a guide profile for review.");
+            return Result<TrustStatusResponse>.Failure("Email must be confirmed before submitting a guide profile for review.");
         }
 
         if (!verification.CodeOfConductAcceptedAt.HasValue || !verification.SafetyRulesAcceptedAt.HasValue)
@@ -237,10 +238,40 @@ public sealed class TrustService : ITrustService
             return Result<TrustStatusResponse>.Failure(profileErrors.ToArray());
         }
 
+        var manualReviewErrors = ValidateManualReviewRequest(request);
+        if (manualReviewErrors.Count > 0)
+        {
+            return Result<TrustStatusResponse>.Failure(manualReviewErrors.ToArray());
+        }
+
         var now = DateTimeOffset.UtcNow;
+        var documentLast4 = NormalizeDocumentLast4(request.DocumentNumberLast4);
+        var dataChanged = !string.Equals(verification.DeclaredLegalName, request.LegalName.Trim(), StringComparison.Ordinal)
+            || !string.Equals(verification.DeclaredCountry, request.Country.Trim(), StringComparison.Ordinal)
+            || !string.Equals(verification.DeclaredCity, request.City.Trim(), StringComparison.Ordinal)
+            || !string.Equals(verification.DeclaredDocumentType, request.DocumentType.Trim(), StringComparison.Ordinal)
+            || !string.Equals(verification.DeclaredDocumentNumberLast4, documentLast4, StringComparison.Ordinal);
+
+        verification.DeclaredLegalName = request.LegalName.Trim();
+        verification.DeclaredCountry = request.Country.Trim();
+        verification.DeclaredCity = request.City.Trim();
+        verification.DeclaredDocumentType = request.DocumentType.Trim();
+        verification.DeclaredDocumentNumberLast4 = documentLast4;
+        verification.ManualDeclarationAcceptedAt ??= now;
+        verification.ManualReviewSubmittedAt = now;
         verification.ProfileSubmittedAt = now;
         verification.Status = UserVerificationStatus.InReview;
-        verification.InReviewReason = "Guide profile is waiting for administrative validation.";
+        verification.InReviewReason = "Guide profile is waiting for manual validation.";
+
+        if (dataChanged)
+        {
+            verification.DeclaredDataReviewed = false;
+            verification.ProfileCoherent = false;
+            verification.EvidenceReviewStatus = ManualEvidenceReviewStatus.Pending;
+            verification.EvidenceReviewedAt = null;
+            verification.EvidenceReviewedByUserId = null;
+            verification.EvidenceNotes = null;
+        }
 
         await CreateReviewCaseIfMissingAsync(
             user.Id,
@@ -259,6 +290,11 @@ public sealed class TrustService : ITrustService
         ContactVerificationChannel channel,
         CancellationToken cancellationToken)
     {
+        if (channel == ContactVerificationChannel.Phone)
+        {
+            return Result<ContactVerificationResponse>.Failure("Phone validation is handled manually by WhatsApp.");
+        }
+
         var user = await _userAccountService.FindByIdAsync(userId, cancellationToken);
         if (user is null)
         {
@@ -321,6 +357,11 @@ public sealed class TrustService : ITrustService
         ConfirmContactVerificationRequest request,
         CancellationToken cancellationToken)
     {
+        if (channel == ContactVerificationChannel.Phone)
+        {
+            return Result<TrustStatusResponse>.Failure("Phone validation is handled manually by WhatsApp.");
+        }
+
         if (string.IsNullOrWhiteSpace(request.Code))
         {
             return Result<TrustStatusResponse>.Failure("Verification code is required.");
@@ -437,10 +478,7 @@ public sealed class TrustService : ITrustService
             verification.EmailVerifiedAt ??= now;
         }
 
-        if (user.PhoneNumberConfirmed)
-        {
-            verification.PhoneVerifiedAt ??= now;
-        }
+        _ = now;
     }
 
     private static void UpdateDerivedStatus(UserAccount user, UserVerification verification)
@@ -475,8 +513,55 @@ public sealed class TrustService : ITrustService
 
     private static bool IsContactVerified(UserAccount user, UserVerification verification)
     {
-        return (user.EmailConfirmed || verification.EmailVerifiedAt.HasValue)
-            && (user.PhoneNumberConfirmed || verification.PhoneVerifiedAt.HasValue);
+        return ManualReviewMapper.IsEmailConfirmed(user, verification)
+            && ManualReviewMapper.IsPhoneContacted(verification);
+    }
+
+    private static IReadOnlyCollection<string> ValidateManualReviewRequest(SubmitManualGuideReviewRequest request)
+    {
+        var errors = new List<string>();
+
+        if (string.IsNullOrWhiteSpace(request.LegalName))
+        {
+            errors.Add("Legal name is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Country))
+        {
+            errors.Add("Country is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.City))
+        {
+            errors.Add("City is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.DocumentType))
+        {
+            errors.Add("Document type is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.DocumentNumberLast4))
+        {
+            errors.Add("Last document digits are required.");
+        }
+        else if (NormalizeDocumentLast4(request.DocumentNumberLast4).Length is < 2 or > 4)
+        {
+            errors.Add("Last document digits must contain 2 to 4 characters.");
+        }
+
+        if (!request.AcceptDeclaration)
+        {
+            errors.Add("Manual declaration must be accepted.");
+        }
+
+        return errors;
+    }
+
+    private static string NormalizeDocumentLast4(string value)
+    {
+        var normalized = new string(value.Trim().Where(char.IsLetterOrDigit).ToArray()).ToUpperInvariant();
+        return normalized.Length <= 4 ? normalized : normalized[^4..];
     }
 
     private static IReadOnlyCollection<string> ValidateIdentityRequest(StartIdentityVerificationRequest request)

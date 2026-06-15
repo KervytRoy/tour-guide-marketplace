@@ -42,6 +42,17 @@ public sealed class AdminVerificationsApiClient
             cancellationToken: cancellationToken);
     }
 
+    public Task<ApiResult<AdminVerificationDetailResponse>> UpdateManualReviewAsync(
+        Guid userId,
+        AdminManualReviewUpdateRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        return _apiClient.PostAsync<AdminManualReviewUpdateRequest, AdminVerificationDetailResponse>(
+            $"api/admin/verifications/{userId}/manual-review",
+            request,
+            cancellationToken: cancellationToken);
+    }
+
     public Task<ApiResult<AdminVerificationDetailResponse>> ApproveProfileAsync(
         Guid userId,
         AdminReviewDecisionRequest request,

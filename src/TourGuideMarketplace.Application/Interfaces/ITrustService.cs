@@ -31,5 +31,8 @@ public interface ITrustService
         AcceptTrustRulesRequest request,
         CancellationToken cancellationToken);
 
-    Task<Result<TrustStatusResponse>> SubmitGuideProfileReviewAsync(Guid userId, CancellationToken cancellationToken);
+    Task<Result<TrustStatusResponse>> SubmitGuideProfileReviewAsync(
+        Guid userId,
+        SubmitManualGuideReviewRequest request,
+        CancellationToken cancellationToken);
 }

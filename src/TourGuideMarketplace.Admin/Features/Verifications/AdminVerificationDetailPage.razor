@@ -88,6 +88,77 @@
                     <MudPaper Class="work-panel" Elevation="0">
                         <div class="panel-heading">
                             <div>
+                                <MudText Typo="Typo.h6">Revision manual fase 2</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Registra WSP, evidencia externa, checklist y entrevista. No almacenes fotos de documentos en la plataforma.</MudText>
+                            </div>
+                            <MudChip T="string" Color="@(_detail.ManualReview?.CanApprove == true ? Color.Success : Color.Warning)" Variant="Variant.Outlined">
+                                @(_detail.ManualReview?.CanApprove == true ? "Listo para aprobar" : "Pendiente")
+                            </MudChip>
+                        </div>
+
+                        <MudGrid Spacing="3">
+                            <MudItem xs="12" md="6">
+                                <MudText Typo="Typo.subtitle2">Datos declarados</MudText>
+                                <MudText Typo="Typo.body2">@(_detail.ManualReview?.LegalName ?? "-")</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                    @(_detail.ManualReview?.Country ?? "-") / @(_detail.ManualReview?.City ?? "-") -
+                                    @(_detail.ManualReview?.DocumentType ?? "-") **** @(_detail.ManualReview?.DocumentNumberLast4 ?? "-")
+                                </MudText>
+                            </MudItem>
+                            <MudItem xs="12" md="6">
+                                <MudCheckBox T="bool" @bind-Value="_phoneContacted" Label="Telefono contactado por WhatsApp" Color="Color.Primary" />
+                                <MudTextField T="string" @bind-Value="_phoneContactNotes" Label="Notas WSP" Lines="2" />
+                            </MudItem>
+                            <MudItem xs="12" md="6">
+                                <MudCheckBox T="bool" @bind-Value="_evidenceReceived" Label="Evidencia recibida por canal externo" Color="Color.Primary" />
+                                <MudSelect T="string" @bind-Value="_evidenceReviewStatus" Label="Resultado evidencia">
+                                    <MudSelectItem T="string" Value="@("Pending")">Pendiente</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("Received")">Recibida</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("MatchesDeclaration")">Coincide con declaracion</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("Inconclusive")">No concluyente</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("Inconsistent")">Inconsistente</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("Rejected")">Rechazada</MudSelectItem>
+                                </MudSelect>
+                                <MudTextField T="string" @bind-Value="_evidenceNotes" Label="Notas evidencia" Lines="3" />
+                            </MudItem>
+                            <MudItem xs="12" md="6">
+                                <MudCheckBox T="bool" @bind-Value="_declaredDataReviewed" Label="Datos declarados revisados" Color="Color.Primary" />
+                                <MudCheckBox T="bool" @bind-Value="_profileCoherent" Label="Perfil coherente con la declaracion" Color="Color.Primary" />
+                                <MudCheckBox T="bool" @bind-Value="_referencesReviewed" Label="Referencias revisadas" Color="Color.Primary" />
+                            </MudItem>
+                            <MudItem xs="12" md="6">
+                                <MudSelect T="string" @bind-Value="_manualInterviewStatus" Label="Estado entrevista">
+                                    <MudSelectItem T="string" Value="@("Pending")">Pendiente</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("Scheduled")">Agendada</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("Completed")">Completada</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("NoShow")">No asistio</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("Cancelled")">Cancelada</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("RequiresFollowUp")">Requiere seguimiento</MudSelectItem>
+                                </MudSelect>
+                                <MudSelect T="string" @bind-Value="_manualInterviewResult" Label="Resultado entrevista">
+                                    <MudSelectItem T="string" Value="@("None")">Sin resultado</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("Passed")">Aprobada</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("Inconclusive")">No concluyente</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("Failed")">Fallida</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("RequiresFollowUp")">Requiere seguimiento</MudSelectItem>
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12" md="6">
+                                <MudTextField T="string" @bind-Value="_manualInterviewChannel" Label="Canal" />
+                                <MudTextField T="string" @bind-Value="_manualInterviewReference" Label="Referencia" />
+                                <MudTextField T="string" @bind-Value="_manualInterviewNotes" Label="Notas entrevista" Lines="3" />
+                            </MudItem>
+                        </MudGrid>
+
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@IsBusy(ManualReviewAction)"
+                                   OnClick="SaveManualReviewAsync" StartIcon="@Icons.Material.Filled.Save" Class="mt-3">
+                            Guardar revision manual
+                        </MudButton>
+                    </MudPaper>
+
+                    <MudPaper Class="work-panel" Elevation="0">
+                        <div class="panel-heading">
+                            <div>
                                 <MudText Typo="Typo.h6">@L["IdentityAttempts"]</MudText>
                                 <MudText Typo="Typo.body2" Color="Color.Secondary">@L["IdentityAttemptsSubtitle"]</MudText>
                             </div>
@@ -180,8 +251,9 @@
                         <MudText Typo="Typo.h6">@L["QuickStatus"]</MudText>
                         <div class="quick-status-grid">
                             <StatusIndicator Label="@L["Email"]" Value="@_detail.TrustStatus.EmailVerified" />
-                            <StatusIndicator Label="@L["Phone"]" Value="@_detail.TrustStatus.PhoneVerified" />
-                            <StatusIndicator Label="@L["Identity"]" Value="@_detail.TrustStatus.IdentityVerified" />
+                            <StatusIndicator Label="WSP" Value="@_detail.TrustStatus.PhoneVerified" />
+                            <StatusIndicator Label="Evidencia" Value="@_detail.TrustStatus.ManualEvidenceReviewed" />
+                            <StatusIndicator Label="Entrevista" Value="@_detail.TrustStatus.ManualInterviewCompleted" />
                             <StatusIndicator Label="@L["Profile"]" Value="@_detail.TrustStatus.ProfileValidated" />
                             <StatusIndicator Label="@L["Conduct"]" Value="@_detail.TrustStatus.CodeOfConductAccepted" />
                             <StatusIndicator Label="@L["Safety"]" Value="@_detail.TrustStatus.SafetyRulesAccepted" />
@@ -248,10 +320,24 @@
     private const string RejectAction = "reject";
     private const string SuspendAction = "suspend";
     private const string ReactivateAction = "reactivate";
+    private const string ManualReviewAction = "manual-review";
 
     private AdminVerificationDetailResponse? _detail;
     private string _reason = string.Empty;
     private string _notes = string.Empty;
+    private bool _phoneContacted;
+    private string _phoneContactNotes = string.Empty;
+    private bool _evidenceReceived;
+    private string _evidenceReviewStatus = "Pending";
+    private string _evidenceNotes = string.Empty;
+    private bool _declaredDataReviewed;
+    private bool _profileCoherent;
+    private bool _referencesReviewed;
+    private string _manualInterviewStatus = "Pending";
+    private string _manualInterviewResult = "None";
+    private string _manualInterviewChannel = string.Empty;
+    private string _manualInterviewReference = string.Empty;
+    private string _manualInterviewNotes = string.Empty;
     private bool _isLoading;
     private string? _busyAction;
 
@@ -263,7 +349,8 @@
     private double CompletionPercent => TotalRequirements == 0 ? 0 : CompletedRequirements * 100d / TotalRequirements;
     private int OpenCaseCount => _detail?.ReviewCases.Count(reviewCase => reviewCase.Status == "Open") ?? 0;
     private bool RequiresReason => string.IsNullOrWhiteSpace(_reason);
-    private bool CanApprove => _detail?.TrustStatus is { IdentityVerified: true, ProfileValidated: false, Status: "InReview" };
+    private bool CanApprove => _detail?.TrustStatus is { ProfileValidated: false, Status: "InReview" }
+        && _detail.ManualReview?.CanApprove == true;
     private bool CanReject => _detail?.TrustStatus is { ProfileValidated: false, Status: "InReview" } && !string.IsNullOrWhiteSpace(_reason);
     private bool CanSuspend => _detail?.TrustStatus.Status != "Suspended" && !string.IsNullOrWhiteSpace(_reason);
     private bool CanReactivate => _detail?.TrustStatus.Status == "Suspended";
@@ -286,6 +373,46 @@
         }
 
         _detail = result.Value;
+        ApplyManualReviewState();
+    }
+
+    private async Task SaveManualReviewAsync()
+    {
+        if (_detail is null)
+        {
+            return;
+        }
+
+        await RunAsync(ManualReviewAction, async () =>
+        {
+            var request = new AdminManualReviewUpdateRequest(
+                _phoneContacted,
+                NullIfWhiteSpace(_phoneContactNotes),
+                _evidenceReviewStatus,
+                _evidenceReceived,
+                NullIfWhiteSpace(_evidenceNotes),
+                _declaredDataReviewed,
+                _profileCoherent,
+                _referencesReviewed,
+                _manualInterviewStatus,
+                _manualInterviewResult,
+                NullIfWhiteSpace(_manualInterviewChannel),
+                null,
+                _manualInterviewStatus == "Completed" ? DateTimeOffset.UtcNow : null,
+                NullIfWhiteSpace(_manualInterviewReference),
+                NullIfWhiteSpace(_manualInterviewNotes));
+
+            var result = await VerificationsApi.UpdateManualReviewAsync(UserId, request);
+            if (!result.Succeeded || result.Value is null)
+            {
+                Snackbar.Add(string.Join(" ", result.Errors), Severity.Error);
+                return;
+            }
+
+            _detail = result.Value;
+            ApplyManualReviewState();
+            Snackbar.Add("Revision manual guardada.", Severity.Success);
+        });
     }
 
     private async Task ExecuteDecisionAsync(string action)
@@ -317,6 +444,7 @@
             }
 
             _detail = result.Value;
+            ApplyManualReviewState();
             _reason = string.Empty;
             _notes = string.Empty;
             Snackbar.Add(L["DecisionRegistered"], Severity.Success);
@@ -339,6 +467,29 @@
     private bool IsBusy(string action)
     {
         return string.Equals(_busyAction, action, StringComparison.Ordinal);
+    }
+
+    private void ApplyManualReviewState()
+    {
+        if (_detail?.ManualReview is null)
+        {
+            return;
+        }
+
+        var review = _detail.ManualReview;
+        _phoneContacted = review.PhoneContacted;
+        _phoneContactNotes = review.PhoneContactNotes ?? string.Empty;
+        _evidenceReceived = review.EvidenceReceivedAt.HasValue;
+        _evidenceReviewStatus = review.EvidenceReviewStatus;
+        _evidenceNotes = review.EvidenceNotes ?? string.Empty;
+        _declaredDataReviewed = review.DeclaredDataReviewed;
+        _profileCoherent = review.ProfileCoherent;
+        _referencesReviewed = review.ReferencesReviewed;
+        _manualInterviewStatus = review.ManualInterviewStatus;
+        _manualInterviewResult = review.ManualInterviewResult;
+        _manualInterviewChannel = review.ManualInterviewChannel ?? string.Empty;
+        _manualInterviewReference = review.ManualInterviewReference ?? string.Empty;
+        _manualInterviewNotes = review.ManualInterviewNotes ?? string.Empty;
     }
 
     private Color GetProgressColor()
@@ -437,8 +588,9 @@
         return requirement.Action switch
         {
             "request-email-code" => L["AdminReqEmailHelp"],
-            "request-phone-code" => L["AdminReqPhoneHelp"],
-            "start-identity-verification" => L["AdminReqIdentityHelp"],
+            "manual-whatsapp-contact" => "Registrar contacto por WhatsApp.",
+            "manual-evidence-review" => "Revisar evidencia recibida por canal externo.",
+            "manual-interview" => "Registrar entrevista manual.",
             "accept-trust-rules" => L["AdminReqRulesHelp"],
             "submit-guide-profile-review" => L["AdminReqReviewHelp"],
             _ => L["Pending"]
@@ -448,5 +600,10 @@
     private static string FormatDate(DateTimeOffset value)
     {
         return value.ToLocalTime().ToString("yyyy-MM-dd HH:mm");
+    }
+
+    private static string? NullIfWhiteSpace(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
     }
 }

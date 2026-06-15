@@ -74,10 +74,12 @@ public sealed class TrustApiClient
     }
 
     public Task<ApiResult<TrustStatusResponse>> SubmitGuideProfileReviewAsync(
+        SubmitManualGuideReviewRequest request,
         CancellationToken cancellationToken = default)
     {
-        return _apiClient.PostAsync<TrustStatusResponse>(
+        return _apiClient.PostAsync<SubmitManualGuideReviewRequest, TrustStatusResponse>(
             "api/trust/me/guide-profile/submit-review",
+            request,
             cancellationToken: cancellationToken);
     }
 }

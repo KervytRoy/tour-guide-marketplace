@@ -1,0 +1,28 @@
+namespace TourGuideMarketplace.Contracts.Trust;
+
+public sealed record ManualReviewResponse(
+    string? LegalName,
+    string? Country,
+    string? City,
+    string? DocumentType,
+    string? DocumentNumberLast4,
+    bool DeclarationAccepted,
+    DateTimeOffset? SubmittedAt,
+    bool PhoneContacted,
+    DateTimeOffset? PhoneContactedAt,
+    string? PhoneContactNotes,
+    string EvidenceReviewStatus,
+    DateTimeOffset? EvidenceReceivedAt,
+    DateTimeOffset? EvidenceReviewedAt,
+    string? EvidenceNotes,
+    bool DeclaredDataReviewed,
+    bool ProfileCoherent,
+    bool ReferencesReviewed,
+    string ManualInterviewStatus,
+    string ManualInterviewResult,
+    string? ManualInterviewChannel,
+    DateTimeOffset? ManualInterviewScheduledAt,
+    DateTimeOffset? ManualInterviewCompletedAt,
+    string? ManualInterviewReference,
+    string? ManualInterviewNotes,
+    bool CanApprove);

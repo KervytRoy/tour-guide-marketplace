@@ -72,9 +72,11 @@ public sealed class AdminTrustService : IAdminTrustService
                 roles.ToArray(),
                 verification.Status.ToString(),
                 user.EmailConfirmed || verification.EmailVerifiedAt.HasValue,
-                user.PhoneNumberConfirmed || verification.PhoneVerifiedAt.HasValue,
+                ManualReviewMapper.IsPhoneContacted(verification),
                 verification.IdentityVerifiedAt.HasValue,
                 verification.ProfileValidatedAt.HasValue,
+                verification.ManualReviewSubmittedAt.HasValue,
+                verification.EvidenceReviewStatus.ToString(),
                 verification.IdentityProvider,
                 lastAttempt?.Status.ToString(),
                 verification.CreatedAt,
@@ -106,6 +108,87 @@ public sealed class AdminTrustService : IAdminTrustService
         return Result<AdminVerificationDetailResponse>.Success(await MapDetailAsync(user, verification, cancellationToken));
     }
 
+    public async Task<Result<AdminVerificationDetailResponse>> UpdateManualReviewAsync(
+        Guid adminUserId,
+        Guid userId,
+        AdminManualReviewUpdateRequest request,
+        CancellationToken cancellationToken)
+    {
+        var user = await _userAccountService.FindByIdAsync(userId, cancellationToken);
+        if (user is null)
+        {
+            return Result<AdminVerificationDetailResponse>.Failure("User was not found.");
+        }
+
+        var verification = await EnsureVerificationAsync(user, cancellationToken);
+        var now = DateTimeOffset.UtcNow;
+
+        if (!Enum.TryParse<ManualEvidenceReviewStatus>(request.EvidenceReviewStatus, ignoreCase: true, out var evidenceStatus))
+        {
+            return Result<AdminVerificationDetailResponse>.Failure("Unknown evidence review status.");
+        }
+
+        if (!Enum.TryParse<ManualInterviewStatus>(request.ManualInterviewStatus, ignoreCase: true, out var interviewStatus))
+        {
+            return Result<AdminVerificationDetailResponse>.Failure("Unknown manual interview status.");
+        }
+
+        if (!Enum.TryParse<ManualInterviewResult>(request.ManualInterviewResult, ignoreCase: true, out var interviewResult))
+        {
+            return Result<AdminVerificationDetailResponse>.Failure("Unknown manual interview result.");
+        }
+
+        verification.PhoneContactNotes = NormalizeOptional(request.PhoneContactNotes);
+        if (request.PhoneContacted)
+        {
+            verification.PhoneContactedAt ??= now;
+            verification.PhoneContactedByUserId ??= adminUserId;
+        }
+        else
+        {
+            verification.PhoneContactedAt = null;
+            verification.PhoneContactedByUserId = null;
+        }
+
+        verification.EvidenceReviewStatus = evidenceStatus;
+        verification.EvidenceNotes = NormalizeOptional(request.EvidenceNotes);
+        verification.EvidenceReceivedAt = request.EvidenceReceived
+            ? verification.EvidenceReceivedAt ?? now
+            : null;
+
+        if (evidenceStatus is ManualEvidenceReviewStatus.MatchesDeclaration
+            or ManualEvidenceReviewStatus.Inconclusive
+            or ManualEvidenceReviewStatus.Inconsistent
+            or ManualEvidenceReviewStatus.Rejected)
+        {
+            verification.EvidenceReviewedAt ??= now;
+            verification.EvidenceReviewedByUserId ??= adminUserId;
+        }
+        else
+        {
+            verification.EvidenceReviewedAt = null;
+            verification.EvidenceReviewedByUserId = null;
+        }
+
+        verification.DeclaredDataReviewed = request.DeclaredDataReviewed;
+        verification.ProfileCoherent = request.ProfileCoherent;
+        verification.ReferencesReviewed = request.ReferencesReviewed;
+        verification.ManualInterviewStatus = interviewStatus;
+        verification.ManualInterviewResult = interviewResult;
+        verification.ManualInterviewChannel = NormalizeOptional(request.ManualInterviewChannel);
+        verification.ManualInterviewScheduledAt = request.ManualInterviewScheduledAt;
+        verification.ManualInterviewCompletedAt = request.ManualInterviewCompletedAt;
+        verification.ManualInterviewReference = NormalizeOptional(request.ManualInterviewReference);
+        verification.ManualInterviewNotes = NormalizeOptional(request.ManualInterviewNotes);
+        verification.ManualInterviewReviewedByUserId = adminUserId;
+
+        SyncContactFlags(user, verification);
+        UpdateDerivedStatus(user, verification);
+        await _trustRepository.SaveChangesAsync(cancellationToken);
+
+        return Result<AdminVerificationDetailResponse>.Success(await MapDetailAsync(user, verification, cancellationToken));
+    }
+
     public async Task<Result<AdminVerificationDetailResponse>> ApproveProfileAsync(
         Guid adminUserId,
         Guid userId,
@@ -121,9 +204,9 @@ public sealed class AdminTrustService : IAdminTrustService
         var context = result.Value!;
         var user = context.User;
         var verification = context.Verification;
-        if (!verification.IdentityVerifiedAt.HasValue)
+        if (!ManualReviewMapper.CanApprove(user, verification))
         {
-            return Result<AdminVerificationDetailResponse>.Failure("Identity must be verified before validating the profile.");
+            return Result<AdminVerificationDetailResponse>.Failure("Manual review must be completed before validating the profile.");
         }
 
         if (verification.Status != UserVerificationStatus.InReview)
@@ -140,6 +223,8 @@ public sealed class AdminTrustService : IAdminTrustService
         var now = DateTimeOffset.UtcNow;
         verification.Status = UserVerificationStatus.ProfileValidated;
         verification.ProfileValidatedAt = now;
+        verification.ManualReviewCompletedAt = now;
+        verification.ManualReviewCompletedByUserId = adminUserId;
         verification.InReviewReason = null;
         profile.IsVerified = true;
 
@@ -170,11 +255,6 @@ public sealed class AdminTrustService : IAdminTrustService
         var context = result.Value!;
         var user = context.User;
         var verification = context.Verification;
-        if (!verification.IdentityVerifiedAt.HasValue)
-        {
-            return Result<AdminVerificationDetailResponse>.Failure("Identity must be verified before requesting profile changes.");
-        }
-
         if (verification.Status != UserVerificationStatus.InReview)
         {
             return Result<AdminVerificationDetailResponse>.Failure("Guide profile must be in review before requesting changes.");
@@ -358,6 +438,7 @@ public sealed class AdminTrustService : IAdminTrustService
             roles.ToArray(),
             TrustStatusMapper.Map(user, verification, roles.ToArray()),
             attempts,
+            ManualReviewMapper.Map(user, verification),
             cases);
     }
 
@@ -449,10 +530,7 @@ public sealed class AdminTrustService : IAdminTrustService
             verification.EmailVerifiedAt ??= now;
         }
 
-        if (user.PhoneNumberConfirmed)
-        {
-            verification.PhoneVerifiedAt ??= now;
-        }
+        _ = now;
     }
 
     private static void UpdateDerivedStatus(UserAccount user, UserVerification verification)
@@ -480,8 +558,8 @@ public sealed class AdminTrustService : IAdminTrustService
             return;
         }
 
-        verification.Status = (user.EmailConfirmed || verification.EmailVerifiedAt.HasValue)
-            && (user.PhoneNumberConfirmed || verification.PhoneVerifiedAt.HasValue)
+        verification.Status = ManualReviewMapper.IsEmailConfirmed(user, verification)
+            && ManualReviewMapper.IsPhoneContacted(verification)
                 ? UserVerificationStatus.ContactVerified
                 : UserVerificationStatus.Unverified;
     }
@@ -494,10 +572,15 @@ public sealed class AdminTrustService : IAdminTrustService
             return;
         }
 
-        verification.Status = (user.EmailConfirmed || verification.EmailVerifiedAt.HasValue)
-            && (user.PhoneNumberConfirmed || verification.PhoneVerifiedAt.HasValue)
+        verification.Status = ManualReviewMapper.IsEmailConfirmed(user, verification)
+            && ManualReviewMapper.IsPhoneContacted(verification)
                 ? UserVerificationStatus.ContactVerified
                 : UserVerificationStatus.Unverified;
+    }
+
+    private static string? NormalizeOptional(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
     }
 
     private static string NormalizeReason(string? reason, string fallback)

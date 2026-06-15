@@ -14,6 +14,12 @@ public interface IAdminTrustService
         Guid userId,
         CancellationToken cancellationToken);
 
+    Task<Result<AdminVerificationDetailResponse>> UpdateManualReviewAsync(
+        Guid adminUserId,
+        Guid userId,
+        AdminManualReviewUpdateRequest request,
+        CancellationToken cancellationToken);
+
     Task<Result<AdminVerificationDetailResponse>> ApproveProfileAsync(
         Guid adminUserId,
         Guid userId,

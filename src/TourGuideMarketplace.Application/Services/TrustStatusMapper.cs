@@ -12,20 +12,24 @@ internal static class TrustStatusMapper
         UserVerification verification,
         IReadOnlyCollection<string> roles)
     {
-        var emailVerified = user.EmailConfirmed || verification.EmailVerifiedAt.HasValue;
-        var phoneVerified = user.PhoneNumberConfirmed || verification.PhoneVerifiedAt.HasValue;
+        var emailVerified = ManualReviewMapper.IsEmailConfirmed(user, verification);
+        var phoneVerified = ManualReviewMapper.IsPhoneContacted(verification);
         var identityVerified = verification.IdentityVerifiedAt.HasValue
             || verification.Status is UserVerificationStatus.IdentityVerified or UserVerificationStatus.ProfileValidated;
         var profileValidated = verification.ProfileValidatedAt.HasValue
             || verification.Status == UserVerificationStatus.ProfileValidated;
         var codeOfConductAccepted = verification.CodeOfConductAcceptedAt.HasValue;
         var safetyRulesAccepted = verification.SafetyRulesAcceptedAt.HasValue;
+        var manualEvidenceReviewed = verification.EvidenceReviewStatus == ManualEvidenceReviewStatus.MatchesDeclaration;
+        var manualInterviewCompleted = verification.ManualInterviewStatus == ManualInterviewStatus.Completed
+            && verification.ManualInterviewResult == ManualInterviewResult.Passed;
 
         var requirements = new List<TrustRequirementResponse>
         {
-            new("email", "Email verificado", emailVerified, emailVerified ? null : "request-email-code"),
-            new("phone", "Telefono verificado", phoneVerified, phoneVerified ? null : "request-phone-code"),
-            new("identity", "Identidad verificada", identityVerified, identityVerified ? null : "start-identity-verification"),
+            new("email", "Email confirmado", emailVerified, emailVerified ? null : "request-email-code"),
+            new("phone", "Telefono contactado por WhatsApp", phoneVerified, phoneVerified ? null : "manual-whatsapp-contact"),
+            new("manual-evidence", "Documento y declaracion jurada revisados", manualEvidenceReviewed, manualEvidenceReviewed ? null : "manual-evidence-review"),
+            new("manual-interview", "Entrevista manual completada", manualInterviewCompleted, manualInterviewCompleted ? null : "manual-interview"),
             new(
                 "rules",
                 "Reglas de seguridad aceptadas",
@@ -37,9 +41,9 @@ internal static class TrustStatusMapper
         {
             requirements.Add(new(
                 "guide-profile",
-                "Perfil de guia validado",
-                profileValidated,
-                profileValidated ? null : "submit-guide-profile-review"));
+                "Perfil de guia completo",
+                profileValidated || verification.ManualReviewSubmittedAt.HasValue,
+                profileValidated || verification.ManualReviewSubmittedAt.HasValue ? null : "submit-guide-profile-review"));
         }
 
         return new TrustStatusResponse(
@@ -51,12 +55,16 @@ internal static class TrustStatusMapper
             profileValidated,
             codeOfConductAccepted,
             safetyRulesAccepted,
+            verification.ManualReviewSubmittedAt.HasValue,
+            manualEvidenceReviewed,
+            manualInterviewCompleted,
             verification.IdentityProvider,
             verification.ExternalVerificationId,
             verification.InReviewReason,
             verification.SuspendedReason,
             verification.IdentityVerifiedAt,
             verification.ProfileValidatedAt,
+            ManualReviewMapper.Map(user, verification),
             requirements);
     }
 }

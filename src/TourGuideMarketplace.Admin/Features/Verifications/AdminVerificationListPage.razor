@@ -96,9 +96,9 @@
                     <MudTh>@L["Guide"]</MudTh>
                     <MudTh>@L["Status"]</MudTh>
                     <MudTh>@L["Contact"]</MudTh>
-                    <MudTh>@L["Identity"]</MudTh>
+                    <MudTh>Manual</MudTh>
                     <MudTh>@L["Profile"]</MudTh>
-                    <MudTh>@L["Provider"]</MudTh>
+                    <MudTh>Evidencia</MudTh>
                     <MudTh>@L["Updated"]</MudTh>
                     <MudTh></MudTh>
                 </HeaderContent>
@@ -122,18 +122,18 @@
                             <MudIcon Icon="@GetBooleanIcon(item.EmailVerified)" Color="@GetBooleanColor(item.EmailVerified)" Size="Size.Small" />
                             <MudText Typo="Typo.caption">@L["Email"]</MudText>
                             <MudIcon Icon="@GetBooleanIcon(item.PhoneVerified)" Color="@GetBooleanColor(item.PhoneVerified)" Size="Size.Small" />
-                            <MudText Typo="Typo.caption">@L["Phone"]</MudText>
+                            <MudText Typo="Typo.caption">WSP</MudText>
                         </div>
                     </MudTd>
-                    <MudTd DataLabel="@L["Identity"]">
-                        <MudIcon Icon="@GetBooleanIcon(item.IdentityVerified)" Color="@GetBooleanColor(item.IdentityVerified)" />
+                    <MudTd DataLabel="Manual">
+                        <MudIcon Icon="@GetBooleanIcon(item.ManualReviewSubmitted)" Color="@GetBooleanColor(item.ManualReviewSubmitted)" />
                     </MudTd>
                     <MudTd DataLabel="@L["Profile"]">
                         <MudIcon Icon="@GetBooleanIcon(item.ProfileValidated)" Color="@GetBooleanColor(item.ProfileValidated)" />
                     </MudTd>
-                    <MudTd DataLabel="@L["Provider"]">
-                        <MudText Typo="Typo.body2">@(item.IdentityProvider ?? "-")</MudText>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">@(item.LastAttemptStatus ?? L["NoAttempts"])</MudText>
+                    <MudTd DataLabel="Evidencia">
+                        <MudText Typo="Typo.body2">@item.EvidenceReviewStatus</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">@(item.LastAttemptStatus ?? "KYC legacy")</MudText>
                     </MudTd>
                     <MudTd DataLabel="@L["Updated"]">
                         <MudText Typo="Typo.body2">@FormatDate(item.UpdatedAt ?? item.CreatedAt)</MudText>

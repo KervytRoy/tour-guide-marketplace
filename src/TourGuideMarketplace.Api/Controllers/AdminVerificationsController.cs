@@ -46,6 +46,24 @@ public sealed class AdminVerificationsController : ControllerBase
         return ToActionResult(result);
     }
 
+    [HttpPost("{userId:guid}/manual-review")]
+    [ProducesResponseType(typeof(AdminVerificationDetailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdateManualReview(
+        Guid userId,
+        AdminManualReviewUpdateRequest request,
+        CancellationToken cancellationToken)
+    {
+        var adminUserId = GetCurrentUserId();
+        if (adminUserId is null)
+        {
+            return Unauthorized(new ApiErrorResponse(["Invalid access token."]));
+        }
+
+        var result = await _adminTrustService.UpdateManualReviewAsync(adminUserId.Value, userId, request, cancellationToken);
+        return ToActionResult(result);
+    }
+
     [HttpPost("{userId:guid}/approve-profile")]
     [ProducesResponseType(typeof(AdminVerificationDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]

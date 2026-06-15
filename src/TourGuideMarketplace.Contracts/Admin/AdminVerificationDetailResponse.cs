@@ -10,4 +10,5 @@ public sealed record AdminVerificationDetailResponse(
     IReadOnlyCollection<string> Roles,
     TrustStatusResponse TrustStatus,
     IReadOnlyCollection<AdminVerificationAttemptResponse> Attempts,
+    ManualReviewResponse? ManualReview,
     IReadOnlyCollection<AdminReviewCaseResponse> ReviewCases);

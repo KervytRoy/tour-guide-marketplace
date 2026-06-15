@@ -11,6 +11,8 @@ public sealed record AdminVerificationSummaryResponse(
     bool PhoneVerified,
     bool IdentityVerified,
     bool ProfileValidated,
+    bool ManualReviewSubmitted,
+    string EvidenceReviewStatus,
     string? IdentityProvider,
     string? LastAttemptStatus,
     DateTimeOffset CreatedAt,

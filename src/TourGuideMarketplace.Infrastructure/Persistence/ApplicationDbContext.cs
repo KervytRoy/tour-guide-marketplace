@@ -269,6 +269,16 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Id
                 .HasFilter("[IsDeleted] = 0");
             entity.Property(verification => verification.IdentityProvider).HasMaxLength(80);
             entity.Property(verification => verification.ExternalVerificationId).HasMaxLength(200);
+            entity.Property(verification => verification.DeclaredLegalName).HasMaxLength(160);
+            entity.Property(verification => verification.DeclaredCountry).HasMaxLength(120);
+            entity.Property(verification => verification.DeclaredCity).HasMaxLength(120);
+            entity.Property(verification => verification.DeclaredDocumentType).HasMaxLength(80);
+            entity.Property(verification => verification.DeclaredDocumentNumberLast4).HasMaxLength(4);
+            entity.Property(verification => verification.PhoneContactNotes).HasMaxLength(1000);
+            entity.Property(verification => verification.EvidenceNotes).HasMaxLength(1000);
+            entity.Property(verification => verification.ManualInterviewChannel).HasMaxLength(80);
+            entity.Property(verification => verification.ManualInterviewReference).HasMaxLength(120);
+            entity.Property(verification => verification.ManualInterviewNotes).HasMaxLength(1000);
             entity.Property(verification => verification.InReviewReason).HasMaxLength(500);
             entity.Property(verification => verification.SuspendedReason).HasMaxLength(500);
             entity.HasOne<ApplicationUser>()

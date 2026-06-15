@@ -136,7 +136,9 @@ public sealed class TrustController : ControllerBase
     [HttpPost("me/guide-profile/submit-review")]
     [ProducesResponseType(typeof(TrustStatusResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> SubmitGuideProfileReview(CancellationToken cancellationToken)
+    public async Task<IActionResult> SubmitGuideProfileReview(
+        SubmitManualGuideReviewRequest request,
+        CancellationToken cancellationToken)
     {
         var userId = GetCurrentUserId();
         if (userId is null)
@@ -144,7 +146,7 @@ public sealed class TrustController : ControllerBase
             return Unauthorized(new ApiErrorResponse(["Invalid access token."]));
         }
 
-        var result = await _trustService.SubmitGuideProfileReviewAsync(userId.Value, cancellationToken);
+        var result = await _trustService.SubmitGuideProfileReviewAsync(userId.Value, request, cancellationToken);
         return ToActionResult(result);
     }
 
