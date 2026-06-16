@@ -26,8 +26,6 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Id
 
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<GuideProfile> GuideProfiles => Set<GuideProfile>();
-    public DbSet<GuideSpecialty> GuideSpecialties => Set<GuideSpecialty>();
-    public DbSet<GuideLanguage> GuideLanguages => Set<GuideLanguage>();
     public DbSet<GuideVerification> GuideVerifications => Set<GuideVerification>();
     public DbSet<TouristProfile> TouristProfiles => Set<TouristProfile>();
     public DbSet<Booking> Bookings => Set<Booking>();
@@ -132,36 +130,8 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Id
             entity.Property(profile => profile.AverageRating).HasPrecision(3, 2);
             entity.Property(profile => profile.Latitude).HasPrecision(9, 6);
             entity.Property(profile => profile.Longitude).HasPrecision(9, 6);
-            entity.HasMany(profile => profile.Specialties)
-                .WithOne()
-                .HasForeignKey(specialty => specialty.GuideProfileId)
-                .OnDelete(DeleteBehavior.Cascade);
-            entity.HasMany(profile => profile.Languages)
-                .WithOne()
-                .HasForeignKey(language => language.GuideProfileId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        builder.Entity<GuideSpecialty>(entity =>
-        {
-            entity.ToTable("GuideSpecialties");
-            entity.HasKey(specialty => specialty.Id);
-            entity.HasQueryFilter(specialty => !specialty.IsDeleted);
-            entity.Property(specialty => specialty.Name).HasMaxLength(80).IsRequired();
-            entity.HasIndex(specialty => new { specialty.GuideProfileId, specialty.Name })
-                .IsUnique()
-                .HasFilter("[IsDeleted] = 0");
-        });
-
-        builder.Entity<GuideLanguage>(entity =>
-        {
-            entity.ToTable("GuideLanguages");
-            entity.HasKey(language => language.Id);
-            entity.HasQueryFilter(language => !language.IsDeleted);
-            entity.Property(language => language.Name).HasMaxLength(80).IsRequired();
-            entity.HasIndex(language => new { language.GuideProfileId, language.Name })
-                .IsUnique()
-                .HasFilter("[IsDeleted] = 0");
+            entity.Property(profile => profile.Specialties).HasMaxLength(2000);
+            entity.Property(profile => profile.Languages).HasMaxLength(2000);
         });
 
         builder.Entity<GuideVerification>(entity =>

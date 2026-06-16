@@ -237,38 +237,6 @@ namespace TourGuideMarketplace.Infrastructure.Persistence.Migrations
                     b.ToTable("Bookings", (string)null);
                 });
 
-            modelBuilder.Entity("TourGuideMarketplace.Domain.Guides.GuideLanguage", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid>("GuideProfileId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("nvarchar(80)");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GuideProfileId", "Name")
-                        .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
-
-                    b.ToTable("GuideLanguages", (string)null);
-                });
-
             modelBuilder.Entity("TourGuideMarketplace.Domain.Guides.GuideProfile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -315,6 +283,11 @@ namespace TourGuideMarketplace.Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsVerified")
                         .HasColumnType("bit");
 
+                    b.Property<string>("Languages")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
                     b.Property<decimal?>("Latitude")
                         .HasPrecision(9, 6)
                         .HasColumnType("decimal(9,6)");
@@ -325,6 +298,11 @@ namespace TourGuideMarketplace.Infrastructure.Persistence.Migrations
 
                     b.Property<int>("ReviewsCount")
                         .HasColumnType("int");
+
+                    b.Property<string>("Specialties")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
@@ -340,38 +318,6 @@ namespace TourGuideMarketplace.Infrastructure.Persistence.Migrations
                     b.HasIndex("City", "Country");
 
                     b.ToTable("GuideProfiles", (string)null);
-                });
-
-            modelBuilder.Entity("TourGuideMarketplace.Domain.Guides.GuideSpecialty", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid>("GuideProfileId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("nvarchar(80)");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GuideProfileId", "Name")
-                        .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
-
-                    b.ToTable("GuideSpecialties", (string)null);
                 });
 
             modelBuilder.Entity("TourGuideMarketplace.Domain.Guides.GuideVerification", b =>
@@ -1095,24 +1041,6 @@ namespace TourGuideMarketplace.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("TourGuideMarketplace.Domain.Guides.GuideLanguage", b =>
-                {
-                    b.HasOne("TourGuideMarketplace.Domain.Guides.GuideProfile", null)
-                        .WithMany("Languages")
-                        .HasForeignKey("GuideProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("TourGuideMarketplace.Domain.Guides.GuideSpecialty", b =>
-                {
-                    b.HasOne("TourGuideMarketplace.Domain.Guides.GuideProfile", null)
-                        .WithMany("Specialties")
-                        .HasForeignKey("GuideProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("TourGuideMarketplace.Domain.Guides.GuideVerification", b =>
                 {
                     b.HasOne("TourGuideMarketplace.Domain.Guides.GuideProfile", null)
@@ -1197,13 +1125,6 @@ namespace TourGuideMarketplace.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TourGuideMarketplace.Domain.Guides.GuideProfile", b =>
-                {
-                    b.Navigation("Languages");
-
-                    b.Navigation("Specialties");
                 });
 #pragma warning restore 612, 618
         }

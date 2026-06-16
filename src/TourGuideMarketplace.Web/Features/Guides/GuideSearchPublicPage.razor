@@ -104,12 +104,7 @@
                                     <MudChip T="string" Size="Size.Small" Color="Color.Secondary" Variant="Variant.Outlined">@L["RatingDisplay", guide.AverageRating]</MudChip>
                                 </div>
 
-                                <div class="home-guide-tags">
-                                    @foreach (var specialty in guide.Specialties.Take(2))
-                                    {
-                                        <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary">@specialty</MudChip>
-                                    }
-                                </div>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">@guide.Specialties</MudText>
                             </div>
                         </MudPaper>
                     </a>

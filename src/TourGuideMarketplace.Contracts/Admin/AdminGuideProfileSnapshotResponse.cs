@@ -9,5 +9,5 @@ public sealed record AdminGuideProfileSnapshotResponse(
     string Currency,
     bool IsVerified,
     bool AvailableNow,
-    IReadOnlyCollection<string> Specialties,
-    IReadOnlyCollection<string> Languages);
+    string Specialties,
+    string Languages);

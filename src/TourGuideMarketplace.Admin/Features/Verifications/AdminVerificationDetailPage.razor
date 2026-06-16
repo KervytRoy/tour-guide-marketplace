@@ -197,14 +197,14 @@
                                     </MudItem>
                                     <MudItem xs="12" md="6">
                                         <ProfileVerificationField Label="Servicios"
-                                                                  ProfileValue="@JoinValues(_detail.GuideProfile?.Specialties)"
+                                                                  ProfileValue="@FormatProfileText(_detail.GuideProfile?.Specialties)"
                                                                   ComparisonLabel="Llamada"
                                                                   ComparisonValue="@(_profileCoherent ? "Confirmados" : "Revisar")"
                                                                   RequiresCorrection="@(!_profileCoherent)" />
                                     </MudItem>
                                     <MudItem xs="12" md="6">
                                         <ProfileVerificationField Label="Idiomas"
-                                                                  ProfileValue="@JoinValues(_detail.GuideProfile?.Languages)"
+                                                                  ProfileValue="@FormatProfileText(_detail.GuideProfile?.Languages)"
                                                                   ComparisonLabel="Llamada"
                                                                   ComparisonValue="@(_profileCoherent ? "Confirmados" : "Revisar")"
                                                                   RequiresCorrection="@(!_profileCoherent)" />
@@ -812,11 +812,9 @@
         return $"{city.Trim()}, {country.Trim()}";
     }
 
-    private static string JoinValues(IReadOnlyCollection<string>? values)
+    private static string FormatProfileText(string? value)
     {
-        return values is null || values.Count == 0
-            ? "-"
-            : string.Join(", ", values);
+        return string.IsNullOrWhiteSpace(value) ? "-" : value.Trim();
     }
 
     private static string Summarize(string? value)

@@ -107,10 +107,10 @@
                 <MudNumericField T="decimal?" @bind-Value="_longitude" Label="@L["Longitude"]" />
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudTextField T="string" @bind-Value="_specialtiesCsv" Label="@L["Specialties"]" HelperText="@L["SpecialtiesHelper"]" />
+                <MudTextField T="string" @bind-Value="_specialties" Label="@L["Specialties"]" HelperText="@L["SpecialtiesHelper"]" />
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudTextField T="string" @bind-Value="_languagesCsv" Label="@L["Languages"]" HelperText="@L["LanguagesHelper"]" />
+                <MudTextField T="string" @bind-Value="_languages" Label="@L["Languages"]" HelperText="@L["LanguagesHelper"]" />
             </MudItem>
         </MudGrid>
     </MudPaper>
@@ -126,8 +126,8 @@
     private bool _availableNow;
     private decimal? _latitude;
     private decimal? _longitude;
-    private string _specialtiesCsv = string.Empty;
-    private string _languagesCsv = string.Empty;
+    private string _specialties = string.Empty;
+    private string _languages = string.Empty;
     private bool _isBusy;
     private bool _isGuideLocationSuggestionsOpen;
     private bool _isLoadingGuideLocationSuggestions;
@@ -153,8 +153,8 @@
         _availableNow = profile.AvailableNow;
         _latitude = profile.Latitude;
         _longitude = profile.Longitude;
-        _specialtiesCsv = string.Join(", ", profile.Specialties);
-        _languagesCsv = string.Join(", ", profile.Languages);
+        _specialties = profile.Specialties;
+        _languages = profile.Languages;
     }
 
     private async Task SaveAsync()
@@ -171,8 +171,8 @@
             _availableNow,
             _latitude,
             _longitude,
-            ParseCsv(_specialtiesCsv),
-            ParseCsv(_languagesCsv)));
+            _specialties,
+            _languages));
         _isBusy = false;
 
         if (!result.Succeeded)
@@ -274,10 +274,4 @@
             : $"{suggestion.Region}, {suggestion.Country}";
     }
 
-    private static IReadOnlyCollection<string> ParseCsv(string value)
-    {
-        return value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToArray();
-    }
 }

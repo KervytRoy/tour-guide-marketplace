@@ -85,22 +85,12 @@
 
                         <div class="public-guide-list">
                             <MudText Typo="Typo.subtitle2">@L["Specialties"]</MudText>
-                            <div class="guide-meta">
-                                @foreach (var specialty in _guide.Specialties)
-                                {
-                                    <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined">@specialty</MudChip>
-                                }
-                            </div>
+                            <MudText Typo="Typo.body2">@FormatProfileText(_guide.Specialties)</MudText>
                         </div>
 
                         <div class="public-guide-list">
                             <MudText Typo="Typo.subtitle2">@L["Languages"]</MudText>
-                            <div class="guide-meta">
-                                @foreach (var language in _guide.Languages)
-                                {
-                                    <MudChip T="string" Color="Color.Secondary" Variant="Variant.Outlined">@language</MudChip>
-                                }
-                            </div>
+                            <MudText Typo="Typo.body2">@FormatProfileText(_guide.Languages)</MudText>
                         </div>
 
                         @if (HasTripContext)
@@ -258,6 +248,11 @@
         }
 
         return string.Join(" - ", parts);
+    }
+
+    private static string FormatProfileText(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? "-" : value.Trim();
     }
 
     private static string? FormatDate(string? value)

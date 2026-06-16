@@ -69,7 +69,7 @@
   <data name="InReview" xml:space="preserve"><value>En revision</value></data>
   <data name="Language" xml:space="preserve"><value>Idioma</value></data>
   <data name="Languages" xml:space="preserve"><value>Idiomas</value></data>
-  <data name="LanguagesHelper" xml:space="preserve"><value>Separados por coma</value></data>
+  <data name="LanguagesHelper" xml:space="preserve"><value>Texto libre</value></data>
   <data name="Latitude" xml:space="preserve"><value>Latitud</value></data>
   <data name="Login" xml:space="preserve"><value>Ingresar</value></data>
   <data name="LoginLoading" xml:space="preserve"><value>Ingresando...</value></data>
@@ -279,7 +279,7 @@
   <data name="SearchGuides" xml:space="preserve"><value>Buscar guias</value></data>
   <data name="SearchGuidesSubtitle" xml:space="preserve"><value>Filtra por ubicacion, idioma, especialidad y disponibilidad.</value></data>
   <data name="Specialties" xml:space="preserve"><value>Especialidades</value></data>
-  <data name="SpecialtiesHelper" xml:space="preserve"><value>Separadas por coma</value></data>
+  <data name="SpecialtiesHelper" xml:space="preserve"><value>Texto libre</value></data>
   <data name="Specialty" xml:space="preserve"><value>Especialidad</value></data>
   <data name="Status" xml:space="preserve"><value>Estado</value></data>
   <data name="StatusContactVerified" xml:space="preserve"><value>Contacto verificado</value></data>

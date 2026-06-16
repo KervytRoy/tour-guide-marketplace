@@ -168,12 +168,7 @@
                                 <MudText Typo="Typo.subtitle1" Class="home-guide-name">@guide.GuideName</MudText>
                                 <MudText Typo="Typo.body2" Color="Color.Secondary">@guide.City, @guide.Country</MudText>
 
-                                <div class="home-guide-tags">
-                                    @foreach (var specialty in guide.Specialties.Take(2))
-                                    {
-                                        <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary">@specialty</MudChip>
-                                    }
-                                </div>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">@guide.Specialties</MudText>
                             </div>
                         </MudPaper>
                     </a>

@@ -16,7 +16,7 @@ internal sealed class GuideProfileRepository : IGuideProfileRepository
 
     public Task<GuideProfile?> GetByUserIdAsync(Guid userId, bool asTracking, CancellationToken cancellationToken)
     {
-        var query = IncludeCollections(_dbContext.GuideProfiles.AsQueryable());
+        var query = _dbContext.GuideProfiles.AsQueryable();
         if (!asTracking)
         {
             query = query.AsNoTracking();
@@ -27,7 +27,7 @@ internal sealed class GuideProfileRepository : IGuideProfileRepository
 
     public Task<GuideProfile?> GetPublicByIdAsync(Guid guideProfileId, CancellationToken cancellationToken)
     {
-        return IncludeCollections(_dbContext.GuideProfiles.AsNoTracking())
+        return _dbContext.GuideProfiles.AsNoTracking()
             .FirstOrDefaultAsync(guide => guide.Id == guideProfileId && guide.IsVerified, cancellationToken);
     }
 
@@ -41,8 +41,6 @@ internal sealed class GuideProfileRepository : IGuideProfileRepository
             .OrderByDescending(guide => guide.IsVerified)
             .ThenByDescending(guide => guide.AverageRating)
             .ThenByDescending(guide => guide.ReviewsCount)
-            .Include(guide => guide.Specialties)
-            .Include(guide => guide.Languages)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToArrayAsync(cancellationToken);
@@ -62,13 +60,6 @@ internal sealed class GuideProfileRepository : IGuideProfileRepository
     public Task SaveChangesAsync(CancellationToken cancellationToken)
     {
         return _dbContext.SaveChangesAsync(cancellationToken);
-    }
-
-    private static IQueryable<GuideProfile> IncludeCollections(IQueryable<GuideProfile> query)
-    {
-        return query
-            .Include(guide => guide.Specialties)
-            .Include(guide => guide.Languages);
     }
 
     private static IQueryable<GuideProfile> ApplySearchFilters(
@@ -92,13 +83,13 @@ internal sealed class GuideProfileRepository : IGuideProfileRepository
         if (!string.IsNullOrWhiteSpace(request.Specialty))
         {
             var specialty = request.Specialty.Trim();
-            query = query.Where(guide => guide.Specialties.Any(item => item.Name == specialty));
+            query = query.Where(guide => guide.Specialties.Contains(specialty));
         }
 
         if (!string.IsNullOrWhiteSpace(request.Language))
         {
             var language = request.Language.Trim();
-            query = query.Where(guide => guide.Languages.Any(item => item.Name == language));
+            query = query.Where(guide => guide.Languages.Contains(language));
         }
 
         if (request.MaxHourlyRate.HasValue)

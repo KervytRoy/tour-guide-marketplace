@@ -16,6 +16,6 @@ public sealed class GuideProfile : AuditableEntity
     public bool AvailableNow { get; set; }
     public decimal? Latitude { get; set; }
     public decimal? Longitude { get; set; }
-    public ICollection<GuideSpecialty> Specialties { get; set; } = [];
-    public ICollection<GuideLanguage> Languages { get; set; } = [];
+    public string Specialties { get; set; } = string.Empty;
+    public string Languages { get; set; } = string.Empty;
 }

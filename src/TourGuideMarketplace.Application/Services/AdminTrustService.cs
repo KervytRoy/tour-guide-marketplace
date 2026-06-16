@@ -614,8 +614,8 @@ public sealed class AdminTrustService : IAdminTrustService
             profile.Currency,
             profile.IsVerified,
             profile.AvailableNow,
-            profile.Specialties.Select(specialty => specialty.Name).Order().ToArray(),
-            profile.Languages.Select(language => language.Name).Order().ToArray());
+            profile.Specialties,
+            profile.Languages);
     }
 
     private sealed record GuideVerificationContext(UserAccount User, UserVerification Verification);

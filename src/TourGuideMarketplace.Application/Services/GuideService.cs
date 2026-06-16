@@ -57,9 +57,8 @@ public sealed class GuideService : IGuideService
         profile.AvailableNow = request.AvailableNow;
         profile.Latitude = request.Latitude;
         profile.Longitude = request.Longitude;
-
-        ReplaceSpecialties(profile, request.Specialties);
-        ReplaceLanguages(profile, request.Languages);
+        profile.Specialties = NormalizeText(request.Specialties);
+        profile.Languages = NormalizeText(request.Languages);
 
         await _guideProfileRepository.SaveChangesAsync(cancellationToken);
 
@@ -152,46 +151,13 @@ public sealed class GuideService : IGuideService
             profile.AvailableNow,
             profile.Latitude,
             profile.Longitude,
-            profile.Specialties.Select(specialty => specialty.Name).Order().ToArray(),
-            profile.Languages.Select(language => language.Name).Order().ToArray());
+            profile.Specialties,
+            profile.Languages);
     }
 
-    private static void ReplaceSpecialties(GuideProfile profile, IReadOnlyCollection<string> requestedSpecialties)
+    private static string NormalizeText(string? value)
     {
-        profile.Specialties.Clear();
-
-        foreach (var specialty in NormalizeList(requestedSpecialties))
-        {
-            profile.Specialties.Add(new GuideSpecialty
-            {
-                GuideProfileId = profile.Id,
-                Name = specialty
-            });
-        }
-    }
-
-    private static void ReplaceLanguages(GuideProfile profile, IReadOnlyCollection<string> requestedLanguages)
-    {
-        profile.Languages.Clear();
-
-        foreach (var language in NormalizeList(requestedLanguages))
-        {
-            profile.Languages.Add(new GuideLanguage
-            {
-                GuideProfileId = profile.Id,
-                Name = language
-            });
-        }
-    }
-
-    private static IReadOnlyCollection<string> NormalizeList(IReadOnlyCollection<string>? values)
-    {
-        return (values ?? [])
-            .Where(value => !string.IsNullOrWhiteSpace(value))
-            .Select(value => value.Trim())
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .Take(20)
-            .ToArray();
+        return string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim();
     }
 
     private static List<string> ValidateProfileRequest(GuideProfileRequest request)
@@ -221,6 +187,16 @@ public sealed class GuideService : IGuideService
         if (string.IsNullOrWhiteSpace(request.Currency) || request.Currency.Trim().Length != 3)
         {
             errors.Add("Currency must be a 3-letter ISO code.");
+        }
+
+        if (request.Specialties?.Trim().Length > 2000)
+        {
+            errors.Add("Specialties cannot exceed 2000 characters.");
+        }
+
+        if (request.Languages?.Trim().Length > 2000)
+        {
+            errors.Add("Languages cannot exceed 2000 characters.");
         }
 
         if (request.Latitude is < -90 or > 90)

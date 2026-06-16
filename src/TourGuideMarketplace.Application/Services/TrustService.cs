@@ -614,12 +614,12 @@ public sealed class TrustService : ITrustService
             errors.Add("Guide profile country is required.");
         }
 
-        if (profile.Specialties.Count == 0)
+        if (string.IsNullOrWhiteSpace(profile.Specialties))
         {
             errors.Add("At least one guide specialty is required.");
         }
 
-        if (profile.Languages.Count == 0)
+        if (string.IsNullOrWhiteSpace(profile.Languages))
         {
             errors.Add("At least one guide language is required.");
         }
