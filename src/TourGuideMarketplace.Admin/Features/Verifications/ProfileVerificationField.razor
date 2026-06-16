@@ -1,0 +1,44 @@
+<div class="profile-check">
+    <MudText Typo="Typo.subtitle2">@Label</MudText>
+    <div class="profile-check-grid">
+        <div>
+            <MudText Typo="Typo.caption" Color="Color.Secondary">Perfil</MudText>
+            <MudText Typo="Typo.body2">@Display(ProfileValue)</MudText>
+        </div>
+        <div>
+            <MudText Typo="Typo.caption" Color="Color.Secondary">@ComparisonLabel</MudText>
+            <MudText Typo="Typo.body2">@Display(ComparisonValue)</MudText>
+        </div>
+        <div>
+            <MudText Typo="Typo.caption" Color="Color.Secondary">Accion</MudText>
+            <MudChip T="string" Color="@ActionColor" Variant="Variant.Outlined">
+                @ActionLabel
+            </MudChip>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Label { get; set; } = string.Empty;
+
+    [Parameter]
+    public string? ProfileValue { get; set; }
+
+    [Parameter]
+    public string? ComparisonLabel { get; set; } = "Llamada";
+
+    [Parameter]
+    public string? ComparisonValue { get; set; }
+
+    [Parameter]
+    public bool RequiresCorrection { get; set; }
+
+    private Color ActionColor => RequiresCorrection ? Color.Warning : Color.Success;
+    private string ActionLabel => RequiresCorrection ? "Solicitar correccion" : "Verificado";
+
+    private static string Display(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? "-" : value.Trim();
+    }
+}

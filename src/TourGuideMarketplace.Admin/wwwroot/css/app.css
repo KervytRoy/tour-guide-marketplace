@@ -155,6 +155,49 @@ a {
     margin-top: 12px;
 }
 
+.manual-validation-flow {
+    margin-top: 18px;
+}
+
+.validation-module {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 18px;
+}
+
+.validation-module-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.profile-check {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px;
+}
+
+.profile-check-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.2fr) minmax(120px, 0.6fr);
+    margin-top: 8px;
+}
+
+.profile-check-grid .mud-typography-body2 {
+    overflow-wrap: anywhere;
+}
+
+.validation-checks {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
 .action-row {
     flex-wrap: wrap;
 }
@@ -302,6 +345,10 @@ a {
     }
 
     .quick-status-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-check-grid {
         grid-template-columns: 1fr;
     }
 

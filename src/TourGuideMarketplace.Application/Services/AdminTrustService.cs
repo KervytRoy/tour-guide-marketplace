@@ -4,6 +4,7 @@ using TourGuideMarketplace.Application.Interfaces;
 using TourGuideMarketplace.Contracts.Admin;
 using TourGuideMarketplace.Contracts.Common;
 using TourGuideMarketplace.Contracts.Security;
+using TourGuideMarketplace.Domain.Guides;
 using TourGuideMarketplace.Domain.Trust;
 
 namespace TourGuideMarketplace.Application.Services;
@@ -128,6 +129,11 @@ public sealed class AdminTrustService : IAdminTrustService
             return Result<AdminVerificationDetailResponse>.Failure("Unknown evidence review status.");
         }
 
+        if (!Enum.TryParse<PhoneContactStatus>(request.PhoneContactStatus, ignoreCase: true, out var phoneContactStatus))
+        {
+            return Result<AdminVerificationDetailResponse>.Failure("Unknown phone contact status.");
+        }
+
         if (!Enum.TryParse<ManualInterviewStatus>(request.ManualInterviewStatus, ignoreCase: true, out var interviewStatus))
         {
             return Result<AdminVerificationDetailResponse>.Failure("Unknown manual interview status.");
@@ -139,7 +145,8 @@ public sealed class AdminTrustService : IAdminTrustService
         }
 
         verification.PhoneContactNotes = NormalizeOptional(request.PhoneContactNotes);
-        if (request.PhoneContacted)
+        verification.PhoneContactStatus = phoneContactStatus;
+        if (phoneContactStatus == PhoneContactStatus.Responded || request.PhoneContacted)
         {
             verification.PhoneContactedAt ??= now;
             verification.PhoneContactedByUserId ??= adminUserId;
@@ -430,12 +437,15 @@ public sealed class AdminTrustService : IAdminTrustService
                 reviewCase.CreatedAt))
             .ToArray();
 
+        var guideProfile = await _guideProfileRepository.GetByUserIdAsync(user.Id, asTracking: false, cancellationToken);
+
         return new AdminVerificationDetailResponse(
             user.Id,
             user.FullName,
             user.Email,
             user.PhoneNumber,
             roles.ToArray(),
+            MapGuideProfile(guideProfile),
             TrustStatusMapper.Map(user, verification, roles.ToArray()),
             attempts,
             ManualReviewMapper.Map(user, verification),
@@ -586,6 +596,26 @@ public sealed class AdminTrustService : IAdminTrustService
     private static string NormalizeReason(string? reason, string fallback)
     {
         return string.IsNullOrWhiteSpace(reason) ? fallback : reason.Trim();
+    }
+
+    private static AdminGuideProfileSnapshotResponse? MapGuideProfile(GuideProfile? profile)
+    {
+        if (profile is null)
+        {
+            return null;
+        }
+
+        return new AdminGuideProfileSnapshotResponse(
+            profile.Id,
+            profile.Bio,
+            profile.City,
+            profile.Country,
+            profile.HourlyRate,
+            profile.Currency,
+            profile.IsVerified,
+            profile.AvailableNow,
+            profile.Specialties.Select(specialty => specialty.Name).Order().ToArray(),
+            profile.Languages.Select(language => language.Name).Order().ToArray());
     }
 
     private sealed record GuideVerificationContext(UserAccount User, UserVerification Verification);

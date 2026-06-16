@@ -1,6 +1,7 @@
 namespace TourGuideMarketplace.Contracts.Admin;
 
 public sealed record AdminManualReviewUpdateRequest(
+    string PhoneContactStatus,
     bool PhoneContacted,
     string? PhoneContactNotes,
     string EvidenceReviewStatus,

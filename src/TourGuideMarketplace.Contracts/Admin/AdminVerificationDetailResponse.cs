@@ -8,6 +8,7 @@ public sealed record AdminVerificationDetailResponse(
     string Email,
     string? PhoneNumber,
     IReadOnlyCollection<string> Roles,
+    AdminGuideProfileSnapshotResponse? GuideProfile,
     TrustStatusResponse TrustStatus,
     IReadOnlyCollection<AdminVerificationAttemptResponse> Attempts,
     ManualReviewResponse? ManualReview,

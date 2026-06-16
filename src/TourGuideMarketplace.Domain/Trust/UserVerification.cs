@@ -27,6 +27,7 @@ public sealed class UserVerification : AuditableEntity
     public Guid? ManualReviewCompletedByUserId { get; set; }
     public DateTimeOffset? PhoneContactedAt { get; set; }
     public Guid? PhoneContactedByUserId { get; set; }
+    public PhoneContactStatus PhoneContactStatus { get; set; } = PhoneContactStatus.Pending;
     public string? PhoneContactNotes { get; set; }
     public DateTimeOffset? EvidenceReceivedAt { get; set; }
     public ManualEvidenceReviewStatus EvidenceReviewStatus { get; set; } = ManualEvidenceReviewStatus.Pending;

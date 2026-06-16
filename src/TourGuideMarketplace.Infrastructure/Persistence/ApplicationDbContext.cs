@@ -274,12 +274,13 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Id
             entity.Property(verification => verification.DeclaredCity).HasMaxLength(120);
             entity.Property(verification => verification.DeclaredDocumentType).HasMaxLength(80);
             entity.Property(verification => verification.DeclaredDocumentNumberLast4).HasMaxLength(4);
+            entity.Property(verification => verification.PhoneContactStatus).HasDefaultValue(PhoneContactStatus.Pending);
             entity.Property(verification => verification.PhoneContactNotes).HasMaxLength(1000);
             entity.Property(verification => verification.EvidenceNotes).HasMaxLength(1000);
             entity.Property(verification => verification.ManualInterviewChannel).HasMaxLength(80);
             entity.Property(verification => verification.ManualInterviewReference).HasMaxLength(120);
             entity.Property(verification => verification.ManualInterviewNotes).HasMaxLength(1000);
-            entity.Property(verification => verification.InReviewReason).HasMaxLength(500);
+            entity.Property(verification => verification.InReviewReason).HasMaxLength(1000);
             entity.Property(verification => verification.SuspendedReason).HasMaxLength(500);
             entity.HasOne<ApplicationUser>()
                 .WithMany()
@@ -328,7 +329,7 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Id
             entity.ToTable("AdminReviewCases");
             entity.HasKey(reviewCase => reviewCase.Id);
             entity.HasQueryFilter(reviewCase => !reviewCase.IsDeleted);
-            entity.Property(reviewCase => reviewCase.Reason).HasMaxLength(500).IsRequired();
+            entity.Property(reviewCase => reviewCase.Reason).HasMaxLength(1000).IsRequired();
             entity.Property(reviewCase => reviewCase.Notes).HasMaxLength(1000);
             entity.Property(reviewCase => reviewCase.Decision).HasMaxLength(500);
             entity.HasIndex(reviewCase => new { reviewCase.UserId, reviewCase.Status, reviewCase.Type });

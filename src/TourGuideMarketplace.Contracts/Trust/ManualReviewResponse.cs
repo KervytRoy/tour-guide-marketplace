@@ -8,6 +8,7 @@ public sealed record ManualReviewResponse(
     string? DocumentNumberLast4,
     bool DeclarationAccepted,
     DateTimeOffset? SubmittedAt,
+    string PhoneContactStatus,
     bool PhoneContacted,
     DateTimeOffset? PhoneContactedAt,
     string? PhoneContactNotes,

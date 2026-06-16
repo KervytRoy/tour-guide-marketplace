@@ -88,67 +88,211 @@
                     <MudPaper Class="work-panel" Elevation="0">
                         <div class="panel-heading">
                             <div>
-                                <MudText Typo="Typo.h6">Revision manual fase 2</MudText>
-                                <MudText Typo="Typo.body2" Color="Color.Secondary">Registra WSP, evidencia externa, checklist y entrevista. No almacenes fotos de documentos en la plataforma.</MudText>
+                                <MudText Typo="Typo.h6">Flujo guiado de validacion</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Acompana la llamada por WhatsApp con preguntas, checks, comparacion contra perfil y observaciones accionables.</MudText>
                             </div>
-                            <MudChip T="string" Color="@(_detail.ManualReview?.CanApprove == true ? Color.Success : Color.Warning)" Variant="Variant.Outlined">
-                                @(_detail.ManualReview?.CanApprove == true ? "Listo para aprobar" : "Pendiente")
-                            </MudChip>
+                            <MudStack Row="true" Spacing="2" Class="action-row">
+                                <MudButton Href="@GetWhatsAppLink()" Target="_blank" Variant="Variant.Outlined" Color="Color.Success"
+                                           Disabled="@string.IsNullOrWhiteSpace(_detail.PhoneNumber)" StartIcon="@Icons.Material.Filled.Chat">
+                                    Abrir WhatsApp
+                                </MudButton>
+                                <MudChip T="string" Color="@(_detail.ManualReview?.CanApprove == true ? Color.Success : Color.Warning)" Variant="Variant.Outlined">
+                                    @(_detail.ManualReview?.CanApprove == true ? "Listo para aprobar" : "Pendiente")
+                                </MudChip>
+                            </MudStack>
                         </div>
 
-                        <MudGrid Spacing="3">
-                            <MudItem xs="12" md="6">
-                                <MudText Typo="Typo.subtitle2">Datos declarados</MudText>
-                                <MudText Typo="Typo.body2">@(_detail.ManualReview?.LegalName ?? "-")</MudText>
-                                <MudText Typo="Typo.caption" Color="Color.Secondary">
-                                    @(_detail.ManualReview?.Country ?? "-") / @(_detail.ManualReview?.City ?? "-") -
-                                    @(_detail.ManualReview?.DocumentType ?? "-") **** @(_detail.ManualReview?.DocumentNumberLast4 ?? "-")
-                                </MudText>
-                            </MudItem>
-                            <MudItem xs="12" md="6">
-                                <MudCheckBox T="bool" @bind-Value="_phoneContacted" Label="Telefono contactado por WhatsApp" Color="Color.Primary" />
-                                <MudTextField T="string" @bind-Value="_phoneContactNotes" Label="Notas WSP" Lines="2" />
-                            </MudItem>
-                            <MudItem xs="12" md="6">
-                                <MudCheckBox T="bool" @bind-Value="_evidenceReceived" Label="Evidencia recibida por canal externo" Color="Color.Primary" />
-                                <MudSelect T="string" @bind-Value="_evidenceReviewStatus" Label="Resultado evidencia">
-                                    <MudSelectItem T="string" Value="@("Pending")">Pendiente</MudSelectItem>
-                                    <MudSelectItem T="string" Value="@("Received")">Recibida</MudSelectItem>
-                                    <MudSelectItem T="string" Value="@("MatchesDeclaration")">Coincide con declaracion</MudSelectItem>
-                                    <MudSelectItem T="string" Value="@("Inconclusive")">No concluyente</MudSelectItem>
-                                    <MudSelectItem T="string" Value="@("Inconsistent")">Inconsistente</MudSelectItem>
-                                    <MudSelectItem T="string" Value="@("Rejected")">Rechazada</MudSelectItem>
-                                </MudSelect>
-                                <MudTextField T="string" @bind-Value="_evidenceNotes" Label="Notas evidencia" Lines="3" />
-                            </MudItem>
-                            <MudItem xs="12" md="6">
-                                <MudCheckBox T="bool" @bind-Value="_declaredDataReviewed" Label="Datos declarados revisados" Color="Color.Primary" />
-                                <MudCheckBox T="bool" @bind-Value="_profileCoherent" Label="Perfil coherente con la declaracion" Color="Color.Primary" />
-                                <MudCheckBox T="bool" @bind-Value="_referencesReviewed" Label="Referencias revisadas" Color="Color.Primary" />
-                            </MudItem>
-                            <MudItem xs="12" md="6">
-                                <MudSelect T="string" @bind-Value="_manualInterviewStatus" Label="Estado entrevista">
-                                    <MudSelectItem T="string" Value="@("Pending")">Pendiente</MudSelectItem>
-                                    <MudSelectItem T="string" Value="@("Scheduled")">Agendada</MudSelectItem>
-                                    <MudSelectItem T="string" Value="@("Completed")">Completada</MudSelectItem>
-                                    <MudSelectItem T="string" Value="@("NoShow")">No asistio</MudSelectItem>
-                                    <MudSelectItem T="string" Value="@("Cancelled")">Cancelada</MudSelectItem>
-                                    <MudSelectItem T="string" Value="@("RequiresFollowUp")">Requiere seguimiento</MudSelectItem>
-                                </MudSelect>
-                                <MudSelect T="string" @bind-Value="_manualInterviewResult" Label="Resultado entrevista">
-                                    <MudSelectItem T="string" Value="@("None")">Sin resultado</MudSelectItem>
-                                    <MudSelectItem T="string" Value="@("Passed")">Aprobada</MudSelectItem>
-                                    <MudSelectItem T="string" Value="@("Inconclusive")">No concluyente</MudSelectItem>
-                                    <MudSelectItem T="string" Value="@("Failed")">Fallida</MudSelectItem>
-                                    <MudSelectItem T="string" Value="@("RequiresFollowUp")">Requiere seguimiento</MudSelectItem>
-                                </MudSelect>
-                            </MudItem>
-                            <MudItem xs="12" md="6">
-                                <MudTextField T="string" @bind-Value="_manualInterviewChannel" Label="Canal" />
-                                <MudTextField T="string" @bind-Value="_manualInterviewReference" Label="Referencia" />
-                                <MudTextField T="string" @bind-Value="_manualInterviewNotes" Label="Notas entrevista" Lines="3" />
-                            </MudItem>
-                        </MudGrid>
+                        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mb-3">
+                            Las observaciones internas quedan en notas. Si marcas una correccion, el motivo se convierte en alerta para el guia con la seccion afectada y como arreglarla.
+                        </MudAlert>
+
+                        @if (_detail.GuideProfile is null)
+                        {
+                            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Class="mb-3">
+                                Este usuario aun no tiene perfil de guia guardado. La validacion puede registrar la llamada, pero no se podra comparar biografia, servicios, idiomas o tarifa.
+                            </MudAlert>
+                        }
+
+                        <MudStack Spacing="3" Class="manual-validation-flow">
+                            <section class="validation-module">
+                                <div class="validation-module-heading">
+                                    <MudText Typo="Typo.subtitle1">1. Contacto por WhatsApp</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Pregunta: puedes confirmar que este es tu numero principal para reservas?</MudText>
+                                </div>
+
+                                <ProfileVerificationField Label="Telefono"
+                                                          ProfileValue="@(_detail.PhoneNumber ?? "-")"
+                                                          ComparisonValue="@GetPhoneContactStatusLabel(_phoneContactStatus)"
+                                                          RequiresCorrection="@IsPhoneContactCorrectionSuggested()" />
+
+                                <MudGrid Spacing="2">
+                                    <MudItem xs="12" md="6">
+                                        <MudSelect T="string" @bind-Value="_phoneContactStatus" Label="Resultado del contacto WSP">
+                                            <MudSelectItem T="string" Value="@("Pending")">Pendiente</MudSelectItem>
+                                            <MudSelectItem T="string" Value="@("Responded")">Si, respondio</MudSelectItem>
+                                            <MudSelectItem T="string" Value="@("NoResponse")">No respondio</MudSelectItem>
+                                            <MudSelectItem T="string" Value="@("NumberDoesNotExist")">El numero no existe</MudSelectItem>
+                                            <MudSelectItem T="string" Value="@("WrongNumber")">Numero equivocado</MudSelectItem>
+                                            <MudSelectItem T="string" Value="@("Busy")">Ocupado</MudSelectItem>
+                                            <MudSelectItem T="string" Value="@("DifferentPerson")">Responde otra persona</MudSelectItem>
+                                            <MudSelectItem T="string" Value="@("RescheduleRequested")">Solicita reprogramar</MudSelectItem>
+                                        </MudSelect>
+                                    </MudItem>
+                                    <MudItem xs="12" md="6">
+                                        <MudTextField T="string" @bind-Value="_phoneContactNotes" Label="Observaciones WSP" Lines="3" />
+                                    </MudItem>
+                                </MudGrid>
+
+                                <MudCheckBox T="bool" @bind-Value="_phoneCorrection.Selected" Label="Pedir correccion del telefono al usuario" Color="Color.Warning" />
+                            </section>
+
+                            <section class="validation-module">
+                                <div class="validation-module-heading">
+                                    <MudText Typo="Typo.subtitle1">2. Identidad y datos declarados</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Pregunta: confirma tu nombre, ciudad, pais y documento declarado.</MudText>
+                                </div>
+
+                                <MudGrid Spacing="2">
+                                    <MudItem xs="12" md="6">
+                                        <ProfileVerificationField Label="Nombre"
+                                                                  ProfileValue="@_detail.FullName"
+                                                                  ComparisonLabel="Declarado"
+                                                                  ComparisonValue="@(_detail.ManualReview?.LegalName ?? "-")"
+                                                                  RequiresCorrection="@(!_declaredDataReviewed)" />
+                                    </MudItem>
+                                    <MudItem xs="12" md="6">
+                                        <ProfileVerificationField Label="Ubicacion"
+                                                                  ProfileValue="@GetGuideLocation()"
+                                                                  ComparisonLabel="Declarado"
+                                                                  ComparisonValue="@GetDeclaredLocation()"
+                                                                  RequiresCorrection="@(!_declaredDataReviewed)" />
+                                    </MudItem>
+                                    <MudItem xs="12" md="6">
+                                        <ProfileVerificationField Label="Documento"
+                                                                  ProfileValue="@GetDeclaredDocument()"
+                                                                  ComparisonLabel="Resultado"
+                                                                  ComparisonValue="@(_declaredDataReviewed ? "Confirmado" : "Pendiente o inconsistente")"
+                                                                  RequiresCorrection="@(!_declaredDataReviewed)" />
+                                    </MudItem>
+                                    <MudItem xs="12" md="6" Class="validation-checks">
+                                        <MudCheckBox T="bool" @bind-Value="_declaredDataReviewed" Label="Datos declarados revisados y consistentes" Color="Color.Primary" />
+                                        <MudCheckBox T="bool" @bind-Value="_identityCorrection.Selected" Label="Pedir correccion de identidad/datos declarados" Color="Color.Warning" />
+                                    </MudItem>
+                                </MudGrid>
+                            </section>
+
+                            <section class="validation-module">
+                                <div class="validation-module-heading">
+                                    <MudText Typo="Typo.subtitle1">3. Perfil del guia</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Pregunta: explica tus servicios, experiencia, idiomas, disponibilidad y tarifa.</MudText>
+                                </div>
+
+                                <MudGrid Spacing="2">
+                                    <MudItem xs="12" md="6">
+                                        <ProfileVerificationField Label="Biografia"
+                                                                  ProfileValue="@Summarize(_detail.GuideProfile?.Bio)"
+                                                                  ComparisonLabel="Llamada"
+                                                                  ComparisonValue="@(_profileCoherent ? "Coherente" : "Pendiente o no coincide")"
+                                                                  RequiresCorrection="@(!_profileCoherent)" />
+                                    </MudItem>
+                                    <MudItem xs="12" md="6">
+                                        <ProfileVerificationField Label="Servicios"
+                                                                  ProfileValue="@JoinValues(_detail.GuideProfile?.Specialties)"
+                                                                  ComparisonLabel="Llamada"
+                                                                  ComparisonValue="@(_profileCoherent ? "Confirmados" : "Revisar")"
+                                                                  RequiresCorrection="@(!_profileCoherent)" />
+                                    </MudItem>
+                                    <MudItem xs="12" md="6">
+                                        <ProfileVerificationField Label="Idiomas"
+                                                                  ProfileValue="@JoinValues(_detail.GuideProfile?.Languages)"
+                                                                  ComparisonLabel="Llamada"
+                                                                  ComparisonValue="@(_profileCoherent ? "Confirmados" : "Revisar")"
+                                                                  RequiresCorrection="@(!_profileCoherent)" />
+                                    </MudItem>
+                                    <MudItem xs="12" md="6">
+                                        <ProfileVerificationField Label="Tarifa y disponibilidad"
+                                                                  ProfileValue="@GetRateAndAvailability()"
+                                                                  ComparisonLabel="Llamada"
+                                                                  ComparisonValue="@(_profileCoherent ? "Confirmada" : "Revisar")"
+                                                                  RequiresCorrection="@(!_profileCoherent)" />
+                                    </MudItem>
+                                    <MudItem xs="12" md="6" Class="validation-checks">
+                                        <MudCheckBox T="bool" @bind-Value="_profileCoherent" Label="Perfil coherente con la declaracion y la llamada" Color="Color.Primary" />
+                                        <MudCheckBox T="bool" @bind-Value="_referencesReviewed" Label="Referencias revisadas" Color="Color.Primary" />
+                                    </MudItem>
+                                    <MudItem xs="12" md="6" Class="validation-checks">
+                                        <MudCheckBox T="bool" @bind-Value="_profileCorrection.Selected" Label="Pedir correccion del perfil del guia" Color="Color.Warning" />
+                                    </MudItem>
+                                </MudGrid>
+                            </section>
+
+                            <section class="validation-module">
+                                <div class="validation-module-heading">
+                                    <MudText Typo="Typo.subtitle1">4. Evidencia externa</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Pregunta: envia por el canal acordado una evidencia temporal clara y consistente.</MudText>
+                                </div>
+
+                                <MudGrid Spacing="2">
+                                    <MudItem xs="12" md="6">
+                                        <ProfileVerificationField Label="Evidencia vs declaracion"
+                                                                  ProfileValue="@GetDeclaredDocument()"
+                                                                  ComparisonLabel="Revision"
+                                                                  ComparisonValue="@GetEvidenceReviewStatusLabel(_evidenceReviewStatus)"
+                                                                  RequiresCorrection="@IsEvidenceCorrectionSuggested()" />
+                                    </MudItem>
+                                    <MudItem xs="12" md="6" Class="validation-checks">
+                                        <MudCheckBox T="bool" @bind-Value="_evidenceReceived" Label="Evidencia recibida por canal externo" Color="Color.Primary" />
+                                        <MudSelect T="string" @bind-Value="_evidenceReviewStatus" Label="Resultado evidencia">
+                                            <MudSelectItem T="string" Value="@("Pending")">Pendiente</MudSelectItem>
+                                            <MudSelectItem T="string" Value="@("Received")">Recibida</MudSelectItem>
+                                            <MudSelectItem T="string" Value="@("MatchesDeclaration")">Coincide con declaracion</MudSelectItem>
+                                            <MudSelectItem T="string" Value="@("Inconclusive")">No concluyente</MudSelectItem>
+                                            <MudSelectItem T="string" Value="@("Inconsistent")">Inconsistente</MudSelectItem>
+                                            <MudSelectItem T="string" Value="@("Rejected")">Rechazada</MudSelectItem>
+                                        </MudSelect>
+                                    </MudItem>
+                                    <MudItem xs="12">
+                                        <MudTextField T="string" @bind-Value="_evidenceNotes" Label="Observaciones evidencia" Lines="3" />
+                                        <MudCheckBox T="bool" @bind-Value="_evidenceCorrection.Selected" Label="Pedir correccion de evidencia al usuario" Color="Color.Warning" />
+                                    </MudItem>
+                                </MudGrid>
+                            </section>
+
+                            <section class="validation-module">
+                                <div class="validation-module-heading">
+                                    <MudText Typo="Typo.subtitle1">5. Entrevista y cierre</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Pregunta: confirma que entiende el funcionamiento, reglas y proximo paso de validacion.</MudText>
+                                </div>
+
+                                <MudGrid Spacing="2">
+                                    <MudItem xs="12" md="6">
+                                        <MudSelect T="string" @bind-Value="_manualInterviewStatus" Label="Estado entrevista">
+                                            <MudSelectItem T="string" Value="@("Pending")">Pendiente</MudSelectItem>
+                                            <MudSelectItem T="string" Value="@("Scheduled")">Agendada</MudSelectItem>
+                                            <MudSelectItem T="string" Value="@("Completed")">Completada</MudSelectItem>
+                                            <MudSelectItem T="string" Value="@("NoShow")">No asistio</MudSelectItem>
+                                            <MudSelectItem T="string" Value="@("Cancelled")">Cancelada</MudSelectItem>
+                                            <MudSelectItem T="string" Value="@("RequiresFollowUp")">Requiere seguimiento</MudSelectItem>
+                                        </MudSelect>
+                                        <MudSelect T="string" @bind-Value="_manualInterviewResult" Label="Resultado entrevista">
+                                            <MudSelectItem T="string" Value="@("None")">Sin resultado</MudSelectItem>
+                                            <MudSelectItem T="string" Value="@("Passed")">Aprobada</MudSelectItem>
+                                            <MudSelectItem T="string" Value="@("Inconclusive")">No concluyente</MudSelectItem>
+                                            <MudSelectItem T="string" Value="@("Failed")">Fallida</MudSelectItem>
+                                            <MudSelectItem T="string" Value="@("RequiresFollowUp")">Requiere seguimiento</MudSelectItem>
+                                        </MudSelect>
+                                    </MudItem>
+                                    <MudItem xs="12" md="6">
+                                        <MudTextField T="string" @bind-Value="_manualInterviewChannel" Label="Canal" />
+                                        <MudTextField T="string" @bind-Value="_manualInterviewReference" Label="Referencia" />
+                                    </MudItem>
+                                    <MudItem xs="12">
+                                        <MudTextField T="string" @bind-Value="_manualInterviewNotes" Label="Observaciones entrevista" Lines="3" />
+                                        <MudCheckBox T="bool" @bind-Value="_interviewCorrection.Selected" Label="Pedir seguimiento o nueva entrevista al usuario" Color="Color.Warning" />
+                                    </MudItem>
+                                </MudGrid>
+                            </section>
+                        </MudStack>
 
                         <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@IsBusy(ManualReviewAction)"
                                    OnClick="SaveManualReviewAsync" StartIcon="@Icons.Material.Filled.Save" Class="mt-3">
@@ -281,6 +425,16 @@
                         </MudText>
 
                         <MudTextField T="string" @bind-Value="_reason" Label="@L["Reason"]" Lines="3" />
+                        @if (CorrectionItems.Any(item => item.Selected))
+                        {
+                            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Class="mt-3">
+                                <MudText Typo="Typo.subtitle2">Alerta que recibira el guia</MudText>
+                                <MudText Typo="Typo.body2">@BuildSelectedCorrectionMessage()</MudText>
+                            </MudAlert>
+                            <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="UseCorrectionMessageAsReason" StartIcon="@Icons.Material.Filled.AutoFixHigh">
+                                Usar mensaje sugerido
+                            </MudButton>
+                        }
                         <MudTextField T="string" @bind-Value="_notes" Label="@L["InternalNotes"]" Lines="3" />
 
                         <MudStack Spacing="2" Class="decision-actions">
@@ -325,7 +479,7 @@
     private AdminVerificationDetailResponse? _detail;
     private string _reason = string.Empty;
     private string _notes = string.Empty;
-    private bool _phoneContacted;
+    private string _phoneContactStatus = "Pending";
     private string _phoneContactNotes = string.Empty;
     private bool _evidenceReceived;
     private string _evidenceReviewStatus = "Pending";
@@ -340,6 +494,26 @@
     private string _manualInterviewNotes = string.Empty;
     private bool _isLoading;
     private string? _busyAction;
+    private readonly CorrectionItem _phoneCorrection = new(
+        "Telefono de contacto",
+        "No pudimos validar el numero registrado por WhatsApp.",
+        "Ingresa un numero activo con WhatsApp y guardalo en tu perfil antes de reenviar la solicitud.");
+    private readonly CorrectionItem _identityCorrection = new(
+        "Identidad",
+        "Los datos declarados no coinciden con la informacion confirmada durante la validacion.",
+        "Revisa tu nombre legal, pais, ciudad y documento declarado en la seccion de validacion.");
+    private readonly CorrectionItem _profileCorrection = new(
+        "Perfil del guia",
+        "La informacion del perfil no es coherente con lo confirmado durante la llamada.",
+        "Actualiza tu biografia, ciudad, servicios, idiomas, tarifa o disponibilidad segun corresponda.");
+    private readonly CorrectionItem _evidenceCorrection = new(
+        "Evidencia",
+        "La evidencia enviada por canal externo esta incompleta o no coincide con tu declaracion.",
+        "Envia una evidencia clara y consistente cuando el equipo te contacte nuevamente.");
+    private readonly CorrectionItem _interviewCorrection = new(
+        "Entrevista",
+        "La entrevista manual quedo pendiente o no fue concluyente.",
+        "Coordina una nueva llamada por WhatsApp y confirma los datos solicitados.");
 
     [Parameter]
     public Guid UserId { get; set; }
@@ -348,10 +522,20 @@
     private int CompletedRequirements => _detail?.TrustStatus.Requirements.Count(requirement => requirement.IsComplete) ?? 0;
     private double CompletionPercent => TotalRequirements == 0 ? 0 : CompletedRequirements * 100d / TotalRequirements;
     private int OpenCaseCount => _detail?.ReviewCases.Count(reviewCase => reviewCase.Status == "Open") ?? 0;
-    private bool RequiresReason => string.IsNullOrWhiteSpace(_reason);
+    private IReadOnlyCollection<CorrectionItem> CorrectionItems =>
+    [
+        _phoneCorrection,
+        _identityCorrection,
+        _profileCorrection,
+        _evidenceCorrection,
+        _interviewCorrection
+    ];
+
+    private bool HasUserCorrectionReason => !string.IsNullOrWhiteSpace(_reason) || CorrectionItems.Any(item => item.Selected);
+    private bool RequiresReason => !HasUserCorrectionReason;
     private bool CanApprove => _detail?.TrustStatus is { ProfileValidated: false, Status: "InReview" }
         && _detail.ManualReview?.CanApprove == true;
-    private bool CanReject => _detail?.TrustStatus is { ProfileValidated: false, Status: "InReview" } && !string.IsNullOrWhiteSpace(_reason);
+    private bool CanReject => _detail?.TrustStatus is { ProfileValidated: false, Status: "InReview" } && HasUserCorrectionReason;
     private bool CanSuspend => _detail?.TrustStatus.Status != "Suspended" && !string.IsNullOrWhiteSpace(_reason);
     private bool CanReactivate => _detail?.TrustStatus.Status == "Suspended";
 
@@ -386,7 +570,8 @@
         await RunAsync(ManualReviewAction, async () =>
         {
             var request = new AdminManualReviewUpdateRequest(
-                _phoneContacted,
+                _phoneContactStatus,
+                _phoneContactStatus == "Responded",
                 NullIfWhiteSpace(_phoneContactNotes),
                 _evidenceReviewStatus,
                 _evidenceReceived,
@@ -425,7 +610,7 @@
         await RunAsync(action, async () =>
         {
             var request = new AdminReviewDecisionRequest(
-                string.IsNullOrWhiteSpace(_reason) ? null : _reason.Trim(),
+                BuildDecisionReason(action),
                 string.IsNullOrWhiteSpace(_notes) ? null : _notes.Trim());
 
             var result = action switch
@@ -469,6 +654,49 @@
         return string.Equals(_busyAction, action, StringComparison.Ordinal);
     }
 
+    private string? BuildDecisionReason(string action)
+    {
+        if (action != RejectAction)
+        {
+            return NullIfWhiteSpace(_reason);
+        }
+
+        var manualReason = NullIfWhiteSpace(_reason);
+        var correctionMessage = BuildSelectedCorrectionMessage();
+
+        if (string.IsNullOrWhiteSpace(manualReason))
+        {
+            return NullIfWhiteSpace(correctionMessage);
+        }
+
+        if (string.IsNullOrWhiteSpace(correctionMessage))
+        {
+            return manualReason;
+        }
+
+        return $"{manualReason}{Environment.NewLine}{Environment.NewLine}{correctionMessage}";
+    }
+
+    private string BuildSelectedCorrectionMessage()
+    {
+        var selectedItems = CorrectionItems.Where(item => item.Selected).ToArray();
+        if (selectedItems.Length == 0)
+        {
+            return string.Empty;
+        }
+
+        return "Correccion requerida: " + string.Join(" ", selectedItems.Select(item => item.UserMessage));
+    }
+
+    private void UseCorrectionMessageAsReason()
+    {
+        var correctionMessage = BuildSelectedCorrectionMessage();
+        if (!string.IsNullOrWhiteSpace(correctionMessage))
+        {
+            _reason = correctionMessage;
+        }
+    }
+
     private void ApplyManualReviewState()
     {
         if (_detail?.ManualReview is null)
@@ -477,7 +705,9 @@
         }
 
         var review = _detail.ManualReview;
-        _phoneContacted = review.PhoneContacted;
+        _phoneContactStatus = review.PhoneContactStatus == "Pending" && review.PhoneContacted
+            ? "Responded"
+            : review.PhoneContactStatus;
         _phoneContactNotes = review.PhoneContactNotes ?? string.Empty;
         _evidenceReceived = review.EvidenceReceivedAt.HasValue;
         _evidenceReviewStatus = review.EvidenceReviewStatus;
@@ -490,6 +720,132 @@
         _manualInterviewChannel = review.ManualInterviewChannel ?? string.Empty;
         _manualInterviewReference = review.ManualInterviewReference ?? string.Empty;
         _manualInterviewNotes = review.ManualInterviewNotes ?? string.Empty;
+        SyncCorrectionDefaults();
+    }
+
+    private void SyncCorrectionDefaults()
+    {
+        _phoneCorrection.Selected = _phoneContactStatus is "NoResponse" or "NumberDoesNotExist" or "WrongNumber";
+        _identityCorrection.Selected = !_declaredDataReviewed && _detail?.ManualReview?.SubmittedAt is not null;
+        _profileCorrection.Selected = !_profileCoherent && _detail?.ManualReview?.SubmittedAt is not null;
+        _evidenceCorrection.Selected = _evidenceReviewStatus is "Inconclusive" or "Inconsistent" or "Rejected";
+        _interviewCorrection.Selected = _manualInterviewResult is "Inconclusive" or "Failed" or "RequiresFollowUp"
+            || _manualInterviewStatus is "NoShow" or "RequiresFollowUp";
+    }
+
+    private string GetWhatsAppLink()
+    {
+        var digits = new string((_detail?.PhoneNumber ?? string.Empty).Where(char.IsDigit).ToArray());
+        return string.IsNullOrWhiteSpace(digits) ? "#" : $"https://wa.me/{digits}";
+    }
+
+    private static string GetPhoneContactStatusLabel(string status)
+    {
+        return status switch
+        {
+            "Responded" => "Si, respondio",
+            "NoResponse" => "No respondio",
+            "NumberDoesNotExist" => "El numero no existe",
+            "WrongNumber" => "Numero equivocado",
+            "Busy" => "Ocupado",
+            "DifferentPerson" => "Responde otra persona",
+            "RescheduleRequested" => "Solicita reprogramar",
+            _ => "Pendiente"
+        };
+    }
+
+    private bool IsPhoneContactCorrectionSuggested()
+    {
+        return _phoneContactStatus is "NoResponse" or "NumberDoesNotExist" or "WrongNumber" or "DifferentPerson";
+    }
+
+    private string GetGuideLocation()
+    {
+        return FormatLocation(_detail?.GuideProfile?.City, _detail?.GuideProfile?.Country);
+    }
+
+    private string GetDeclaredLocation()
+    {
+        return FormatLocation(_detail?.ManualReview?.City, _detail?.ManualReview?.Country);
+    }
+
+    private string GetDeclaredDocument()
+    {
+        var documentType = _detail?.ManualReview?.DocumentType;
+        var last4 = _detail?.ManualReview?.DocumentNumberLast4;
+        if (string.IsNullOrWhiteSpace(documentType) && string.IsNullOrWhiteSpace(last4))
+        {
+            return "-";
+        }
+
+        return $"{(string.IsNullOrWhiteSpace(documentType) ? "Documento" : documentType)} **** {(string.IsNullOrWhiteSpace(last4) ? "-" : last4)}";
+    }
+
+    private string GetRateAndAvailability()
+    {
+        if (_detail?.GuideProfile is null)
+        {
+            return "-";
+        }
+
+        var availability = _detail.GuideProfile.AvailableNow ? "Disponible ahora" : "No disponible ahora";
+        return $"{_detail.GuideProfile.HourlyRate:0.##} {_detail.GuideProfile.Currency} / {availability}";
+    }
+
+    private static string FormatLocation(string? city, string? country)
+    {
+        if (string.IsNullOrWhiteSpace(city) && string.IsNullOrWhiteSpace(country))
+        {
+            return "-";
+        }
+
+        if (string.IsNullOrWhiteSpace(country))
+        {
+            return city?.Trim() ?? "-";
+        }
+
+        if (string.IsNullOrWhiteSpace(city))
+        {
+            return country.Trim();
+        }
+
+        return $"{city.Trim()}, {country.Trim()}";
+    }
+
+    private static string JoinValues(IReadOnlyCollection<string>? values)
+    {
+        return values is null || values.Count == 0
+            ? "-"
+            : string.Join(", ", values);
+    }
+
+    private static string Summarize(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return "-";
+        }
+
+        var trimmed = value.Trim();
+        return trimmed.Length <= 180 ? trimmed : $"{trimmed[..180]}...";
+    }
+
+    private static string GetEvidenceReviewStatusLabel(string status)
+    {
+        return status switch
+        {
+            "Received" => "Recibida",
+            "MatchesDeclaration" => "Coincide con declaracion",
+            "Inconclusive" => "No concluyente",
+            "Inconsistent" => "Inconsistente",
+            "Rejected" => "Rechazada",
+            _ => "Pendiente"
+        };
+    }
+
+    private bool IsEvidenceCorrectionSuggested()
+    {
+        return _evidenceReviewStatus is "Inconclusive" or "Inconsistent" or "Rejected";
     }
 
     private Color GetProgressColor()
@@ -605,5 +961,21 @@
     private static string? NullIfWhiteSpace(string? value)
     {
         return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
+
+    private sealed class CorrectionItem
+    {
+        public CorrectionItem(string section, string error, string fix)
+        {
+            Section = section;
+            Error = error;
+            Fix = fix;
+        }
+
+        public string Section { get; }
+        public string Error { get; }
+        public string Fix { get; }
+        public bool Selected { get; set; }
+        public string UserMessage => $"{Section}: {Error} Como arreglarlo: {Fix}";
     }
 }

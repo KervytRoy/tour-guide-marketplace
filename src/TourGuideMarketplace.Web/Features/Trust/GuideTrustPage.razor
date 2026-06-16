@@ -39,7 +39,7 @@
             <div>
                 <MudText Typo="Typo.overline">@L["Status"]</MudText>
                 <MudText Typo="Typo.h5">@GetStatusLabel(_status.Status)</MudText>
-                @if (!string.IsNullOrWhiteSpace(_status.InReviewReason))
+                @if (!NeedsProfileChanges && !string.IsNullOrWhiteSpace(_status.InReviewReason))
                 {
                     <MudText Color="Color.Secondary">@_status.InReviewReason</MudText>
                 }
@@ -57,7 +57,16 @@
         @if (NeedsProfileChanges)
         {
             <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined">
-                @L["ProfileChangesAlert"]
+                <MudStack Spacing="2">
+                    <MudText Typo="Typo.subtitle2">@L["ProfileChangesAlert"]</MudText>
+                    @if (!string.IsNullOrWhiteSpace(_status.InReviewReason))
+                    {
+                        <MudText Typo="Typo.body2">@_status.InReviewReason</MudText>
+                    }
+                    <MudButton Href="/guide/profile" Variant="Variant.Filled" Color="Color.Warning" StartIcon="@Icons.Material.Filled.Edit">
+                        @L["EditProfile"]
+                    </MudButton>
+                </MudStack>
             </MudAlert>
         }
         else if (IsProfileInReview)

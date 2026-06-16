@@ -16,6 +16,7 @@ internal static class ManualReviewMapper
             verification.DeclaredDocumentNumberLast4,
             verification.ManualDeclarationAcceptedAt.HasValue,
             verification.ManualReviewSubmittedAt,
+            verification.PhoneContactStatus.ToString(),
             IsPhoneContacted(verification),
             verification.PhoneContactedAt,
             verification.PhoneContactNotes,
@@ -60,7 +61,8 @@ internal static class ManualReviewMapper
 
     public static bool IsPhoneContacted(UserVerification verification)
     {
-        return verification.PhoneContactedAt.HasValue;
+        return verification.PhoneContactStatus == PhoneContactStatus.Responded
+            || (verification.PhoneContactStatus == PhoneContactStatus.Pending && verification.PhoneContactedAt.HasValue);
     }
 
     public static bool HasDeclaredData(UserVerification verification)
